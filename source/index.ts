@@ -1,4 +1,6 @@
 import { Agent } from "./helpers/Agent"
+import Body from "./helpers/components/Body"
+import Html from "./helpers/components/Html"
 // @ts-ignore
 import * as THREE from "./libs/three/three.module.js"
 
@@ -61,3 +63,11 @@ declare global {
 window.agent = agent
 window.listenResize = listenResize
 window.initializeAgent = initializeAgent
+
+new Html({
+    children: [
+        new Body({
+            
+        })
+    ],
+})

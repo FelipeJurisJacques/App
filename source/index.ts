@@ -1,6 +1,7 @@
 import { Agent } from "./helpers/Agent"
 import Body from "./helpers/components/Body"
 import Html from "./helpers/components/Html"
+import Object from "./helpers/components/Object"
 // @ts-ignore
 import * as THREE from "./libs/three/three.module.js"
 
@@ -64,10 +65,13 @@ window.agent = agent
 window.listenResize = listenResize
 window.initializeAgent = initializeAgent
 
-new Html({
+const root = new Html({
     children: [
         new Body({
-            
+            children: [
+                new Object({})
+            ],
         })
     ],
 })
+root.build(window)

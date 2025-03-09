@@ -32336,6 +32336,53 @@ class Agent {
     }
 }
 
+class Component {
+    dom;
+}
+
+class Body extends Component {
+    children;
+    constructor({ children }) {
+        super();
+        this.children = children ? children : [];
+    }
+    build(parent) {
+        this.dom = parent.ownerDocument.body;
+        for (const child of this.children) {
+            child.build(this.dom);
+        }
+    }
+}
+
+class Html {
+    dom;
+    children;
+    constructor({ children }) {
+        this.children = children;
+    }
+    build(window) {
+        this.dom = window.document.documentElement;
+        for (const child of this.children) {
+            child.build(this.dom);
+        }
+    }
+}
+
+let Object$1 = class Object extends Component {
+    children;
+    constructor({ children }) {
+        super();
+        this.children = children ? children : [];
+    }
+    build(parent) {
+        this.dom = parent.ownerDocument.createElement("object");
+        parent.append(this.dom);
+        for (const child of this.children) {
+            child.build(this.dom);
+        }
+    }
+};
+
 const agent = new Agent();
 let renderer = null;
 let camera = null;
@@ -32385,5 +32432,15 @@ function initializeAgent(helper) {
 window.agent = agent;
 window.listenResize = listenResize;
 window.initializeAgent = initializeAgent;
+const root = new Html({
+    children: [
+        new Body({
+            children: [
+                new Object$1({})
+            ],
+        })
+    ],
+});
+root.build(window);
 
 export { initializeAgent, listenResize };

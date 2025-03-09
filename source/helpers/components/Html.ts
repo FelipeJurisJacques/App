@@ -1,11 +1,17 @@
 import Component from "./Component"
 
-export default class Html implements Component {
-    private dom: Document
+export default class Html {
+    protected dom?: HTMLElement
     private children: Component[]
 
     constructor({ children }: { children: Component[] }) {
         this.children = children
-        this.dom = window.document
+    }
+    
+    build(window: Window): void {
+        this.dom = window.document.documentElement
+        for (const child of this.children) {
+            child.build(this.dom)
+        }
     }
 }

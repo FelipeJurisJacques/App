@@ -15,7 +15,7 @@ export default class Document {
     render(window: Window): void {
         this.dom = window.document.documentElement
         for (const child of this.children) {
-            child.build(this.dom)
+            child.render(this.dom)
         }
     }
 }

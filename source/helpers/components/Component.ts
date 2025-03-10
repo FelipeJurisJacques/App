@@ -5,8 +5,8 @@ export default abstract class Component {
 
     public abstract get tag(): string
 
-    public build(parent: HTMLElement | SVGElement): void {
-        if (this.tag === 'svg') {
+    public render(parent: HTMLElement | SVGElement): void {
+        if (parent instanceof SVGElement || this.tag === 'svg') {
             this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', this.tag)
         } else {
             this.dom = parent.ownerDocument.createElement(this.tag)
@@ -19,7 +19,7 @@ export default abstract class Component {
         parent.append(this.dom)
         if (this.children) {
             for (const child of this.children) {
-                child.build(this.dom)
+                child.render(this.dom)
             }
         }
     }

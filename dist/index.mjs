@@ -32337,30 +32337,105 @@ class Agent {
 }
 
 class Component {
+    children;
     dom;
+    attributes = {};
+    build(parent) {
+        if (this.tag === 'svg') {
+            this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', this.tag);
+        }
+        else {
+            this.dom = parent.ownerDocument.createElement(this.tag);
+        }
+        if (this.attributes) {
+            for (const key in this.attributes) {
+                this.dom.setAttribute(key, this.attributes[key]);
+            }
+        }
+        parent.append(this.dom);
+        if (this.children) {
+            for (const child of this.children) {
+                child.build(this.dom);
+            }
+        }
+    }
+    toString() {
+        let result = '';
+        if (this.dom) {
+            result = this.dom.outerHTML;
+        }
+        else {
+            result = `<${this.tag}`;
+            if (this.attributes) {
+                for (const key in this.attributes) {
+                    result += ` ${key}="${this.attributes[key]}"`;
+                }
+            }
+            result += '>';
+            if (this.children) {
+                for (const child of this.children) {
+                    result += child.toString();
+                }
+            }
+            result += `</${this.tag}>`;
+        }
+        return result;
+    }
 }
 
-class Body extends Component {
-    children;
+class Svg extends Component {
     constructor({ children }) {
         super();
         this.children = children ? children : [];
     }
+    get tag() {
+        return 'svg';
+    }
+}
+
+class Body extends Component {
+    constructor({ children }) {
+        super();
+        this.children = children ? children : [];
+    }
+    get tag() {
+        return 'body';
+    }
     build(parent) {
         this.dom = parent.ownerDocument.body;
-        for (const child of this.children) {
-            child.build(this.dom);
+        if (this.children) {
+            for (const child of this.children) {
+                child.build(this.dom);
+            }
         }
     }
 }
 
-class Html {
+let Object$1 = class Object extends Component {
+    constructor({ data, children }) {
+        super();
+        if (data) {
+            this.attributes = {
+                data: data
+            };
+        }
+        this.children = children ? children : [];
+    }
+    get tag() {
+        return 'object';
+    }
+};
+
+class Document {
     dom;
     children;
     constructor({ children }) {
         this.children = children;
     }
-    build(window) {
+    get tag() {
+        return 'html';
+    }
+    render(window) {
         this.dom = window.document.documentElement;
         for (const child of this.children) {
             child.build(this.dom);
@@ -32368,20 +32443,15 @@ class Html {
     }
 }
 
-let Object$1 = class Object extends Component {
-    children;
-    constructor({ children }) {
-        super();
-        this.children = children ? children : [];
+class Application {
+    window;
+    constructor(context) {
+        this.window = context ? context : window;
     }
-    build(parent) {
-        this.dom = parent.ownerDocument.createElement("object");
-        parent.append(this.dom);
-        for (const child of this.children) {
-            child.build(this.dom);
-        }
+    render(document) {
+        document.render(this.window);
     }
-};
+}
 
 const agent = new Agent();
 let renderer = null;
@@ -32432,15 +32502,18 @@ function initializeAgent(helper) {
 window.agent = agent;
 window.listenResize = listenResize;
 window.initializeAgent = initializeAgent;
-const root = new Html({
+const svg = new Svg({});
+const app = new Application();
+app.render(new Document({
     children: [
         new Body({
             children: [
-                new Object$1({})
+                new Object$1({
+                    data: `data:image/svg+xml;base64,${btoa(svg.toString())}`,
+                }),
             ],
         })
     ],
-});
-root.build(window);
+}));
 
 export { initializeAgent, listenResize };

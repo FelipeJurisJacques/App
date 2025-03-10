@@ -1,9 +1,11 @@
 import { Agent } from "./helpers/Agent"
+import Svg from "./helpers/components/Svg"
 import Body from "./helpers/components/Body"
-import Html from "./helpers/components/Html"
 import Object from "./helpers/components/Object"
+import Document from "./helpers/components/Document"
 // @ts-ignore
 import * as THREE from "./libs/three/three.module.js"
+import Application from "./helpers/Application"
 
 const agent = new Agent()
 let renderer: null | THREE.WebGLRendere = null
@@ -65,13 +67,16 @@ window.agent = agent
 window.listenResize = listenResize
 window.initializeAgent = initializeAgent
 
-const root = new Html({
+const svg = new Svg({})
+const app = new  Application()
+app.render(new Document({
     children: [
         new Body({
             children: [
-                new Object({})
+                new Object({
+                    data: `data:image/svg+xml;base64,${btoa(svg.toString())}`,
+                }),
             ],
         })
     ],
-})
-root.build(window)
+}))

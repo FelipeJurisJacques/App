@@ -1,18 +1,18 @@
 import Component from "./Component"
 
 export default class Object extends Component {
-    private children: Component[]
 
-    constructor({ children }: { children?: Component[] }) {
+    constructor({ data, children }: { data?: string, children?: Component[] }) {
         super()
+        if (data) {
+            this.attributes = {
+                data: data
+            }
+        }
         this.children = children ? children : []
     }
 
-    public build(parent: HTMLElement): void {
-        this.dom = parent.ownerDocument.createElement('object')
-        parent.append(this.dom)
-        for (const child of this.children) {
-            child.build(this.dom)
-        }
+    public get tag(): string {
+        return 'object'
     }
 }

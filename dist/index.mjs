@@ -32337,11 +32337,21 @@ class Agent {
 }
 
 class Component {
-    children;
+    _children;
     dom;
-    attributes = {};
-    build(parent) {
-        if (this.tag === 'svg') {
+    _attributes = {};
+    get id() {
+        const id = this.getAttribute('id');
+        return id ? id : '';
+    }
+    get children() {
+        if (!this._children) {
+            this._children = [];
+        }
+        return this._children;
+    }
+    render(parent) {
+        if (parent instanceof SVGElement || this.tag === 'svg') {
             this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', this.tag);
         }
         else {
@@ -32355,7 +32365,7 @@ class Component {
         parent.append(this.dom);
         if (this.children) {
             for (const child of this.children) {
-                child.build(this.dom);
+                child.render(this.dom);
             }
         }
     }
@@ -32381,12 +32391,40 @@ class Component {
         }
         return result;
     }
+    set children(children) {
+        this._children = children;
+    }
+    get attributes() {
+        return this._attributes ? this._attributes : {};
+    }
+    setAttribute(key, value) {
+        if (this._attributes) {
+            this._attributes[key] = value;
+        }
+        else {
+            this._attributes = {
+                [key]: value,
+            };
+        }
+    }
+    getAttribute(key) {
+        return this._attributes && this._attributes[key] ? this._attributes[key] : null;
+    }
 }
 
 class Svg extends Component {
-    constructor({ children }) {
+    constructor({ width, height, viewBox, children }) {
         super();
-        this.children = children ? children : [];
+        if (width) {
+            this.setAttribute('width', width.toString());
+        }
+        if (height) {
+            this.setAttribute('height', height.toString());
+        }
+        if (viewBox) {
+            this.setAttribute('viewBox', viewBox);
+        }
+        this.children = children;
     }
     get tag() {
         return 'svg';
@@ -32401,11 +32439,11 @@ class Body extends Component {
     get tag() {
         return 'body';
     }
-    build(parent) {
+    render(parent) {
         this.dom = parent.ownerDocument.body;
         if (this.children) {
             for (const child of this.children) {
-                child.build(this.dom);
+                child.render(this.dom);
             }
         }
     }
@@ -32438,7 +32476,7 @@ class Document {
     render(window) {
         this.dom = window.document.documentElement;
         for (const child of this.children) {
-            child.build(this.dom);
+            child.render(this.dom);
         }
     }
 }
@@ -32450,6 +32488,19 @@ class Application {
     }
     render(document) {
         document.render(this.window);
+    }
+}
+
+class Canvas extends Component {
+    constructor({ width, height }) {
+        super();
+        this.attributes = {
+            width: width.toString(),
+            height: height.toString(),
+        };
+    }
+    get tag() {
+        return 'canvas';
     }
 }
 
@@ -32508,6 +32559,10 @@ app.render(new Document({
     children: [
         new Body({
             children: [
+                new Canvas({
+                    width: 100,
+                    height: 100,
+                }),
                 new Object$1({
                     data: `data:image/svg+xml;base64,${btoa(svg.toString())}`,
                 }),

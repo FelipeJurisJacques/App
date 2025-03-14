@@ -1,17 +1,21 @@
-import Component from "./Component";
+import Component, { IComponent } from "./Component";
+
+interface IPolygon extends IComponent {
+    color?: string
+    points: string
+    clipPath?: string
+}
 
 export default class Polygon extends Component {
 
-    constructor({ color, points, clipPath }: { color?: string, points: string, clipPath?: string }) {
-        super()
-        if (color) {
-            this.attributes.set('fill', color)
+    constructor(component: IPolygon) {
+        super(component)
+        this.attributes.set('points', component.points)
+        if (component.color) {
+            this.attributes.set('fill', component.color)
         }
-        if (points) {
-            this.attributes.set('points', points)
-        }
-        if (clipPath) {
-            this.attributes.set('clip-path', clipPath)
+        if (component.clipPath) {
+            this.attributes.set('clip-path', component.clipPath)
         }
     }
 

@@ -1,11 +1,15 @@
-import Component from "./Component"
+import Component, { IComponent } from "./Component"
+
+interface IBody extends IComponent {
+    children?: Component[]
+}
 
 export default class Body extends Component {
 
-    constructor({ children }: { children?: Component[] }) {
-        super()
-        if (children) {
-            this.children = children
+    constructor(component: IBody = {}) {
+        super(component)
+        if (component.children) {
+            this.children = component.children
         }
     }
 

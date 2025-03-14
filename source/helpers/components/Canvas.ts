@@ -1,11 +1,16 @@
-import Component from "./Component";
+import Component, { IComponent } from "./Component";
+
+interface ICanvas extends IComponent {
+    width: number
+    height: number
+}
 
 export default class Canvas extends Component {
 
-    public constructor({ width, height }: { width: number, height: number }) {
-        super()
-        this.attributes.set('width', width.toString())
-        this.attributes.set('height', height.toString())
+    public constructor(component: ICanvas) {
+        super(component)
+        this.attributes.set('width', component.width.toString())
+        this.attributes.set('height', component.height.toString())
     }
 
     public get tag(): string {

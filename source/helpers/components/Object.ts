@@ -1,17 +1,20 @@
-import Component from "./Component"
+import Component, { IComponent } from "./Component"
+
+interface IObject extends IComponent {
+    data?: string
+    children?: Component[]
+    onRender?: Function
+}
 
 export default class Object extends Component {
 
-    constructor({ data, children, onRender }: { data?: string, children?: Component[], onRender?: Function }) {
-        super()
-        if (data) {
-            this.attributes.set('data', data)
+    constructor(component: IObject = {}) {
+        super(component)
+        if (component.data) {
+            this.attributes.set('data', component.data)
         }
-        if (children) {
-            this.children = children
-        }
-        if (onRender) {
-            this.handlers.set('render', onRender)
+        if (component.children) {
+            this.children = component.children
         }
     }
 

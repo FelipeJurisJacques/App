@@ -1,11 +1,18 @@
-import Component from "./Component"
+import Component, { IComponent } from "./Component"
+
+interface IClipPath extends IComponent {
+    id: string
+    children?: Component[]
+}
 
 export default class ClipPath extends Component {
 
-    constructor({ id, children }: { id: string, children?: Component[] }) {
+    constructor(component: IClipPath) {
         super()
-        this.attributes.set('id', id)
-        this.children = children ? children : []
+        this.attributes.set('id', component.id)
+        if (component.children) {
+            this.children = component.children
+        }
     }
 
     public get tag(): string {

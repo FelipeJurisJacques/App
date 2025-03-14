@@ -1,11 +1,35 @@
-import Style from "../styles/Style"
+export interface IComponent {
+    transform?: {
+        x: number
+        y: number
+        width: number
+        height: number
+    }
+    style?: {
+        color?: string
+        width?: string
+        height?: string
+        fontSize?: string
+        fontWeight?: string
+        fontFamily?: string
+        backgroundColor?: string
+    }
+    onRender?: Function
+}
 
 export default abstract class Component {
-    private _style?: Style
+    private _style?: InstanceType<typeof Component.Style>
     private _children?: Component[]
     protected dom?: HTMLElement | SVGElement
     private _handlers?: Map<string, Function>
     private _attributes?: Map<string, string>
+    private _transform?: InstanceType<typeof Component.Transform>
+
+    public constructor(component: IComponent = {}) {
+        if (component.onRender) {
+            this.handlers.set('render', component.onRender)
+        }
+    }
 
     public abstract get tag(): string
 
@@ -19,9 +43,9 @@ export default abstract class Component {
         return ''
     }
 
-    public get style(): Style {
+    public get style(): InstanceType<typeof Component.Style> {
         if (!this._style) {
-            this._style = new Style()
+            this._style = new Component.Style(this)
         }
         return this._style
     }
@@ -33,8 +57,11 @@ export default abstract class Component {
         return this._children
     }
 
-    public set style(style: Style) {
-        this._style = style
+    public get transform(): InstanceType<typeof Component.Transform> {
+        if (!this._transform) {
+            this._transform = new Component.Transform(this)
+        }
+        return this._transform
     }
 
     public render(parent: HTMLElement | SVGElement): void {
@@ -115,5 +142,69 @@ export default abstract class Component {
             this._handlers = new Map()
         }
         return this._handlers
+    }
+
+    public static Transform = class {
+        private _rect?: DOMRect
+
+        public constructor(element: Component) {
+            this._rect = element.dom?.getBoundingClientRect()
+        }
+
+        get width(): number {
+            return this._rect?.width ?? 0.0
+        }
+
+        get height(): number {
+            return this._rect?.height ?? 0.0
+        }
+
+        get x(): number {
+            return this._rect?.x ?? 0.0
+        }
+
+        get y(): number {
+            return this._rect?.y ?? 0.0
+        }
+
+        get top(): number {
+            return this._rect?.top ?? 0.0
+        }
+
+        get right(): number {
+            return this._rect?.right ?? 0.0
+        }
+
+        get bottom(): number {
+            return this._rect?.bottom ?? 0.0
+        }
+
+        get left(): number {
+            return this._rect?.left ?? 0.0
+        }
+
+        set x(value: number) {
+            this._rect!.x = value
+        }
+
+        set y(value: number) {
+            this._rect!.y = value
+        }
+
+        set width(value: number) {
+            this._rect!.width = value
+        }
+
+        set height(value: number) {
+            this._rect!.height = value
+        }
+    }
+
+    public static Style = class {
+        private _style?: CSSStyleDeclaration
+
+        public constructor(element: Component) {
+            this._style = element.dom?.style
+        }
     }
 }

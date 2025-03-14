@@ -1,12 +1,17 @@
-import Component from "./Component";
+import Component, { IComponent } from "./Component"
+
+interface IGroup extends IComponent {
+    children: Component[]
+    clipPath?: string
+}
 
 export default class Group extends Component {
 
-    public constructor({ children, clipPath }: { children: Component[], clipPath?: string }) {
-        super()
-        this.children = children
-        if (clipPath) {
-            this.attributes.set('clip-path', clipPath)
+    public constructor(component: IGroup) {
+        super(component)
+        this.children = component.children
+        if (component.clipPath) {
+            this.attributes.set('clip-path', component.clipPath)
         }
     }
 

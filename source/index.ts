@@ -9,6 +9,7 @@ import Application from "./helpers/Application"
 import Canvas from "./helpers/components/Canvas"
 import VectorialScalable from "./helpers/styles/VectorialScalable"
 import Vector2 from "./utils/Vector2"
+import Render from "./helpers/events/Render"
 
 const agent = new Agent()
 let renderer: null | THREE.WebGLRendere = null
@@ -80,63 +81,64 @@ app.render(new Document({
                     height: 100,
                 }),
                 new Object({
-                    onRender: () => {
-                        const width = screen.width
-                        const clip = new VectorialScalable(100, 50)
+                    onRender: function (event: Render) {
+                        const element = event.target
+                        const width = element.transform.width
+                        const mw = width / 2
+                        const clip = new VectorialScalable(width, 50)
                         const paths: Vector2[][] = []
                         let path: Vector2[] = []
-                        path.Add(0, 15);
-                        path.Add(mw - 170, 15);
-                        path.Add(mw - 160, 5);
-                        path.Add(mw - 50, 5);
-                        path.Add(mw - 40, 15);
-                        path.Add(mw + 40, 15);
-                        path.Add(mw + 50, 5);
-                        path.Add(mw + 160, 5);
-                        path.Add(mw + 170, 15);
-                        path.Add(width, 15);
-                        path.Add(width, 50);
-                        path.Add(0, 50);
-                        path.Add(0, 15);
-                        paths.Add(path);
+                        path.push(new Vector2(0, 15))
+                        path.push(new Vector2(mw - 170, 15))
+                        path.push(new Vector2(mw - 160, 5))
+                        path.push(new Vector2(mw - 50, 5))
+                        path.push(new Vector2(mw - 40, 15))
+                        path.push(new Vector2(mw + 40, 15))
+                        path.push(new Vector2(mw + 50, 5))
+                        path.push(new Vector2(mw + 160, 5))
+                        path.push(new Vector2(mw + 170, 15))
+                        path.push(new Vector2(width, 15))
+                        path.push(new Vector2(width, 50))
+                        path.push(new Vector2(0, 50))
+                        path.push(new Vector2(0, 15))
+                        paths.push(path)
 
-                        path = new VectorialScalable.Path();
-                        for (int i = 0; i < 50; i += 2)
-{
-                    path.Add(0, i);
-                    path.Add(width, i);
-                    path.Add(width, i + 1);
-                    path.Add(0, i + 1);
-                    path.Add(0, i);
-                }
-paths.Add(path);
-            clip.AddPolygon(paths, "#1a1a1a");
+                        path = []
+                        for (let i = 0; i < 50; i += 2) {
+                            path.push(new Vector2(0, i))
+                            path.push(new Vector2(width, i))
+                            path.push(new Vector2(width, i + 1))
+                            path.push(new Vector2(0, i + 1))
+                            path.push(new Vector2(0, i))
+                        }
+                        paths.push(path)
+                        clip.addPolygon(paths, '#1a1a1a')
 
-            path = new VectorialScalable.Path();
-            path.Add(0, 15);
-            path.Add(mw - 170, 15);
-            path.Add(mw - 160, 5);
-            path.Add(mw - 50, 5);
-            path.Add(mw - 40, 15);
-            path.Add(mw + 40, 15);
-            path.Add(mw + 50, 5);
-            path.Add(mw + 160, 5);
-            path.Add(mw + 170, 15);
-            path.Add(width, 15);
-            path.Add(width, 17);
-            path.Add(mw + 169, 17);
-            path.Add(mw + 159, 7);
-            path.Add(mw + 51, 7);
-            path.Add(mw + 41, 17);
-            path.Add(mw - 41, 17);
-            path.Add(mw - 51, 7);
-            path.Add(mw - 159, 7);
-            path.Add(mw - 169, 17);
-            path.Add(0, 17);
-            path.Add(0, 15);
-            clip.AddPolygon(path, "#00f2ff");
-            this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`
-        }
+                        path = []
+                        path.push(new Vector2(0, 15))
+                        path.push(new Vector2(mw - 170, 15))
+                        path.push(new Vector2(mw - 160, 5))
+                        path.push(new Vector2(mw - 50, 5))
+                        path.push(new Vector2(mw - 40, 15))
+                        path.push(new Vector2(mw + 40, 15))
+                        path.push(new Vector2(mw + 50, 5))
+                        path.push(new Vector2(mw + 160, 5))
+                        path.push(new Vector2(mw + 170, 15))
+                        path.push(new Vector2(width, 15))
+                        path.push(new Vector2(width, 17))
+                        path.push(new Vector2(mw + 169, 17))
+                        path.push(new Vector2(mw + 159, 7))
+                        path.push(new Vector2(mw + 51, 7))
+                        path.push(new Vector2(mw + 41, 17))
+                        path.push(new Vector2(mw - 41, 17))
+                        path.push(new Vector2(mw - 51, 7))
+                        path.push(new Vector2(mw - 159, 7))
+                        path.push(new Vector2(mw - 169, 17))
+                        path.push(new Vector2(0, 17))
+                        path.push(new Vector2(0, 15))
+                        clip.addPolygon(path, '#00f2ff')
+                        this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`
+                    }
                 }),
             ],
         })

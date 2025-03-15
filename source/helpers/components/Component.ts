@@ -1,3 +1,5 @@
+import Render from "../events/Render"
+
 export interface IComponent {
     transform?: {
         x: number
@@ -91,7 +93,7 @@ export default abstract class Component {
         if (this.dom && this._handlers) {
             const event = this._handlers.get('resize')
             if (event) {
-                event()
+                event(new Render(this))
             }
         }
     }

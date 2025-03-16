@@ -46,10 +46,14 @@ export default class VectorialScalable extends StyleSheet {
     }
 
     public write(style: InstanceType<typeof Element.Style>): void {
-        style.backgroundImage = `url('data:image/svg+xml,${encodeURIComponent(this.element.toString())}')`
+        style.backgroundImage = this.toString()
         style.backgroundSize = 'cover'
         style.backgroundPosition = 'center'
         style.backgroundRepeat = 'no-repeat'
+    }
+
+    public toString(): string {
+        return `url('data:image/svg+xml,${encodeURIComponent(this.element.toString())}')`
     }
 
     private createClipPath(id: string, path: string): ClipPath {

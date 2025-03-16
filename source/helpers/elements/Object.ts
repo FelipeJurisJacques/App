@@ -8,13 +8,13 @@ interface IObject extends IElement {
 
 export default class Object extends Element {
 
-    constructor(Element: IObject = {}) {
-        super(Element)
-        if (Element.data) {
-            this.attributes.set('data', Element.data)
+    constructor(element: IObject = {}) {
+        super(element)
+        if (element.data) {
+            this.attributes.set('data', element.data)
         }
-        if (Element.children) {
-            this.children = Element.children
+        if (element.children) {
+            this.children = element.children
         }
     }
 

@@ -32162,6 +32162,15 @@ class WebGLRenderer {
 
 }
 
+class Vector2 {
+    x;
+    y;
+    constructor(x = 0.0, y = 0.0) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 // @ts-ignore
 class Agent {
     n;
@@ -32427,13 +32436,11 @@ class Element {
             this.dom = parent.ownerDocument.createElement(this.tag);
         }
         if (this._attributes) {
-            const keys = this._attributes.keys();
-            for (const key in keys) {
-                let value = this._attributes.get(key);
-                if (value) {
+            this._attributes.forEach((value, key) => {
+                if (this.dom) {
                     this.dom.setAttribute(key, value);
                 }
-            }
+            });
         }
         parent.append(this.dom);
         if (this._children) {
@@ -32456,10 +32463,9 @@ class Element {
         else {
             result = `<${this.tag}`;
             if (this._attributes) {
-                const keys = this._attributes.keys();
-                for (const key in keys) {
-                    result += ` ${key}="${this._attributes.get(key)}"`;
-                }
+                this._attributes.forEach((value, key) => {
+                    result += ` ${key}="${value}"`;
+                });
             }
             result += '>';
             if (this._children) {
@@ -32482,7 +32488,7 @@ class Element {
     }
     get handler() {
         if (!this._handler) {
-            this._handler = new Element.Subject(this);
+            this._handler = new Element.Subject();
         }
         return this._handler;
     }
@@ -32578,10 +32584,8 @@ class Element {
         }
     };
     static Subject = class {
-        _element;
         _handlers;
-        constructor(element) {
-            this._element = element;
+        constructor() {
             this._handlers = new Map();
         }
         subscribe(event, callback) {
@@ -32604,6 +32608,18 @@ class Element {
     };
 }
 
+class Div extends Element {
+    constructor(element = {}) {
+        super(element);
+        if (element.children) {
+            this.children = element.children;
+        }
+    }
+    get tag() {
+        return 'div';
+    }
+}
+
 class Body extends Element {
     constructor(Element = {}) {
         super(Element);
@@ -32616,14 +32632,25 @@ class Body extends Element {
     }
 }
 
-let Object$1 = class Object extends Element {
-    constructor(Element = {}) {
+class Canvas extends Element {
+    constructor(Element) {
         super(Element);
-        if (Element.data) {
-            this.attributes.set('data', Element.data);
+        this.attributes.set('width', Element.width.toString());
+        this.attributes.set('height', Element.height.toString());
+    }
+    get tag() {
+        return 'canvas';
+    }
+}
+
+let Object$1 = class Object extends Element {
+    constructor(element = {}) {
+        super(element);
+        if (element.data) {
+            this.attributes.set('data', element.data);
         }
-        if (Element.children) {
-            this.children = Element.children;
+        if (element.children) {
+            this.children = element.children;
         }
     }
     get data() {
@@ -32637,6 +32664,16 @@ let Object$1 = class Object extends Element {
         return 'object';
     }
 };
+
+class Application {
+    window;
+    constructor(context) {
+        this.window = context ? context : window;
+    }
+    render(document) {
+        document.render(this.window);
+    }
+}
 
 class Document {
     dom;
@@ -32652,27 +32689,6 @@ class Document {
         for (const child of this.children) {
             child.render(this.dom);
         }
-    }
-}
-
-class Application {
-    window;
-    constructor(context) {
-        this.window = context ? context : window;
-    }
-    render(document) {
-        document.render(this.window);
-    }
-}
-
-class Canvas extends Element {
-    constructor(Element) {
-        super(Element);
-        this.attributes.set('width', Element.width.toString());
-        this.attributes.set('height', Element.height.toString());
-    }
-    get tag() {
-        return 'canvas';
     }
 }
 
@@ -32791,10 +32807,13 @@ class VectorialScalable extends StyleSheet {
         }
     }
     write(style) {
-        style.backgroundImage = `url('data:image/svg+xml,${encodeURIComponent(this.element.toString())}')`;
+        style.backgroundImage = this.toString();
         style.backgroundSize = 'cover';
         style.backgroundPosition = 'center';
         style.backgroundRepeat = 'no-repeat';
+    }
+    toString() {
+        return `url('data:image/svg+xml,${encodeURIComponent(this.element.toString())}')`;
     }
     createClipPath(id, path) {
         return new ClipPath({
@@ -32840,15 +32859,7 @@ class VectorialScalable extends StyleSheet {
     }
 }
 
-class Vector2 {
-    x;
-    y;
-    constructor(x = 0.0, y = 0.0) {
-        this.x = x;
-        this.y = y;
-    }
-}
-
+// @ts-ignore
 const agent = new Agent();
 let renderer = null;
 let camera = null;
@@ -32907,7 +32918,7 @@ app.render(new Document({
                     width: 100,
                     height: 100,
                 }),
-                new Object$1({
+                new Div({
                     onRender: function (event) {
                         const element = event.target;
                         const width = element.transform.width;
@@ -32962,7 +32973,12 @@ app.render(new Document({
                         path.push(new Vector2(0, 17));
                         path.push(new Vector2(0, 15));
                         clip.addPolygon(path, '#00f2ff');
-                        clip.write(element.style);
+                        if (element instanceof Object$1) {
+                            element.data = clip.toString();
+                        }
+                        else {
+                            clip.write(element.style);
+                        }
                     }
                 }),
             ],

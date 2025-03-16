@@ -101,13 +101,11 @@ export default abstract class Element {
             this.dom = parent.ownerDocument.createElement(this.tag)
         }
         if (this._attributes) {
-            const keys = this._attributes.keys()
-            for (const key in keys) {
-                let value = this._attributes.get(key)
-                if (value) {
+            this._attributes.forEach((value, key) => {
+                if (this.dom) {
                     this.dom.setAttribute(key, value)
                 }
-            }
+            })
         }
         parent.append(this.dom)
         if (this._children) {
@@ -131,10 +129,9 @@ export default abstract class Element {
         } else {
             result = `<${this.tag}`
             if (this._attributes) {
-                const keys = this._attributes.keys()
-                for (const key in keys) {
-                    result += ` ${key}="${this._attributes.get(key)}"`
-                }
+                this._attributes.forEach((value, key) => {
+                    result += ` ${key}="${value}"`
+                })
             }
             result += '>'
             if (this._children) {
@@ -160,7 +157,7 @@ export default abstract class Element {
 
     protected get handler(): InstanceType<typeof Element.Subject> {
         if (!this._handler) {
-            this._handler = new Element.Subject(this)
+            this._handler = new Element.Subject()
         }
         return this._handler
     }
@@ -284,11 +281,9 @@ export default abstract class Element {
     }
 
     public static Subject = class {
-        private _element: Element
         private _handlers: Map<Type, Function[]>
 
-        public constructor(element: Element) {
-            this._element = element
+        public constructor() {
             this._handlers = new Map()
         }
 

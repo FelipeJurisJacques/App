@@ -1,15 +1,15 @@
-import { Agent } from "./helpers/Agent"
-import Svg from "./helpers/elements/Svg"
-import Body from "./helpers/elements/Body"
-import Object from "./helpers/elements/Object"
-import Document from "./helpers/elements/Document"
 // @ts-ignore
 import * as THREE from "./libs/three/three.module.js"
-import Application from "./helpers/Application"
-import Canvas from "./helpers/elements/Canvas"
-import VectorialScalable from "./helpers/styles/VectorialScalable"
 import Vector2 from "./utils/Vector2"
+import { Agent } from "./helpers/Agent"
+import Div from "./helpers/elements/Div"
+import Body from "./helpers/elements/Body"
 import Render from "./helpers/events/Render"
+import Canvas from "./helpers/elements/Canvas"
+import Object from "./helpers/elements/Object"
+import Application from "./helpers/Application"
+import Document from "./helpers/elements/Document"
+import VectorialScalable from "./helpers/styles/VectorialScalable"
 
 const agent = new Agent()
 let renderer: null | THREE.WebGLRendere = null
@@ -80,7 +80,7 @@ app.render(new Document({
                     width: 100,
                     height: 100,
                 }),
-                new Object({
+                new Div({
                     onRender: function (event: Render) {
                         const element = event.target
                         const width = element.transform.width
@@ -138,7 +138,11 @@ app.render(new Document({
                         path.push(new Vector2(0, 15))
                         clip.addPolygon(path, '#00f2ff')
 
-                        clip.write(element.style)
+                        if (element instanceof Object) {
+                            element.data = clip.toString()
+                        } else {
+                            clip.write(element.style)
+                        }
                     }
                 }),
             ],

@@ -1,7 +1,7 @@
-import Component from "./Component";
+import Element from "./Element";
 import StyleSheetSelector from "../styles/StyleSheetSelector";
 
-export default class Style extends Component {
+export default class Style extends Element {
     private _styles: StyleSheetSelector[]
 
     public constructor({children}: {children?: StyleSheetSelector[]}) {

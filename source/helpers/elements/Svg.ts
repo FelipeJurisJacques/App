@@ -1,8 +1,8 @@
-import Component from "./Component"
+import Element from "./Element"
 
-export default class Svg extends Component {
+export default class Svg extends Element {
 
-    constructor({ width, height, viewBox, children }: { width?: number | string, height?: number | string, viewBox?: string, children?: Component[] }) {
+    constructor({ width, height, viewBox, children }: { width?: number | string, height?: number | string, viewBox?: string, children?: Element[] }) {
         super()
         if (width) {
             this.attributes.set('width', width.toString())

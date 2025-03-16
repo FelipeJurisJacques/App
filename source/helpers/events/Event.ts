@@ -1,1 +1,5 @@
-export default abstract class Event { }
+import Type from "./Type"
+
+export default interface Event {
+    get type(): Type
+}

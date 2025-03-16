@@ -1,12 +1,12 @@
 import { Agent } from "./helpers/Agent"
-import Svg from "./helpers/components/Svg"
-import Body from "./helpers/components/Body"
-import Object from "./helpers/components/Object"
-import Document from "./helpers/components/Document"
+import Svg from "./helpers/elements/Svg"
+import Body from "./helpers/elements/Body"
+import Object from "./helpers/elements/Object"
+import Document from "./helpers/elements/Document"
 // @ts-ignore
 import * as THREE from "./libs/three/three.module.js"
 import Application from "./helpers/Application"
-import Canvas from "./helpers/components/Canvas"
+import Canvas from "./helpers/elements/Canvas"
 import VectorialScalable from "./helpers/styles/VectorialScalable"
 import Vector2 from "./utils/Vector2"
 import Render from "./helpers/events/Render"
@@ -137,7 +137,8 @@ app.render(new Document({
                         path.push(new Vector2(0, 17))
                         path.push(new Vector2(0, 15))
                         clip.addPolygon(path, '#00f2ff')
-                        this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`
+
+                        clip.write(element.style)
                     }
                 }),
             ],

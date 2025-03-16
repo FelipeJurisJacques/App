@@ -370,7 +370,7 @@ function normalize( value, array ) {
 
 }
 
-class Vector2 {
+let Vector2$1 = class Vector2 {
 
 	constructor( x = 0, y = 0 ) {
 
@@ -845,7 +845,7 @@ class Vector2 {
 
 	}
 
-}
+};
 
 class Matrix3 {
 
@@ -1806,9 +1806,9 @@ class Texture extends EventDispatcher {
 		this.internalFormat = null;
 		this.type = type;
 
-		this.offset = new Vector2( 0, 0 );
-		this.repeat = new Vector2( 1, 1 );
-		this.center = new Vector2( 0, 0 );
+		this.offset = new Vector2$1( 0, 0 );
+		this.repeat = new Vector2$1( 1, 1 );
+		this.center = new Vector2$1( 0, 0 );
 		this.rotation = 0;
 
 		this.matrixAutoUpdate = true;
@@ -9509,7 +9509,7 @@ class MeshBasicMaterial extends Material {
 }
 
 const _vector$9 = /*@__PURE__*/ new Vector3();
-const _vector2$1 = /*@__PURE__*/ new Vector2();
+const _vector2$1 = /*@__PURE__*/ new Vector2$1();
 
 class BufferAttribute {
 
@@ -10456,9 +10456,9 @@ class BufferGeometry extends EventDispatcher {
 			vB = new Vector3(),
 			vC = new Vector3(),
 
-			uvA = new Vector2(),
-			uvB = new Vector2(),
-			uvC = new Vector2(),
+			uvA = new Vector2$1(),
+			uvB = new Vector2$1(),
+			uvC = new Vector2$1(),
 
 			sdir = new Vector3(),
 			tdir = new Vector3();
@@ -11373,13 +11373,13 @@ function checkGeometryIntersection( object, material, raycaster, ray, uv, uv1, n
 
 		if ( uv ) {
 
-			intersection.uv = Triangle.getInterpolatedAttribute( uv, a, b, c, barycoord, new Vector2() );
+			intersection.uv = Triangle.getInterpolatedAttribute( uv, a, b, c, barycoord, new Vector2$1() );
 
 		}
 
 		if ( uv1 ) {
 
-			intersection.uv1 = Triangle.getInterpolatedAttribute( uv1, a, b, c, barycoord, new Vector2() );
+			intersection.uv1 = Triangle.getInterpolatedAttribute( uv1, a, b, c, barycoord, new Vector2$1() );
 
 		}
 
@@ -11946,8 +11946,8 @@ class Camera extends Object3D {
 }
 
 const _v3$1 = /*@__PURE__*/ new Vector3();
-const _minTarget = /*@__PURE__*/ new Vector2();
-const _maxTarget = /*@__PURE__*/ new Vector2();
+const _minTarget = /*@__PURE__*/ new Vector2$1();
+const _maxTarget = /*@__PURE__*/ new Vector2$1();
 
 
 class PerspectiveCamera extends Camera {
@@ -13545,7 +13545,7 @@ function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, inte
 
 }
 
-class Group extends Object3D {
+let Group$1 = class Group extends Object3D {
 
 	constructor() {
 
@@ -13557,7 +13557,7 @@ class Group extends Object3D {
 
 	}
 
-}
+};
 
 class DepthTexture extends Texture {
 
@@ -13737,7 +13737,7 @@ class RingGeometry extends BufferGeometry {
 		let radius = innerRadius;
 		const radiusStep = ( ( outerRadius - innerRadius ) / phiSegments );
 		const vertex = new Vector3();
-		const uv = new Vector2();
+		const uv = new Vector2$1();
 
 		// generate vertices, normals and uvs
 
@@ -13988,7 +13988,7 @@ class LightShadow {
 		this.radius = 1;
 		this.blurSamples = 8;
 
-		this.mapSize = new Vector2( 512, 512 );
+		this.mapSize = new Vector2$1( 512, 512 );
 
 		this.map = null;
 		this.mapPass = null;
@@ -13998,7 +13998,7 @@ class LightShadow {
 		this.needsUpdate = false;
 
 		this._frustum = new Frustum();
-		this._frameExtents = new Vector2( 1, 1 );
+		this._frameExtents = new Vector2$1( 1, 1 );
 
 		this._viewportCount = 1;
 
@@ -15322,7 +15322,7 @@ const UniformsLib = {
 
 		normalMap: { value: null },
 		normalMapTransform: { value: /*@__PURE__*/ new Matrix3() },
-		normalScale: { value: /*@__PURE__*/ new Vector2( 1, 1 ) }
+		normalScale: { value: /*@__PURE__*/ new Vector2$1( 1, 1 ) }
 
 	},
 
@@ -15472,7 +15472,7 @@ const UniformsLib = {
 
 		diffuse: { value: /*@__PURE__*/ new Color( 0xffffff ) },
 		opacity: { value: 1.0 },
-		center: { value: /*@__PURE__*/ new Vector2( 0.5, 0.5 ) },
+		center: { value: /*@__PURE__*/ new Vector2$1( 0.5, 0.5 ) },
 		rotation: { value: 0.0 },
 		map: { value: null },
 		mapTransform: { value: /*@__PURE__*/ new Matrix3() },
@@ -15788,7 +15788,7 @@ ShaderLib.physical = {
 			clearcoatMapTransform: { value: /*@__PURE__*/ new Matrix3() },
 			clearcoatNormalMap: { value: null },
 			clearcoatNormalMapTransform: { value: /*@__PURE__*/ new Matrix3() },
-			clearcoatNormalScale: { value: /*@__PURE__*/ new Vector2( 1, 1 ) },
+			clearcoatNormalScale: { value: /*@__PURE__*/ new Vector2$1( 1, 1 ) },
 			clearcoatRoughness: { value: 0 },
 			clearcoatRoughnessMap: { value: null },
 			clearcoatRoughnessMapTransform: { value: /*@__PURE__*/ new Matrix3() },
@@ -15811,7 +15811,7 @@ ShaderLib.physical = {
 			transmission: { value: 0 },
 			transmissionMap: { value: null },
 			transmissionMapTransform: { value: /*@__PURE__*/ new Matrix3() },
-			transmissionSamplerSize: { value: /*@__PURE__*/ new Vector2() },
+			transmissionSamplerSize: { value: /*@__PURE__*/ new Vector2$1() },
 			transmissionSamplerMap: { value: null },
 			thickness: { value: 0 },
 			thicknessMap: { value: null },
@@ -15824,7 +15824,7 @@ ShaderLib.physical = {
 			specularIntensity: { value: 1 },
 			specularIntensityMap: { value: null },
 			specularIntensityMapTransform: { value: /*@__PURE__*/ new Matrix3() },
-			anisotropyVector: { value: /*@__PURE__*/ new Vector2() },
+			anisotropyVector: { value: /*@__PURE__*/ new Vector2$1() },
 			anisotropyMap: { value: null },
 			anisotropyMapTransform: { value: /*@__PURE__*/ new Matrix3() },
 		}
@@ -18769,7 +18769,7 @@ function WebGLMorphtargets( gl, capabilities, textures ) {
 			entry = {
 				count: morphTargetsCount,
 				texture: texture,
-				size: new Vector2( width, height )
+				size: new Vector2$1( width, height )
 			};
 
 			morphTextures.set( geometry, entry );
@@ -22325,7 +22325,7 @@ function ShadowUniformsCache() {
 						shadowBias: 0,
 						shadowNormalBias: 0,
 						shadowRadius: 1,
-						shadowMapSize: new Vector2()
+						shadowMapSize: new Vector2$1()
 					};
 					break;
 
@@ -22335,7 +22335,7 @@ function ShadowUniformsCache() {
 						shadowBias: 0,
 						shadowNormalBias: 0,
 						shadowRadius: 1,
-						shadowMapSize: new Vector2()
+						shadowMapSize: new Vector2$1()
 					};
 					break;
 
@@ -22345,7 +22345,7 @@ function ShadowUniformsCache() {
 						shadowBias: 0,
 						shadowNormalBias: 0,
 						shadowRadius: 1,
-						shadowMapSize: new Vector2(),
+						shadowMapSize: new Vector2$1(),
 						shadowCameraNear: 1,
 						shadowCameraFar: 1000
 					};
@@ -22902,8 +22902,8 @@ function WebGLShadowMap( renderer, objects, capabilities ) {
 
 	let _frustum = new Frustum();
 
-	const _shadowMapSize = new Vector2(),
-		_viewportSize = new Vector2(),
+	const _shadowMapSize = new Vector2$1(),
+		_viewportSize = new Vector2$1(),
 
 		_viewport = new Vector4(),
 
@@ -22922,7 +22922,7 @@ function WebGLShadowMap( renderer, objects, capabilities ) {
 		},
 		uniforms: {
 			shadow_pass: { value: null },
-			resolution: { value: new Vector2() },
+			resolution: { value: new Vector2$1() },
 			radius: { value: 4.0 }
 		},
 
@@ -24637,7 +24637,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 	const multisampledRTTExt = extensions.has( 'WEBGL_multisampled_render_to_texture' ) ? extensions.get( 'WEBGL_multisampled_render_to_texture' ) : null;
 	const supportsInvalidateFramebuffer = typeof navigator === 'undefined' ? false : /OculusBrowser/g.test( navigator.userAgent );
 
-	const _imageDimensions = new Vector2();
+	const _imageDimensions = new Vector2$1();
 	const _videoTextures = new WeakMap();
 	let _canvas;
 
@@ -27035,7 +27035,7 @@ class WebXRController {
 
 		if ( this._hand === null ) {
 
-			this._hand = new Group();
+			this._hand = new Group$1();
 			this._hand.matrixAutoUpdate = false;
 			this._hand.visible = false;
 
@@ -27052,7 +27052,7 @@ class WebXRController {
 
 		if ( this._targetRay === null ) {
 
-			this._targetRay = new Group();
+			this._targetRay = new Group$1();
 			this._targetRay.matrixAutoUpdate = false;
 			this._targetRay.visible = false;
 			this._targetRay.hasLinearVelocity = false;
@@ -27070,7 +27070,7 @@ class WebXRController {
 
 		if ( this._grip === null ) {
 
-			this._grip = new Group();
+			this._grip = new Group$1();
 			this._grip.matrixAutoUpdate = false;
 			this._grip.visible = false;
 			this._grip.hasLinearVelocity = false;
@@ -27342,7 +27342,7 @@ class WebXRController {
 
 		if ( hand.joints[ inputjoint.jointName ] === undefined ) {
 
-			const joint = new Group();
+			const joint = new Group$1();
 			joint.matrixAutoUpdate = false;
 			joint.visible = false;
 			hand.joints[ inputjoint.jointName ] = joint;
@@ -27494,7 +27494,7 @@ class WebXRManager extends EventDispatcher {
 		const controllers = [];
 		const controllerInputSources = [];
 
-		const currentSize = new Vector2();
+		const currentSize = new Vector2$1();
 		let currentPixelRatio = null;
 
 		//
@@ -32336,13 +32336,72 @@ class Agent {
     }
 }
 
-class Component {
+var Type;
+(function (Type) {
+    Type[Type["Render"] = 0] = "Render";
+    Type[Type["Click"] = 1] = "Click";
+    Type[Type["Hover"] = 2] = "Hover";
+})(Type || (Type = {}));
+var Type$1 = Type;
+
+class Render {
+    _target;
+    get type() {
+        return Type$1.Render;
+    }
+    constructor(target) {
+        this._target = target;
+    }
+    get target() {
+        return this._target;
+    }
+}
+
+class Element {
     _children;
     dom;
-    _attributes = {};
+    _attributes;
+    _style;
+    _handler;
+    _transform;
+    constructor(element = {}) {
+        if (element.onRender) {
+            this.handler.subscribe(Type$1.Render, element.onRender);
+        }
+        if (element.style) {
+            this.handler.subscribe(Type$1.Render, () => {
+                if (element.style?.backgroundColor) {
+                    this.style.backgroundColor = element.style.backgroundColor;
+                }
+                if (element.style?.backgroundImage) {
+                    this.style.backgroundImage = element.style.backgroundImage;
+                }
+                if (element.style?.backgroundSize) {
+                    this.style.backgroundSize = element.style.backgroundSize;
+                }
+                if (element.style?.backgroundPosition) {
+                    this.style.backgroundPosition = element.style.backgroundPosition;
+                }
+                if (element.style?.backgroundRepeat) {
+                    this.style.backgroundRepeat = element.style.backgroundRepeat;
+                }
+            });
+        }
+    }
     get id() {
-        const id = this.getAttribute('id');
-        return id ? id : '';
+        if (this._attributes) {
+            const id = this._attributes.get('id');
+            if (id) {
+                return id;
+            }
+        }
+        return '';
+    }
+    get style() {
+        if (!this._style) {
+            this._style = new Element.Style(this);
+        }
+        return this._style;
     }
     get children() {
         if (!this._children) {
@@ -32350,24 +32409,44 @@ class Component {
         }
         return this._children;
     }
+    get transform() {
+        if (!this._transform) {
+            this._transform = new Element.Transform(this);
+        }
+        return this._transform;
+    }
     render(parent) {
-        if (parent instanceof SVGElement || this.tag === 'svg') {
-            this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', this.tag);
+        const tag = this.tag;
+        if (tag === 'svg' || parent instanceof SVGElement) {
+            this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', tag);
+        }
+        else if (tag === 'body') {
+            this.dom = parent.ownerDocument.body;
         }
         else {
             this.dom = parent.ownerDocument.createElement(this.tag);
         }
-        if (this.attributes) {
-            for (const key in this.attributes) {
-                this.dom.setAttribute(key, this.attributes[key]);
+        if (this._attributes) {
+            const keys = this._attributes.keys();
+            for (const key in keys) {
+                let value = this._attributes.get(key);
+                if (value) {
+                    this.dom.setAttribute(key, value);
+                }
             }
         }
         parent.append(this.dom);
-        if (this.children) {
-            for (const child of this.children) {
+        if (this._children) {
+            for (const child of this._children) {
                 child.render(this.dom);
             }
         }
+        if (this._handler) {
+            this._handler.notify(new Render(this));
+        }
+    }
+    onRender(observer) {
+        this.handler.subscribe(Type$1.Render, observer);
     }
     toString() {
         let result = '';
@@ -32376,14 +32455,15 @@ class Component {
         }
         else {
             result = `<${this.tag}`;
-            if (this.attributes) {
-                for (const key in this.attributes) {
-                    result += ` ${key}="${this.attributes[key]}"`;
+            if (this._attributes) {
+                const keys = this._attributes.keys();
+                for (const key in keys) {
+                    result += ` ${key}="${this._attributes.get(key)}"`;
                 }
             }
             result += '>';
-            if (this.children) {
-                for (const child of this.children) {
+            if (this._children) {
+                for (const child of this._children) {
                     result += child.toString();
                 }
             }
@@ -32395,69 +32475,163 @@ class Component {
         this._children = children;
     }
     get attributes() {
-        return this._attributes ? this._attributes : {};
-    }
-    setAttribute(key, value) {
-        if (this._attributes) {
-            this._attributes[key] = value;
+        if (!this._attributes) {
+            this._attributes = new Map();
         }
-        else {
-            this._attributes = {
-                [key]: value,
-            };
+        return this._attributes;
+    }
+    get handler() {
+        if (!this._handler) {
+            this._handler = new Element.Subject(this);
         }
+        return this._handler;
     }
-    getAttribute(key) {
-        return this._attributes && this._attributes[key] ? this._attributes[key] : null;
-    }
+    static Transform = class {
+        _rect;
+        constructor(element) {
+            this._rect = element.dom?.getBoundingClientRect();
+        }
+        get width() {
+            return this._rect?.width ?? 0.0;
+        }
+        get height() {
+            return this._rect?.height ?? 0.0;
+        }
+        get x() {
+            return this._rect?.x ?? 0.0;
+        }
+        get y() {
+            return this._rect?.y ?? 0.0;
+        }
+        get top() {
+            return this._rect?.top ?? 0.0;
+        }
+        get right() {
+            return this._rect?.right ?? 0.0;
+        }
+        get bottom() {
+            return this._rect?.bottom ?? 0.0;
+        }
+        get left() {
+            return this._rect?.left ?? 0.0;
+        }
+        set x(value) {
+            this._rect.x = value;
+        }
+        set y(value) {
+            this._rect.y = value;
+        }
+        set width(value) {
+            this._rect.width = value;
+        }
+        set height(value) {
+            this._rect.height = value;
+        }
+    };
+    static Style = class {
+        _element;
+        constructor(element) {
+            this._element = element;
+        }
+        get backgroundImage() {
+            return this._style?.backgroundImage ?? '';
+        }
+        get backgroundSize() {
+            return this._style?.backgroundSize ?? '';
+        }
+        get backgroundPosition() {
+            return this._style?.backgroundPosition ?? '';
+        }
+        get backgroundRepeat() {
+            return this._style?.backgroundRepeat ?? '';
+        }
+        get backgroundColor() {
+            return this._style?.backgroundColor ?? '';
+        }
+        set backgroundImage(value) {
+            if (this._style) {
+                this._style.backgroundImage = value;
+            }
+        }
+        set backgroundSize(value) {
+            if (this._style) {
+                this._style.backgroundSize = value;
+            }
+        }
+        set backgroundPosition(value) {
+            if (this._style) {
+                this._style.backgroundPosition = value;
+            }
+        }
+        set backgroundRepeat(value) {
+            if (this._style) {
+                this._style.backgroundRepeat = value;
+            }
+        }
+        set backgroundColor(value) {
+            if (this._style) {
+                this._style.backgroundColor = value;
+            }
+        }
+        get _style() {
+            return this._element.dom?.style ?? null;
+        }
+    };
+    static Subject = class {
+        _element;
+        _handlers;
+        constructor(element) {
+            this._element = element;
+            this._handlers = new Map();
+        }
+        subscribe(event, callback) {
+            const handlers = this._handlers.get(event);
+            if (handlers) {
+                handlers.push(callback);
+            }
+            else {
+                this._handlers.set(event, [callback]);
+            }
+        }
+        notify(event) {
+            const handlers = this._handlers.get(event.type);
+            if (handlers) {
+                for (const handler of handlers) {
+                    handler(event);
+                }
+            }
+        }
+    };
 }
 
-class Svg extends Component {
-    constructor({ width, height, viewBox, children }) {
-        super();
-        if (width) {
-            this.setAttribute('width', width.toString());
+class Body extends Element {
+    constructor(Element = {}) {
+        super(Element);
+        if (Element.children) {
+            this.children = Element.children;
         }
-        if (height) {
-            this.setAttribute('height', height.toString());
-        }
-        if (viewBox) {
-            this.setAttribute('viewBox', viewBox);
-        }
-        this.children = children;
-    }
-    get tag() {
-        return 'svg';
-    }
-}
-
-class Body extends Component {
-    constructor({ children }) {
-        super();
-        this.children = children ? children : [];
     }
     get tag() {
         return 'body';
     }
-    render(parent) {
-        this.dom = parent.ownerDocument.body;
-        if (this.children) {
-            for (const child of this.children) {
-                child.render(this.dom);
-            }
-        }
-    }
 }
 
-let Object$1 = class Object extends Component {
-    constructor({ data, children }) {
-        super();
-        if (data) {
-            this.attributes = {
-                data: data
-            };
+let Object$1 = class Object extends Element {
+    constructor(Element = {}) {
+        super(Element);
+        if (Element.data) {
+            this.attributes.set('data', Element.data);
         }
-        this.children = children ? children : [];
+        if (Element.children) {
+            this.children = Element.children;
+        }
+    }
+    get data() {
+        const value = this.attributes.get('data');
+        return value ? value : null;
+    }
+    set data(value) {
+        this.attributes.set('data', value);
     }
     get tag() {
         return 'object';
@@ -32491,16 +32665,187 @@ class Application {
     }
 }
 
-class Canvas extends Component {
-    constructor({ width, height }) {
-        super();
-        this.attributes = {
-            width: width.toString(),
-            height: height.toString(),
-        };
+class Canvas extends Element {
+    constructor(Element) {
+        super(Element);
+        this.attributes.set('width', Element.width.toString());
+        this.attributes.set('height', Element.height.toString());
     }
     get tag() {
         return 'canvas';
+    }
+}
+
+class Svg extends Element {
+    constructor({ width, height, viewBox, children }) {
+        super();
+        if (width) {
+            this.attributes.set('width', width.toString());
+        }
+        if (height) {
+            this.attributes.set('height', height.toString());
+        }
+        if (viewBox) {
+            this.attributes.set('viewBox', viewBox);
+        }
+        if (children) {
+            this.children = children;
+        }
+    }
+    get tag() {
+        return 'svg';
+    }
+}
+
+class StyleSheet {
+    _styles;
+    constructor() {
+        this._styles = new Map();
+    }
+    toString() {
+        let styles = '';
+        this._styles.forEach((value, key) => {
+            styles += `${key}: ${value};`;
+        });
+        return styles;
+    }
+}
+
+class Group extends Element {
+    constructor(element) {
+        super(element);
+        this.children = element.children;
+        if (element.clipPath) {
+            this.attributes.set('clip-path', element.clipPath);
+        }
+    }
+    get tag() {
+        return 'g';
+    }
+}
+
+class Polygon extends Element {
+    constructor(Element) {
+        super(Element);
+        this.attributes.set('points', Element.points);
+        if (Element.color) {
+            this.attributes.set('fill', Element.color);
+        }
+        if (Element.clipPath) {
+            this.attributes.set('clip-path', Element.clipPath);
+        }
+    }
+    get tag() {
+        return 'polygon';
+    }
+}
+
+class ClipPath extends Element {
+    constructor(Element) {
+        super();
+        this.attributes.set('id', Element.id);
+        if (Element.children) {
+            this.children = Element.children;
+        }
+    }
+    get tag() {
+        return 'clipPath';
+    }
+}
+
+class VectorialScalable extends StyleSheet {
+    element;
+    index;
+    constructor(width, height) {
+        super();
+        this.index = 0;
+        this.element = new Svg({
+            width: width,
+            height: height,
+            viewBox: `0 0 ${width} ${height}`,
+        });
+    }
+    addPolygon(paths, color) {
+        if (paths.length === 0) {
+            return;
+        }
+        const values = [];
+        if (Array.isArray(paths[0])) {
+            for (const item of paths) {
+                let points = '';
+                for (const point of item) {
+                    points += `${point.x} ${point.y} `;
+                }
+                values.push(points.trimEnd());
+            }
+        }
+        else {
+            let points = '';
+            for (const point of paths) {
+                points += `${point.x} ${point.y} `;
+            }
+            values.push(points.trimEnd());
+        }
+        if (values.length > 0) {
+            this.element.children.push(this.createPolygon(values, color));
+        }
+    }
+    write(style) {
+        style.backgroundImage = `url('data:image/svg+xml,${encodeURIComponent(this.element.toString())}')`;
+        style.backgroundSize = 'cover';
+        style.backgroundPosition = 'center';
+        style.backgroundRepeat = 'no-repeat';
+    }
+    createClipPath(id, path) {
+        return new ClipPath({
+            id: id,
+            children: [
+                new Polygon({
+                    points: path,
+                }),
+            ],
+        });
+    }
+    createPolygon(paths, color) {
+        {
+            if (paths.length == 0) {
+                throw new Error('No paths provided');
+            }
+            else if (paths.length == 1) {
+                return new Polygon({
+                    color: color,
+                    points: paths[0],
+                });
+            }
+            else {
+                const id = `clip${this.index++}`;
+                this.element.children.push(this.createClipPath(id, paths[0]));
+                if (paths.length == 2) {
+                    return new Polygon({
+                        color: color,
+                        points: paths[1],
+                        clipPath: `url(#${id})`,
+                    });
+                }
+                else {
+                    return new Group({
+                        clipPath: `url(#${id})`,
+                        children: [
+                            this.createPolygon(paths.slice(1), color),
+                        ],
+                    });
+                }
+            }
+        }
+    }
+}
+
+class Vector2 {
+    x;
+    y;
+    constructor(x = 0.0, y = 0.0) {
+        this.x = x;
+        this.y = y;
     }
 }
 
@@ -32553,7 +32898,6 @@ function initializeAgent(helper) {
 window.agent = agent;
 window.listenResize = listenResize;
 window.initializeAgent = initializeAgent;
-const svg = new Svg({});
 const app = new Application();
 app.render(new Document({
     children: [
@@ -32564,7 +32908,62 @@ app.render(new Document({
                     height: 100,
                 }),
                 new Object$1({
-                    data: `data:image/svg+xml;base64,${btoa(svg.toString())}`,
+                    onRender: function (event) {
+                        const element = event.target;
+                        const width = element.transform.width;
+                        const mw = width / 2;
+                        const clip = new VectorialScalable(width, 50);
+                        const paths = [];
+                        let path = [];
+                        path.push(new Vector2(0, 15));
+                        path.push(new Vector2(mw - 170, 15));
+                        path.push(new Vector2(mw - 160, 5));
+                        path.push(new Vector2(mw - 50, 5));
+                        path.push(new Vector2(mw - 40, 15));
+                        path.push(new Vector2(mw + 40, 15));
+                        path.push(new Vector2(mw + 50, 5));
+                        path.push(new Vector2(mw + 160, 5));
+                        path.push(new Vector2(mw + 170, 15));
+                        path.push(new Vector2(width, 15));
+                        path.push(new Vector2(width, 50));
+                        path.push(new Vector2(0, 50));
+                        path.push(new Vector2(0, 15));
+                        paths.push(path);
+                        path = [];
+                        for (let i = 0; i < 50; i += 2) {
+                            path.push(new Vector2(0, i));
+                            path.push(new Vector2(width, i));
+                            path.push(new Vector2(width, i + 1));
+                            path.push(new Vector2(0, i + 1));
+                            path.push(new Vector2(0, i));
+                        }
+                        paths.push(path);
+                        clip.addPolygon(paths, '#1a1a1a');
+                        path = [];
+                        path.push(new Vector2(0, 15));
+                        path.push(new Vector2(mw - 170, 15));
+                        path.push(new Vector2(mw - 160, 5));
+                        path.push(new Vector2(mw - 50, 5));
+                        path.push(new Vector2(mw - 40, 15));
+                        path.push(new Vector2(mw + 40, 15));
+                        path.push(new Vector2(mw + 50, 5));
+                        path.push(new Vector2(mw + 160, 5));
+                        path.push(new Vector2(mw + 170, 15));
+                        path.push(new Vector2(width, 15));
+                        path.push(new Vector2(width, 17));
+                        path.push(new Vector2(mw + 169, 17));
+                        path.push(new Vector2(mw + 159, 7));
+                        path.push(new Vector2(mw + 51, 7));
+                        path.push(new Vector2(mw + 41, 17));
+                        path.push(new Vector2(mw - 41, 17));
+                        path.push(new Vector2(mw - 51, 7));
+                        path.push(new Vector2(mw - 159, 7));
+                        path.push(new Vector2(mw - 169, 17));
+                        path.push(new Vector2(0, 17));
+                        path.push(new Vector2(0, 15));
+                        clip.addPolygon(path, '#00f2ff');
+                        clip.write(element.style);
+                    }
                 }),
             ],
         })

@@ -1,10 +1,10 @@
-import Component from "./Component"
+import Element from "./Element"
 
 export default class Document {
     protected dom?: HTMLElement
-    private children: Component[]
+    private children: Element[]
 
-    constructor({ children }: { children: Component[] }) {
+    constructor({ children }: { children: Element[] }) {
         this.children = children
     }
 

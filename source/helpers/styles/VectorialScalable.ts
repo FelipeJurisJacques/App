@@ -1,9 +1,10 @@
-import Svg from "../components/Svg"
+import Svg from "../elements/Svg"
 import StyleSheet from "./StyleSheet"
-import Group from "../components/Group"
+import Group from "../elements/Group"
+import Element from "../elements/Element"
 import Vector2 from "../../utils/Vector2"
-import Polygon from "../components/Polygon"
-import ClipPath from "../components/ClipPath"
+import Polygon from "../elements/Polygon"
+import ClipPath from "../elements/ClipPath"
 
 export default class VectorialScalable extends StyleSheet {
     private element: Svg
@@ -44,11 +45,11 @@ export default class VectorialScalable extends StyleSheet {
         }
     }
 
-    public getStyle(): string {
-        const svg = this.element.toString()
-        const data = `url('data:image/svg+xml,${encodeURIComponent(svg)}')`
-        const style = `background-image: ${data}; background-size: cover; background-position: center; background-repeat: no-repeat;`
-        return style
+    public write(style: InstanceType<typeof Element.Style>): void {
+        style.backgroundImage = `url('data:image/svg+xml,${encodeURIComponent(this.element.toString())}')`
+        style.backgroundSize = 'cover'
+        style.backgroundPosition = 'center'
+        style.backgroundRepeat = 'no-repeat'
     }
 
     private createClipPath(id: string, path: string): ClipPath {
@@ -90,12 +91,5 @@ export default class VectorialScalable extends StyleSheet {
                 }
             }
         }
-    }
-
-    public toString(): string {
-        const svg = this.element.toString()
-        const data = `url('data:image/svg+xml,${encodeURIComponent(svg)}')`
-        const style = `background-image: ${data}; background-size: cover; background-position: center; background-repeat: no-repeat;`
-        return style
     }
 }

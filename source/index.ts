@@ -72,75 +72,74 @@ window.listenResize = listenResize
 window.initializeAgent = initializeAgent
 
 const app = new Application()
-app.render(new Document({
-    children: [
-        new Body({
-            children: [
-                new Canvas({
-                    width: 100,
-                    height: 100,
+app.render(new Document(function () {
+    this.children = [
+        new Body(function () {
+            this.children = [
+                new Canvas(function () {
+                    this.width = 100
+                    this.height = 100
                 }),
-                new Object({
-                    onRender: function (event: Render) {
-                        const element = event.target
-                        const width = element.transform.width
-                        const mw = width / 2
-                        const clip = new VectorialScalable(width, 50)
-                        const paths: Vector2[][] = []
-                        let path: Vector2[] = []
-                        path.push(new Vector2(0, 15))
-                        path.push(new Vector2(mw - 170, 15))
-                        path.push(new Vector2(mw - 160, 5))
-                        path.push(new Vector2(mw - 50, 5))
-                        path.push(new Vector2(mw - 40, 15))
-                        path.push(new Vector2(mw + 40, 15))
-                        path.push(new Vector2(mw + 50, 5))
-                        path.push(new Vector2(mw + 160, 5))
-                        path.push(new Vector2(mw + 170, 15))
-                        path.push(new Vector2(width, 15))
-                        path.push(new Vector2(width, 50))
-                        path.push(new Vector2(0, 50))
-                        path.push(new Vector2(0, 15))
-                        paths.push(path)
+                new Object(function () {
+                    const width = this.transform.width
+                    const mw = width / 2
+                    const clip = new VectorialScalable(width, 50)
+                    const paths: Vector2[][] = []
+                    let path: Vector2[] = []
 
-                        path = []
-                        for (let i = 0; i < 50; i += 2) {
-                            path.push(new Vector2(0, i))
-                            path.push(new Vector2(width, i))
-                            path.push(new Vector2(width, i + 1))
-                            path.push(new Vector2(0, i + 1))
-                            path.push(new Vector2(0, i))
-                        }
-                        paths.push(path)
-                        clip.addPolygon(paths, '#1a1a1a')
+                    path.push(new Vector2(0, 15))
+                    path.push(new Vector2(mw - 170, 15))
+                    path.push(new Vector2(mw - 160, 5))
+                    path.push(new Vector2(mw - 50, 5))
+                    path.push(new Vector2(mw - 40, 15))
+                    path.push(new Vector2(mw + 40, 15))
+                    path.push(new Vector2(mw + 50, 5))
+                    path.push(new Vector2(mw + 160, 5))
+                    path.push(new Vector2(mw + 170, 15))
+                    path.push(new Vector2(width, 15))
+                    path.push(new Vector2(width, 50))
+                    path.push(new Vector2(0, 50))
+                    path.push(new Vector2(0, 15))
+                    paths.push(path)
 
-                        path = []
-                        path.push(new Vector2(0, 15))
-                        path.push(new Vector2(mw - 170, 15))
-                        path.push(new Vector2(mw - 160, 5))
-                        path.push(new Vector2(mw - 50, 5))
-                        path.push(new Vector2(mw - 40, 15))
-                        path.push(new Vector2(mw + 40, 15))
-                        path.push(new Vector2(mw + 50, 5))
-                        path.push(new Vector2(mw + 160, 5))
-                        path.push(new Vector2(mw + 170, 15))
-                        path.push(new Vector2(width, 15))
-                        path.push(new Vector2(width, 17))
-                        path.push(new Vector2(mw + 169, 17))
-                        path.push(new Vector2(mw + 159, 7))
-                        path.push(new Vector2(mw + 51, 7))
-                        path.push(new Vector2(mw + 41, 17))
-                        path.push(new Vector2(mw - 41, 17))
-                        path.push(new Vector2(mw - 51, 7))
-                        path.push(new Vector2(mw - 159, 7))
-                        path.push(new Vector2(mw - 169, 17))
-                        path.push(new Vector2(0, 17))
-                        path.push(new Vector2(0, 15))
-                        clip.addPolygon(path, '#00f2ff')
-                        this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`
+                    path = []
+                    for (let i = 0; i < 50; i += 2) {
+                        path.push(new Vector2(0, i))
+                        path.push(new Vector2(width, i))
+                        path.push(new Vector2(width, i + 1))
+                        path.push(new Vector2(0, i + 1))
+                        path.push(new Vector2(0, i))
                     }
+                    paths.push(path)
+                    clip.addPolygon(paths, '#1a1a1a')
+
+                    path = []
+                    path.push(new Vector2(0, 15))
+                    path.push(new Vector2(mw - 170, 15))
+                    path.push(new Vector2(mw - 160, 5))
+                    path.push(new Vector2(mw - 50, 5))
+                    path.push(new Vector2(mw - 40, 15))
+                    path.push(new Vector2(mw + 40, 15))
+                    path.push(new Vector2(mw + 50, 5))
+                    path.push(new Vector2(mw + 160, 5))
+                    path.push(new Vector2(mw + 170, 15))
+                    path.push(new Vector2(width, 15))
+                    path.push(new Vector2(width, 17))
+                    path.push(new Vector2(mw + 169, 17))
+                    path.push(new Vector2(mw + 159, 7))
+                    path.push(new Vector2(mw + 51, 7))
+                    path.push(new Vector2(mw + 41, 17))
+                    path.push(new Vector2(mw - 41, 17))
+                    path.push(new Vector2(mw - 51, 7))
+                    path.push(new Vector2(mw - 159, 7))
+                    path.push(new Vector2(mw - 169, 17))
+                    path.push(new Vector2(0, 17))
+                    path.push(new Vector2(0, 15))
+                    clip.addPolygon(path, '#00f2ff')
+
+                    this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`
                 }),
-            ],
+            ]
         })
-    ],
+    ]
 }))

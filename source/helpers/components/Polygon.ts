@@ -1,25 +1,20 @@
-import Component, { IComponent } from "./Component";
-
-interface IPolygon extends IComponent {
-    color?: string
-    points: string
-    clipPath?: string
-}
+import Component from './Component'
 
 export default class Polygon extends Component {
+    private _render: (this: Polygon) => void
 
-    constructor(component: IPolygon) {
-        super(component)
-        this.attributes.set('points', component.points)
-        if (component.color) {
-            this.attributes.set('fill', component.color)
-        }
-        if (component.clipPath) {
-            this.attributes.set('clip-path', component.clipPath)
-        }
+    public constructor(render: (this: Polygon) => void) {
+        super()
+        this._render = render
     }
 
     public get tag(): string {
         return 'polygon'
+    }
+
+    public render(parent: HTMLElement | SVGElement): void {
+        this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', this.tag)
+        parent.appendChild(this.dom)
+        this._render.call(this)
     }
 }

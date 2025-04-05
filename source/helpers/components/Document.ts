@@ -1,21 +1,27 @@
-import Component from "./Component"
+import Component from './Component'
 
 export default class Document {
     protected dom?: HTMLElement
-    private children: Component[]
+    private _render: (this: Document) => void
 
-    constructor({ children }: { children: Component[] }) {
-        this.children = children
+    constructor(render: (this: Document) => void) {
+        this._render = render
     }
 
     public get tag(): string {
         return 'html'
     }
 
+    public set children(children: Component[]) {
+        if (this.dom) {
+            for (let child of children) {
+                child.render(this.dom)
+            }
+        }
+    }
+
     render(window: Window): void {
         this.dom = window.document.documentElement
-        for (const child of this.children) {
-            child.render(this.dom)
-        }
+        this._render.call(this)
     }
 }

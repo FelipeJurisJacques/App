@@ -1,19 +1,19 @@
-import Component, { IComponent } from "./Component"
+import Stackable from './Stackable'
 
-interface IBody extends IComponent {
-    children?: Component[]
-}
+export default class Body extends Stackable {
+    private _render: (this: Body) => void
 
-export default class Body extends Component {
-
-    constructor(component: IBody = {}) {
-        super(component)
-        if (component.children) {
-            this.children = component.children
-        }
+    public constructor(render: (this: Body) => void = () => { }) {
+        super()
+        this._render = render
     }
 
     public get tag(): string {
         return 'body'
+    }
+
+    public render(parent: HTMLElement): void {
+        this.dom = parent.ownerDocument.body
+        this._render.call(this)
     }
 }

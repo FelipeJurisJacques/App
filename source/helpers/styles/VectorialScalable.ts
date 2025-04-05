@@ -1,22 +1,18 @@
-import Svg from "../components/Svg"
-import StyleSheet from "./StyleSheet"
-import Group from "../components/Group"
-import Vector2 from "../../utils/Vector2"
-import Polygon from "../components/Polygon"
-import ClipPath from "../components/ClipPath"
+import StyleSheet from './StyleSheet'
+import Vector2 from '../../utils/Vector2'
 
 export default class VectorialScalable extends StyleSheet {
-    private element: Svg
     private index: number
+    private width: number
+    private height: number
+    private elements: string[]
 
     public constructor(width: number, height: number) {
         super()
         this.index = 0
-        this.element = new Svg({
-            width: width,
-            height: height,
-            viewBox: `0 0 ${width} ${height}`,
-        })
+        this.elements = []
+        this.width = width
+        this.height = height
     }
 
     public addPolygon(paths: Vector2[] | Vector2[][], color: string): void {
@@ -40,60 +36,35 @@ export default class VectorialScalable extends StyleSheet {
             values.push(points.trimEnd())
         }
         if (values.length > 0) {
-            this.element.children.push(this.createPolygon(values, color))
+            this.elements.push(this.createPolygon(values, color))
         }
     }
 
-    public getStyle(): string {
-        const svg = this.element.toString()
-        const data = `url('data:image/svg+xml,${encodeURIComponent(svg)}')`
-        const style = `background-image: ${data}; background-size: cover; background-position: center; background-repeat: no-repeat;`
-        return style
+    private createClipPath(id: string, path: string): string {
+        return `<clipPath id="${id}"><polygon points="${path}" /></clipPath>`
     }
 
-    private createClipPath(id: string, path: string): ClipPath {
-        return new ClipPath({
-            id: id,
-            children: [
-                new Polygon({
-                    points: path,
-                }),
-            ],
-        })
-    }
-
-    private createPolygon(paths: string[], color: string): Polygon {
-        {
-            if (paths.length == 0) {
-                throw new Error('No paths provided')
-            } else if (paths.length == 1) {
-                return new Polygon({
-                    color: color,
-                    points: paths[0],
-                })
-            } else {
-                const id = `clip${this.index++}`
-                this.element.children.push(this.createClipPath(id, paths[0]))
-                if (paths.length == 2) {
-                    return new Polygon({
-                        color: color,
-                        points: paths[1],
-                        clipPath: `url(#${id})`,
-                    })
-                } else {
-                    return new Group({
-                        clipPath: `url(#${id})`,
-                        children: [
-                            this.createPolygon(paths.slice(1), color),
-                        ],
-                    })
-                }
-            }
+    private createPolygon(paths: string[], color: string): string {
+        if (paths.length == 0) {
+            throw new Error('No paths provided')
         }
+        if (paths.length == 1) {
+            return `<polygon points="${paths[0]}" fill="${color}" />`
+        }
+        const id = `clip${this.index++}`
+        this.elements.push(this.createClipPath(id, paths[0]))
+        if (paths.length == 2) {
+            return `<polygon points="${paths[1]}" fill="${color}" clip-path="url(#${id})" />`
+        }
+        return `<g clip-path="url(#${id})">${this.createPolygon(paths.slice(1), color)}</g>`
     }
 
     public toString(): string {
-        const svg = this.element.toString()
+        let svg = `<svg width="${this.width}" height="${this.height}" viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg">`
+        svg += this.elements.join('')
+        svg += '</svg>'
+        console.log(svg)
+        return svg
         const data = `url('data:image/svg+xml,${encodeURIComponent(svg)}')`
         const style = `background-image: ${data}; background-size: cover; background-position: center; background-repeat: no-repeat;`
         return style

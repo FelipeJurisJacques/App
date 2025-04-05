@@ -1,26 +1,20 @@
-import Component from "./Component";
-import StyleSheetSelector from "../styles/StyleSheetSelector";
+import Component from './Component'
 
 export default class Style extends Component {
-    private _styles: StyleSheetSelector[]
+    private _render: (this: Style) => void
 
-    public constructor({children}: {children?: StyleSheetSelector[]}) {
+    public constructor(render: (this: Style) => void) {
         super()
-        this._styles = children ? children : []
-    }
-
-    public render(parent: HTMLElement | SVGElement): void {
-        super.render(parent)
-        if (this.dom) {
-            let styles = ''
-            for (const style of this._styles) {
-                styles += style.toString()
-            }
-            this.dom.innerHTML = styles
-        }
+        this._render = render
     }
 
     public get tag(): string {
         return 'style'
+    }
+
+    public render(parent: HTMLElement | SVGElement): void {
+        this.dom = parent.ownerDocument.createElement(this.tag)
+        parent.appendChild(this.dom)
+        this._render.call(this)
     }
 }

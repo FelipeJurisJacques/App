@@ -1,21 +1,20 @@
-import Component, { IComponent } from "./Component"
-
-interface IClipPath extends IComponent {
-    id: string
-    children?: Component[]
-}
+import Component from './Component'
 
 export default class ClipPath extends Component {
+    private _render: (this: ClipPath) => void
 
-    constructor(component: IClipPath) {
+    public constructor(render: (this: ClipPath) => void) {
         super()
-        this.attributes.set('id', component.id)
-        if (component.children) {
-            this.children = component.children
-        }
+        this._render = render
     }
 
     public get tag(): string {
         return 'clipPath'
+    }
+
+    public render(parent: HTMLElement | SVGElement): void {
+        this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', this.tag)
+        parent.appendChild(this.dom)
+        this._render.call(this)
     }
 }

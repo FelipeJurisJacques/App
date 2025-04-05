@@ -370,7 +370,7 @@ function normalize( value, array ) {
 
 }
 
-class Vector2 {
+let Vector2$1 = class Vector2 {
 
 	constructor( x = 0, y = 0 ) {
 
@@ -845,7 +845,7 @@ class Vector2 {
 
 	}
 
-}
+};
 
 class Matrix3 {
 
@@ -1806,9 +1806,9 @@ class Texture extends EventDispatcher {
 		this.internalFormat = null;
 		this.type = type;
 
-		this.offset = new Vector2( 0, 0 );
-		this.repeat = new Vector2( 1, 1 );
-		this.center = new Vector2( 0, 0 );
+		this.offset = new Vector2$1( 0, 0 );
+		this.repeat = new Vector2$1( 1, 1 );
+		this.center = new Vector2$1( 0, 0 );
 		this.rotation = 0;
 
 		this.matrixAutoUpdate = true;
@@ -9509,7 +9509,7 @@ class MeshBasicMaterial extends Material {
 }
 
 const _vector$9 = /*@__PURE__*/ new Vector3();
-const _vector2$1 = /*@__PURE__*/ new Vector2();
+const _vector2$1 = /*@__PURE__*/ new Vector2$1();
 
 class BufferAttribute {
 
@@ -10456,9 +10456,9 @@ class BufferGeometry extends EventDispatcher {
 			vB = new Vector3(),
 			vC = new Vector3(),
 
-			uvA = new Vector2(),
-			uvB = new Vector2(),
-			uvC = new Vector2(),
+			uvA = new Vector2$1(),
+			uvB = new Vector2$1(),
+			uvC = new Vector2$1(),
 
 			sdir = new Vector3(),
 			tdir = new Vector3();
@@ -11373,13 +11373,13 @@ function checkGeometryIntersection( object, material, raycaster, ray, uv, uv1, n
 
 		if ( uv ) {
 
-			intersection.uv = Triangle.getInterpolatedAttribute( uv, a, b, c, barycoord, new Vector2() );
+			intersection.uv = Triangle.getInterpolatedAttribute( uv, a, b, c, barycoord, new Vector2$1() );
 
 		}
 
 		if ( uv1 ) {
 
-			intersection.uv1 = Triangle.getInterpolatedAttribute( uv1, a, b, c, barycoord, new Vector2() );
+			intersection.uv1 = Triangle.getInterpolatedAttribute( uv1, a, b, c, barycoord, new Vector2$1() );
 
 		}
 
@@ -11946,8 +11946,8 @@ class Camera extends Object3D {
 }
 
 const _v3$1 = /*@__PURE__*/ new Vector3();
-const _minTarget = /*@__PURE__*/ new Vector2();
-const _maxTarget = /*@__PURE__*/ new Vector2();
+const _minTarget = /*@__PURE__*/ new Vector2$1();
+const _maxTarget = /*@__PURE__*/ new Vector2$1();
 
 
 class PerspectiveCamera extends Camera {
@@ -13737,7 +13737,7 @@ class RingGeometry extends BufferGeometry {
 		let radius = innerRadius;
 		const radiusStep = ( ( outerRadius - innerRadius ) / phiSegments );
 		const vertex = new Vector3();
-		const uv = new Vector2();
+		const uv = new Vector2$1();
 
 		// generate vertices, normals and uvs
 
@@ -13988,7 +13988,7 @@ class LightShadow {
 		this.radius = 1;
 		this.blurSamples = 8;
 
-		this.mapSize = new Vector2( 512, 512 );
+		this.mapSize = new Vector2$1( 512, 512 );
 
 		this.map = null;
 		this.mapPass = null;
@@ -13998,7 +13998,7 @@ class LightShadow {
 		this.needsUpdate = false;
 
 		this._frustum = new Frustum();
-		this._frameExtents = new Vector2( 1, 1 );
+		this._frameExtents = new Vector2$1( 1, 1 );
 
 		this._viewportCount = 1;
 
@@ -15322,7 +15322,7 @@ const UniformsLib = {
 
 		normalMap: { value: null },
 		normalMapTransform: { value: /*@__PURE__*/ new Matrix3() },
-		normalScale: { value: /*@__PURE__*/ new Vector2( 1, 1 ) }
+		normalScale: { value: /*@__PURE__*/ new Vector2$1( 1, 1 ) }
 
 	},
 
@@ -15472,7 +15472,7 @@ const UniformsLib = {
 
 		diffuse: { value: /*@__PURE__*/ new Color( 0xffffff ) },
 		opacity: { value: 1.0 },
-		center: { value: /*@__PURE__*/ new Vector2( 0.5, 0.5 ) },
+		center: { value: /*@__PURE__*/ new Vector2$1( 0.5, 0.5 ) },
 		rotation: { value: 0.0 },
 		map: { value: null },
 		mapTransform: { value: /*@__PURE__*/ new Matrix3() },
@@ -15788,7 +15788,7 @@ ShaderLib.physical = {
 			clearcoatMapTransform: { value: /*@__PURE__*/ new Matrix3() },
 			clearcoatNormalMap: { value: null },
 			clearcoatNormalMapTransform: { value: /*@__PURE__*/ new Matrix3() },
-			clearcoatNormalScale: { value: /*@__PURE__*/ new Vector2( 1, 1 ) },
+			clearcoatNormalScale: { value: /*@__PURE__*/ new Vector2$1( 1, 1 ) },
 			clearcoatRoughness: { value: 0 },
 			clearcoatRoughnessMap: { value: null },
 			clearcoatRoughnessMapTransform: { value: /*@__PURE__*/ new Matrix3() },
@@ -15811,7 +15811,7 @@ ShaderLib.physical = {
 			transmission: { value: 0 },
 			transmissionMap: { value: null },
 			transmissionMapTransform: { value: /*@__PURE__*/ new Matrix3() },
-			transmissionSamplerSize: { value: /*@__PURE__*/ new Vector2() },
+			transmissionSamplerSize: { value: /*@__PURE__*/ new Vector2$1() },
 			transmissionSamplerMap: { value: null },
 			thickness: { value: 0 },
 			thicknessMap: { value: null },
@@ -15824,7 +15824,7 @@ ShaderLib.physical = {
 			specularIntensity: { value: 1 },
 			specularIntensityMap: { value: null },
 			specularIntensityMapTransform: { value: /*@__PURE__*/ new Matrix3() },
-			anisotropyVector: { value: /*@__PURE__*/ new Vector2() },
+			anisotropyVector: { value: /*@__PURE__*/ new Vector2$1() },
 			anisotropyMap: { value: null },
 			anisotropyMapTransform: { value: /*@__PURE__*/ new Matrix3() },
 		}
@@ -18769,7 +18769,7 @@ function WebGLMorphtargets( gl, capabilities, textures ) {
 			entry = {
 				count: morphTargetsCount,
 				texture: texture,
-				size: new Vector2( width, height )
+				size: new Vector2$1( width, height )
 			};
 
 			morphTextures.set( geometry, entry );
@@ -22325,7 +22325,7 @@ function ShadowUniformsCache() {
 						shadowBias: 0,
 						shadowNormalBias: 0,
 						shadowRadius: 1,
-						shadowMapSize: new Vector2()
+						shadowMapSize: new Vector2$1()
 					};
 					break;
 
@@ -22335,7 +22335,7 @@ function ShadowUniformsCache() {
 						shadowBias: 0,
 						shadowNormalBias: 0,
 						shadowRadius: 1,
-						shadowMapSize: new Vector2()
+						shadowMapSize: new Vector2$1()
 					};
 					break;
 
@@ -22345,7 +22345,7 @@ function ShadowUniformsCache() {
 						shadowBias: 0,
 						shadowNormalBias: 0,
 						shadowRadius: 1,
-						shadowMapSize: new Vector2(),
+						shadowMapSize: new Vector2$1(),
 						shadowCameraNear: 1,
 						shadowCameraFar: 1000
 					};
@@ -22902,8 +22902,8 @@ function WebGLShadowMap( renderer, objects, capabilities ) {
 
 	let _frustum = new Frustum();
 
-	const _shadowMapSize = new Vector2(),
-		_viewportSize = new Vector2(),
+	const _shadowMapSize = new Vector2$1(),
+		_viewportSize = new Vector2$1(),
 
 		_viewport = new Vector4(),
 
@@ -22922,7 +22922,7 @@ function WebGLShadowMap( renderer, objects, capabilities ) {
 		},
 		uniforms: {
 			shadow_pass: { value: null },
-			resolution: { value: new Vector2() },
+			resolution: { value: new Vector2$1() },
 			radius: { value: 4.0 }
 		},
 
@@ -24637,7 +24637,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 	const multisampledRTTExt = extensions.has( 'WEBGL_multisampled_render_to_texture' ) ? extensions.get( 'WEBGL_multisampled_render_to_texture' ) : null;
 	const supportsInvalidateFramebuffer = typeof navigator === 'undefined' ? false : /OculusBrowser/g.test( navigator.userAgent );
 
-	const _imageDimensions = new Vector2();
+	const _imageDimensions = new Vector2$1();
 	const _videoTextures = new WeakMap();
 	let _canvas;
 
@@ -27494,7 +27494,7 @@ class WebXRManager extends EventDispatcher {
 		const controllers = [];
 		const controllerInputSources = [];
 
-		const currentSize = new Vector2();
+		const currentSize = new Vector2$1();
 		let currentPixelRatio = null;
 
 		//
@@ -32337,127 +32337,132 @@ class Agent {
 }
 
 class Component {
-    _children;
+    _style;
     dom;
-    _attributes = {};
+    _handlers;
+    _attributes;
+    _transform;
     get id() {
-        const id = this.getAttribute('id');
-        return id ? id : '';
-    }
-    get children() {
-        if (!this._children) {
-            this._children = [];
-        }
-        return this._children;
-    }
-    render(parent) {
-        if (parent instanceof SVGElement || this.tag === 'svg') {
-            this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', this.tag);
-        }
-        else {
-            this.dom = parent.ownerDocument.createElement(this.tag);
-        }
-        if (this.attributes) {
-            for (const key in this.attributes) {
-                this.dom.setAttribute(key, this.attributes[key]);
+        if (this._attributes) {
+            const id = this._attributes.get('id');
+            if (id) {
+                return id;
             }
         }
-        parent.append(this.dom);
-        if (this.children) {
-            for (const child of this.children) {
+        return '';
+    }
+    get style() {
+        if (!this._style) {
+            this._style = new Component.Style(this);
+        }
+        return this._style;
+    }
+    get transform() {
+        if (!this._transform) {
+            this._transform = new Component.Transform(this);
+        }
+        return this._transform;
+    }
+    onRender(event) {
+        if (!this._handlers) {
+            this._handlers = new Map();
+        }
+        this._handlers.set('resize', event);
+    }
+    static Transform = class {
+        _rect;
+        constructor(element) {
+            this._rect = element.dom?.getBoundingClientRect();
+        }
+        get width() {
+            return this._rect?.width ?? 0.0;
+        }
+        get height() {
+            return this._rect?.height ?? 0.0;
+        }
+        get x() {
+            return this._rect?.x ?? 0.0;
+        }
+        get y() {
+            return this._rect?.y ?? 0.0;
+        }
+        get top() {
+            return this._rect?.top ?? 0.0;
+        }
+        get right() {
+            return this._rect?.right ?? 0.0;
+        }
+        get bottom() {
+            return this._rect?.bottom ?? 0.0;
+        }
+        get left() {
+            return this._rect?.left ?? 0.0;
+        }
+        set x(value) {
+            this._rect.x = value;
+        }
+        set y(value) {
+            this._rect.y = value;
+        }
+        set width(value) {
+            this._rect.width = value;
+        }
+        set height(value) {
+            this._rect.height = value;
+        }
+    };
+    static Style = class {
+        _style;
+        constructor(element) {
+            this._style = element.dom?.style;
+        }
+    };
+}
+
+class Stackable extends Component {
+    get children() {
+        return [];
+    }
+    set children(children) {
+        if (this.dom) {
+            for (let child of children) {
                 child.render(this.dom);
             }
         }
     }
-    toString() {
-        let result = '';
-        if (this.dom) {
-            result = this.dom.outerHTML;
-        }
-        else {
-            result = `<${this.tag}`;
-            if (this.attributes) {
-                for (const key in this.attributes) {
-                    result += ` ${key}="${this.attributes[key]}"`;
-                }
-            }
-            result += '>';
-            if (this.children) {
-                for (const child of this.children) {
-                    result += child.toString();
-                }
-            }
-            result += `</${this.tag}>`;
-        }
-        return result;
-    }
-    set children(children) {
-        this._children = children;
-    }
-    get attributes() {
-        return this._attributes ? this._attributes : {};
-    }
-    setAttribute(key, value) {
-        if (this._attributes) {
-            this._attributes[key] = value;
-        }
-        else {
-            this._attributes = {
-                [key]: value,
-            };
-        }
-    }
-    getAttribute(key) {
-        return this._attributes && this._attributes[key] ? this._attributes[key] : null;
-    }
 }
 
-class Svg extends Component {
-    constructor({ width, height, viewBox, children }) {
+class Body extends Stackable {
+    _render;
+    constructor(render = () => { }) {
         super();
-        if (width) {
-            this.setAttribute('width', width.toString());
-        }
-        if (height) {
-            this.setAttribute('height', height.toString());
-        }
-        if (viewBox) {
-            this.setAttribute('viewBox', viewBox);
-        }
-        this.children = children;
-    }
-    get tag() {
-        return 'svg';
-    }
-}
-
-class Body extends Component {
-    constructor({ children }) {
-        super();
-        this.children = children ? children : [];
+        this._render = render;
     }
     get tag() {
         return 'body';
     }
     render(parent) {
         this.dom = parent.ownerDocument.body;
-        if (this.children) {
-            for (const child of this.children) {
-                child.render(this.dom);
-            }
-        }
+        this._render.call(this);
     }
 }
 
 let Object$1 = class Object extends Component {
-    constructor({ data, children }) {
+    _render;
+    constructor(render = () => { }) {
         super();
-        if (data) {
-            this.attributes = {
-                data: data
-            };
-        }
-        this.children = children ? children : [];
+        this._render = render;
+    }
+    get data() {
+        return this.dom?.getAttribute('data') ?? '';
+    }
+    set data(value) {
+        this.dom?.setAttribute('data', value);
+    }
+    render(parent) {
+        this.dom = parent.ownerDocument.createElement('object');
+        this._render.call(this);
+        parent.append(this.dom);
     }
     get tag() {
         return 'object';
@@ -32466,18 +32471,23 @@ let Object$1 = class Object extends Component {
 
 class Document {
     dom;
-    children;
-    constructor({ children }) {
-        this.children = children;
+    _render;
+    constructor(render) {
+        this._render = render;
     }
     get tag() {
         return 'html';
     }
+    set children(children) {
+        if (this.dom) {
+            for (let child of children) {
+                child.render(this.dom);
+            }
+        }
+    }
     render(window) {
         this.dom = window.document.documentElement;
-        for (const child of this.children) {
-            child.render(this.dom);
-        }
+        this._render.call(this);
     }
 }
 
@@ -32492,15 +32502,130 @@ class Application {
 }
 
 class Canvas extends Component {
-    constructor({ width, height }) {
+    _render;
+    constructor(render = () => { }) {
         super();
-        this.attributes = {
-            width: width.toString(),
-            height: height.toString(),
-        };
+        this._render = render;
+    }
+    get width() {
+        if (this.dom) {
+            if (this.dom.hasAttribute('width')) {
+                return parseInt(this.dom.getAttribute('width'));
+            }
+        }
+        return 0;
+    }
+    get height() {
+        if (this.dom) {
+            if (this.dom.hasAttribute('height')) {
+                return parseInt(this.dom.getAttribute('height'));
+            }
+        }
+        return 0;
+    }
+    set width(value) {
+        if (this.dom) {
+            this.dom.setAttribute('width', value.toString());
+        }
+    }
+    set height(value) {
+        if (this.dom) {
+            this.dom.setAttribute('height', value.toString());
+        }
+    }
+    render(parent) {
+        this.dom = parent.ownerDocument.createElement('canvas');
+        this._render.call(this);
+        parent.append(this.dom);
     }
     get tag() {
         return 'canvas';
+    }
+}
+
+class StyleSheet {
+    _styles;
+    constructor() {
+        this._styles = new Map();
+    }
+    toString() {
+        let styles = '';
+        this._styles.forEach((value, key) => {
+            styles += `${key}: ${value};`;
+        });
+        return styles;
+    }
+}
+
+class VectorialScalable extends StyleSheet {
+    index;
+    width;
+    height;
+    elements;
+    constructor(width, height) {
+        super();
+        this.index = 0;
+        this.elements = [];
+        this.width = width;
+        this.height = height;
+    }
+    addPolygon(paths, color) {
+        if (paths.length === 0) {
+            return;
+        }
+        const values = [];
+        if (Array.isArray(paths[0])) {
+            for (const item of paths) {
+                let points = '';
+                for (const point of item) {
+                    points += `${point.x} ${point.y} `;
+                }
+                values.push(points.trimEnd());
+            }
+        }
+        else {
+            let points = '';
+            for (const point of paths) {
+                points += `${point.x} ${point.y} `;
+            }
+            values.push(points.trimEnd());
+        }
+        if (values.length > 0) {
+            this.elements.push(this.createPolygon(values, color));
+        }
+    }
+    createClipPath(id, path) {
+        return `<clipPath id="${id}"><polygon points="${path}" /></clipPath>`;
+    }
+    createPolygon(paths, color) {
+        if (paths.length == 0) {
+            throw new Error('No paths provided');
+        }
+        if (paths.length == 1) {
+            return `<polygon points="${paths[0]}" fill="${color}" />`;
+        }
+        const id = `clip${this.index++}`;
+        this.elements.push(this.createClipPath(id, paths[0]));
+        if (paths.length == 2) {
+            return `<polygon points="${paths[1]}" fill="${color}" clip-path="url(#${id})" />`;
+        }
+        return `<g clip-path="url(#${id})">${this.createPolygon(paths.slice(1), color)}</g>`;
+    }
+    toString() {
+        let svg = `<svg width="${this.width}" height="${this.height}" viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg">`;
+        svg += this.elements.join('');
+        svg += '</svg>';
+        console.log(svg);
+        return svg;
+    }
+}
+
+class Vector2 {
+    x;
+    y;
+    constructor(x = 0.0, y = 0.0) {
+        this.x = x;
+        this.y = y;
     }
 }
 
@@ -32553,22 +32678,73 @@ function initializeAgent(helper) {
 window.agent = agent;
 window.listenResize = listenResize;
 window.initializeAgent = initializeAgent;
-const svg = new Svg({});
 const app = new Application();
-app.render(new Document({
-    children: [
-        new Body({
-            children: [
-                new Canvas({
-                    width: 100,
-                    height: 100,
+app.render(new Document(function () {
+    this.children = [
+        new Body(function () {
+            this.children = [
+                new Canvas(function () {
+                    this.width = 100;
+                    this.height = 100;
                 }),
-                new Object$1({
-                    data: `data:image/svg+xml;base64,${btoa(svg.toString())}`,
+                new Object$1(function () {
+                    const width = this.transform.width;
+                    const mw = width / 2;
+                    const clip = new VectorialScalable(width, 50);
+                    const paths = [];
+                    let path = [];
+                    path.push(new Vector2(0, 15));
+                    path.push(new Vector2(mw - 170, 15));
+                    path.push(new Vector2(mw - 160, 5));
+                    path.push(new Vector2(mw - 50, 5));
+                    path.push(new Vector2(mw - 40, 15));
+                    path.push(new Vector2(mw + 40, 15));
+                    path.push(new Vector2(mw + 50, 5));
+                    path.push(new Vector2(mw + 160, 5));
+                    path.push(new Vector2(mw + 170, 15));
+                    path.push(new Vector2(width, 15));
+                    path.push(new Vector2(width, 50));
+                    path.push(new Vector2(0, 50));
+                    path.push(new Vector2(0, 15));
+                    paths.push(path);
+                    path = [];
+                    for (let i = 0; i < 50; i += 2) {
+                        path.push(new Vector2(0, i));
+                        path.push(new Vector2(width, i));
+                        path.push(new Vector2(width, i + 1));
+                        path.push(new Vector2(0, i + 1));
+                        path.push(new Vector2(0, i));
+                    }
+                    paths.push(path);
+                    clip.addPolygon(paths, '#1a1a1a');
+                    path = [];
+                    path.push(new Vector2(0, 15));
+                    path.push(new Vector2(mw - 170, 15));
+                    path.push(new Vector2(mw - 160, 5));
+                    path.push(new Vector2(mw - 50, 5));
+                    path.push(new Vector2(mw - 40, 15));
+                    path.push(new Vector2(mw + 40, 15));
+                    path.push(new Vector2(mw + 50, 5));
+                    path.push(new Vector2(mw + 160, 5));
+                    path.push(new Vector2(mw + 170, 15));
+                    path.push(new Vector2(width, 15));
+                    path.push(new Vector2(width, 17));
+                    path.push(new Vector2(mw + 169, 17));
+                    path.push(new Vector2(mw + 159, 7));
+                    path.push(new Vector2(mw + 51, 7));
+                    path.push(new Vector2(mw + 41, 17));
+                    path.push(new Vector2(mw - 41, 17));
+                    path.push(new Vector2(mw - 51, 7));
+                    path.push(new Vector2(mw - 159, 7));
+                    path.push(new Vector2(mw - 169, 17));
+                    path.push(new Vector2(0, 17));
+                    path.push(new Vector2(0, 15));
+                    clip.addPolygon(path, '#00f2ff');
+                    this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`;
                 }),
-            ],
+            ];
         })
-    ],
+    ];
 }));
 
 export { initializeAgent, listenResize };

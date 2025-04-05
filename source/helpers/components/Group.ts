@@ -1,21 +1,20 @@
-import Component, { IComponent } from "./Component"
-
-interface IGroup extends IComponent {
-    children: Component[]
-    clipPath?: string
-}
+import Component from './Component'
 
 export default class Group extends Component {
+    private _render: (this: Group) => void
 
-    public constructor(component: IGroup) {
-        super(component)
-        this.children = component.children
-        if (component.clipPath) {
-            this.attributes.set('clip-path', component.clipPath)
-        }
+    public constructor(render: (this: Group) => void) {
+        super()
+        this._render = render
     }
 
     public get tag(): string {
         return 'g'
+    }
+
+    public render(parent: HTMLElement | SVGElement): void {
+        this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', this.tag)
+        parent.appendChild(this.dom)
+        this._render.call(this)
     }
 }

@@ -1,4 +1,4 @@
-import StyleSheet from "./StyleSheet"
+import StyleSheet from './StyleSheet'
 
 export default class StyleSheetSelector {
     private _selector: string

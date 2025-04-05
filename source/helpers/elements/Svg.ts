@@ -1,9 +1,15 @@
-import Component from "./Component"
+import Element from "./Element"
 
+<<<<<<< HEAD:source/helpers/components/Svg.ts
 export default class Svg extends Component {
     private _render: (this: Svg) => void
 
     public constructor(render: (this: Svg) => void) {
+=======
+export default class Svg extends Element {
+
+    constructor({ width, height, viewBox, children }: { width?: number | string, height?: number | string, viewBox?: string, children?: Element[] }) {
+>>>>>>> 12411245bab8266f5246baa802936f03143f0316:source/helpers/elements/Svg.ts
         super()
         this._render = render
     }

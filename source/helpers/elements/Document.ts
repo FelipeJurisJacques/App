@@ -1,3 +1,4 @@
+<<<<<<< HEAD:source/helpers/components/Document.ts
 import Component from './Component'
 
 export default class Document {
@@ -6,6 +7,16 @@ export default class Document {
 
     constructor(render: (this: Document) => void) {
         this._render = render
+=======
+import Element from "./Element"
+
+export default class Document {
+    protected dom?: HTMLElement
+    private children: Element[]
+
+    constructor({ children }: { children: Element[] }) {
+        this.children = children
+>>>>>>> 12411245bab8266f5246baa802936f03143f0316:source/helpers/elements/Document.ts
     }
 
     public get tag(): string {

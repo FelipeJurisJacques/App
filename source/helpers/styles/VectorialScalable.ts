@@ -1,5 +1,15 @@
+<<<<<<< HEAD
 import StyleSheet from './StyleSheet'
 import Vector2 from '../../utils/Vector2'
+=======
+import Svg from "../elements/Svg"
+import StyleSheet from "./StyleSheet"
+import Group from "../elements/Group"
+import Element from "../elements/Element"
+import Vector2 from "../../utils/Vector2"
+import Polygon from "../elements/Polygon"
+import ClipPath from "../elements/ClipPath"
+>>>>>>> 12411245bab8266f5246baa802936f03143f0316
 
 export default class VectorialScalable extends StyleSheet {
     private index: number
@@ -40,8 +50,20 @@ export default class VectorialScalable extends StyleSheet {
         }
     }
 
+<<<<<<< HEAD
     private createClipPath(id: string, path: string): string {
         return `<clipPath id="${id}"><polygon points="${path}" /></clipPath>`
+=======
+    public write(style: InstanceType<typeof Element.Style>): void {
+        style.backgroundImage = this.toString()
+        style.backgroundSize = 'cover'
+        style.backgroundPosition = 'center'
+        style.backgroundRepeat = 'no-repeat'
+    }
+
+    public toString(): string {
+        return `url('data:image/svg+xml,${encodeURIComponent(this.element.toString())}')`
+>>>>>>> 12411245bab8266f5246baa802936f03143f0316
     }
 
     private createPolygon(paths: string[], color: string): string {
@@ -58,6 +80,7 @@ export default class VectorialScalable extends StyleSheet {
         }
         return `<g clip-path="url(#${id})">${this.createPolygon(paths.slice(1), color)}</g>`
     }
+<<<<<<< HEAD
 
     public toString(): string {
         let svg = `<svg width="${this.width}" height="${this.height}" viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg">`
@@ -69,4 +92,6 @@ export default class VectorialScalable extends StyleSheet {
         const style = `background-image: ${data}; background-size: cover; background-position: center; background-repeat: no-repeat;`
         return style
     }
+=======
+>>>>>>> 12411245bab8266f5246baa802936f03143f0316
 }

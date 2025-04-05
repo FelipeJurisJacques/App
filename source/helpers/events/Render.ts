@@ -1,15 +1,19 @@
+import Type from "./Type"
 import Event from "./Event"
-import Component from "../components/Component"
+import Element from "../elements/Element"
 
-export default class Render extends Event {
-    private _target: Component
+export default class Render implements Event {
+    private _target: Element
 
-    public constructor(target: Component) {
-        super()
+    public get type(): Type {
+        return Type.Render
+    }
+
+    public constructor(target: Element) {
         this._target = target
     }
 
-    public get target(): Component {
+    public get target(): Element {
         return this._target
     }
 }

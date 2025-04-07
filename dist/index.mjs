@@ -13545,7 +13545,7 @@ function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, inte
 
 }
 
-let Group$1 = class Group extends Object3D {
+class Group extends Object3D {
 
 	constructor() {
 
@@ -13557,7 +13557,7 @@ let Group$1 = class Group extends Object3D {
 
 	}
 
-};
+}
 
 class DepthTexture extends Texture {
 
@@ -27035,7 +27035,7 @@ class WebXRController {
 
 		if ( this._hand === null ) {
 
-			this._hand = new Group$1();
+			this._hand = new Group();
 			this._hand.matrixAutoUpdate = false;
 			this._hand.visible = false;
 
@@ -27052,7 +27052,7 @@ class WebXRController {
 
 		if ( this._targetRay === null ) {
 
-			this._targetRay = new Group$1();
+			this._targetRay = new Group();
 			this._targetRay.matrixAutoUpdate = false;
 			this._targetRay.visible = false;
 			this._targetRay.hasLinearVelocity = false;
@@ -27070,7 +27070,7 @@ class WebXRController {
 
 		if ( this._grip === null ) {
 
-			this._grip = new Group$1();
+			this._grip = new Group();
 			this._grip.matrixAutoUpdate = false;
 			this._grip.visible = false;
 			this._grip.hasLinearVelocity = false;
@@ -27342,7 +27342,7 @@ class WebXRController {
 
 		if ( hand.joints[ inputjoint.jointName ] === undefined ) {
 
-			const joint = new Group$1();
+			const joint = new Group();
 			joint.matrixAutoUpdate = false;
 			joint.visible = false;
 			hand.joints[ inputjoint.jointName ] = joint;
@@ -32345,86 +32345,30 @@ class Agent {
     }
 }
 
-<<<<<<< HEAD
-class Component {
+class Element {
     _style;
     dom;
     _handlers;
     _attributes;
     _transform;
-=======
-var Type;
-(function (Type) {
-    Type[Type["Render"] = 0] = "Render";
-    Type[Type["Click"] = 1] = "Click";
-    Type[Type["Hover"] = 2] = "Hover";
-})(Type || (Type = {}));
-var Type$1 = Type;
-
-class Render {
-    _target;
-    get type() {
-        return Type$1.Render;
-    }
-    constructor(target) {
-        this._target = target;
-    }
-    get target() {
-        return this._target;
-    }
-}
-
-class Element {
-    _children;
-    dom;
-    _attributes;
-    _style;
-    _handler;
-    _transform;
-    constructor(element = {}) {
-        if (element.onRender) {
-            this.handler.subscribe(Type$1.Render, element.onRender);
-        }
-        if (element.style) {
-            this.handler.subscribe(Type$1.Render, () => {
-                if (element.style?.backgroundColor) {
-                    this.style.backgroundColor = element.style.backgroundColor;
-                }
-                if (element.style?.backgroundImage) {
-                    this.style.backgroundImage = element.style.backgroundImage;
-                }
-                if (element.style?.backgroundSize) {
-                    this.style.backgroundSize = element.style.backgroundSize;
-                }
-                if (element.style?.backgroundPosition) {
-                    this.style.backgroundPosition = element.style.backgroundPosition;
-                }
-                if (element.style?.backgroundRepeat) {
-                    this.style.backgroundRepeat = element.style.backgroundRepeat;
-                }
-            });
-        }
-    }
->>>>>>> 12411245bab8266f5246baa802936f03143f0316
     get id() {
         if (this._attributes) {
             const id = this._attributes.get('id');
             if (id) {
                 return id;
             }
-<<<<<<< HEAD
         }
         return '';
     }
     get style() {
         if (!this._style) {
-            this._style = new Component.Style(this);
+            this._style = new Element.Style(this);
         }
         return this._style;
     }
     get transform() {
         if (!this._transform) {
-            this._transform = new Component.Transform(this);
+            this._transform = new Element.Transform(this);
         }
         return this._transform;
     }
@@ -32484,68 +32428,20 @@ class Element {
     };
 }
 
-class Stackable extends Component {
+class Stackable extends Element {
     get children() {
         return [];
     }
     set children(children) {
         if (this.dom) {
-            for (let child of children) {
-=======
-        }
-        return '';
-    }
-    get style() {
-        if (!this._style) {
-            this._style = new Element.Style(this);
-        }
-        return this._style;
-    }
-    get children() {
-        if (!this._children) {
-            this._children = [];
-        }
-        return this._children;
-    }
-    get transform() {
-        if (!this._transform) {
-            this._transform = new Element.Transform(this);
-        }
-        return this._transform;
-    }
-    render(parent) {
-        const tag = this.tag;
-        if (tag === 'svg' || parent instanceof SVGElement) {
-            this.dom = parent.ownerDocument.createElementNS('http://www.w3.org/2000/svg', tag);
-        }
-        else if (tag === 'body') {
-            this.dom = parent.ownerDocument.body;
-        }
-        else {
-            this.dom = parent.ownerDocument.createElement(this.tag);
-        }
-        if (this._attributes) {
-            this._attributes.forEach((value, key) => {
-                if (this.dom) {
-                    this.dom.setAttribute(key, value);
-                }
-            });
-        }
-        parent.append(this.dom);
-        if (this._children) {
-            for (const child of this._children) {
->>>>>>> 12411245bab8266f5246baa802936f03143f0316
+            // while (this.dom.firstChild) {
+            //     this.dom.removeChild(this.dom.firstChild)
+            // }
+            for (const child of children) {
                 child.render(this.dom);
             }
         }
-        if (this._handler) {
-            this._handler.notify(new Render(this));
-        }
     }
-    onRender(observer) {
-        this.handler.subscribe(Type$1.Render, observer);
-    }
-<<<<<<< HEAD
 }
 
 class Body extends Stackable {
@@ -32553,287 +32449,17 @@ class Body extends Stackable {
     constructor(render = () => { }) {
         super();
         this._render = render;
-=======
-    toString() {
-        let result = '';
-        if (this.dom) {
-            result = this.dom.outerHTML;
-        }
-        else {
-            result = `<${this.tag}`;
-            if (this._attributes) {
-                this._attributes.forEach((value, key) => {
-                    result += ` ${key}="${value}"`;
-                });
-            }
-            result += '>';
-            if (this._children) {
-                for (const child of this._children) {
-                    result += child.toString();
-                }
-            }
-            result += `</${this.tag}>`;
-        }
-        return result;
-    }
-    set children(children) {
-        this._children = children;
-    }
-    get attributes() {
-        if (!this._attributes) {
-            this._attributes = new Map();
-        }
-        return this._attributes;
-    }
-    get handler() {
-        if (!this._handler) {
-            this._handler = new Element.Subject();
-        }
-        return this._handler;
-    }
-    static Transform = class {
-        _rect;
-        constructor(element) {
-            this._rect = element.dom?.getBoundingClientRect();
-        }
-        get width() {
-            return this._rect?.width ?? 0.0;
-        }
-        get height() {
-            return this._rect?.height ?? 0.0;
-        }
-        get x() {
-            return this._rect?.x ?? 0.0;
-        }
-        get y() {
-            return this._rect?.y ?? 0.0;
-        }
-        get top() {
-            return this._rect?.top ?? 0.0;
-        }
-        get right() {
-            return this._rect?.right ?? 0.0;
-        }
-        get bottom() {
-            return this._rect?.bottom ?? 0.0;
-        }
-        get left() {
-            return this._rect?.left ?? 0.0;
-        }
-        set x(value) {
-            this._rect.x = value;
-        }
-        set y(value) {
-            this._rect.y = value;
-        }
-        set width(value) {
-            this._rect.width = value;
-        }
-        set height(value) {
-            this._rect.height = value;
-        }
-    };
-    static Style = class {
-        _element;
-        constructor(element) {
-            this._element = element;
-        }
-        get backgroundImage() {
-            return this._style?.backgroundImage ?? '';
-        }
-        get backgroundSize() {
-            return this._style?.backgroundSize ?? '';
-        }
-        get backgroundPosition() {
-            return this._style?.backgroundPosition ?? '';
-        }
-        get backgroundRepeat() {
-            return this._style?.backgroundRepeat ?? '';
-        }
-        get backgroundColor() {
-            return this._style?.backgroundColor ?? '';
-        }
-        set backgroundImage(value) {
-            if (this._style) {
-                this._style.backgroundImage = value;
-            }
-        }
-        set backgroundSize(value) {
-            if (this._style) {
-                this._style.backgroundSize = value;
-            }
-        }
-        set backgroundPosition(value) {
-            if (this._style) {
-                this._style.backgroundPosition = value;
-            }
-        }
-        set backgroundRepeat(value) {
-            if (this._style) {
-                this._style.backgroundRepeat = value;
-            }
-        }
-        set backgroundColor(value) {
-            if (this._style) {
-                this._style.backgroundColor = value;
-            }
-        }
-        get _style() {
-            return this._element.dom?.style ?? null;
-        }
-    };
-    static Subject = class {
-        _handlers;
-        constructor() {
-            this._handlers = new Map();
-        }
-        subscribe(event, callback) {
-            const handlers = this._handlers.get(event);
-            if (handlers) {
-                handlers.push(callback);
-            }
-            else {
-                this._handlers.set(event, [callback]);
-            }
-        }
-        notify(event) {
-            const handlers = this._handlers.get(event.type);
-            if (handlers) {
-                for (const handler of handlers) {
-                    handler(event);
-                }
-            }
-        }
-    };
-}
-
-class Div extends Element {
-    constructor(element = {}) {
-        super(element);
-        if (element.children) {
-            this.children = element.children;
-        }
-    }
-    get tag() {
-        return 'div';
-    }
-}
-
-class Body extends Element {
-    constructor(Element = {}) {
-        super(Element);
-        if (Element.children) {
-            this.children = Element.children;
-        }
->>>>>>> 12411245bab8266f5246baa802936f03143f0316
     }
     get tag() {
         return 'body';
     }
-<<<<<<< HEAD
     render(parent) {
         this.dom = parent.ownerDocument.body;
         this._render.call(this);
     }
 }
 
-let Object$1 = class Object extends Component {
-    _render;
-    constructor(render = () => { }) {
-        super();
-        this._render = render;
-    }
-    get data() {
-        return this.dom?.getAttribute('data') ?? '';
-    }
-    set data(value) {
-        this.dom?.setAttribute('data', value);
-    }
-    render(parent) {
-        this.dom = parent.ownerDocument.createElement('object');
-        this._render.call(this);
-        parent.append(this.dom);
-=======
-}
-
 class Canvas extends Element {
-    constructor(Element) {
-        super(Element);
-        this.attributes.set('width', Element.width.toString());
-        this.attributes.set('height', Element.height.toString());
-    }
-    get tag() {
-        return 'canvas';
-    }
-}
-
-let Object$1 = class Object extends Element {
-    constructor(element = {}) {
-        super(element);
-        if (element.data) {
-            this.attributes.set('data', element.data);
-        }
-        if (element.children) {
-            this.children = element.children;
-        }
-    }
-    get data() {
-        const value = this.attributes.get('data');
-        return value ? value : null;
-    }
-    set data(value) {
-        this.attributes.set('data', value);
->>>>>>> 12411245bab8266f5246baa802936f03143f0316
-    }
-    get tag() {
-        return 'object';
-    }
-};
-
-class Application {
-    window;
-    constructor(context) {
-        this.window = context ? context : window;
-    }
-    render(document) {
-        document.render(this.window);
-    }
-}
-
-class Document {
-    dom;
-    _render;
-    constructor(render) {
-        this._render = render;
-    }
-    get tag() {
-        return 'html';
-    }
-    set children(children) {
-        if (this.dom) {
-            for (let child of children) {
-                child.render(this.dom);
-            }
-        }
-    }
-    render(window) {
-        this.dom = window.document.documentElement;
-        this._render.call(this);
-    }
-}
-
-<<<<<<< HEAD
-class Application {
-    window;
-    constructor(context) {
-        this.window = context ? context : window;
-    }
-    render(document) {
-        document.render(this.window);
-    }
-}
-
-class Canvas extends Component {
     _render;
     constructor(render = () => { }) {
         super();
@@ -32869,26 +32495,63 @@ class Canvas extends Component {
         this.dom = parent.ownerDocument.createElement('canvas');
         this._render.call(this);
         parent.append(this.dom);
-=======
-class Svg extends Element {
-    constructor({ width, height, viewBox, children }) {
-        super();
-        if (width) {
-            this.attributes.set('width', width.toString());
-        }
-        if (height) {
-            this.attributes.set('height', height.toString());
-        }
-        if (viewBox) {
-            this.attributes.set('viewBox', viewBox);
-        }
-        if (children) {
-            this.children = children;
-        }
->>>>>>> 12411245bab8266f5246baa802936f03143f0316
     }
     get tag() {
-        return 'svg';
+        return 'canvas';
+    }
+}
+
+let Object$1 = class Object extends Element {
+    _render;
+    constructor(render = () => { }) {
+        super();
+        this._render = render;
+    }
+    get data() {
+        return this.dom?.getAttribute('data') ?? '';
+    }
+    set data(value) {
+        this.dom?.setAttribute('data', value);
+    }
+    render(parent) {
+        this.dom = parent.ownerDocument.createElement('object');
+        this._render.call(this);
+        parent.append(this.dom);
+    }
+    get tag() {
+        return 'object';
+    }
+};
+
+class Application {
+    window;
+    constructor(context) {
+        this.window = context ? context : window;
+    }
+    render(document) {
+        document.render(this.window);
+    }
+}
+
+class Document {
+    dom;
+    _render;
+    constructor(render) {
+        this._render = render;
+    }
+    get tag() {
+        return 'html';
+    }
+    set children(children) {
+        if (this.dom) {
+            for (const child of children) {
+                child.render(this.dom);
+            }
+        }
+    }
+    render(window) {
+        this.dom = window.document.documentElement;
+        this._render.call(this);
     }
 }
 
@@ -32906,7 +32569,6 @@ class StyleSheet {
     }
 }
 
-<<<<<<< HEAD
 class VectorialScalable extends StyleSheet {
     index;
     width;
@@ -32918,61 +32580,6 @@ class VectorialScalable extends StyleSheet {
         this.elements = [];
         this.width = width;
         this.height = height;
-=======
-class Group extends Element {
-    constructor(element) {
-        super(element);
-        this.children = element.children;
-        if (element.clipPath) {
-            this.attributes.set('clip-path', element.clipPath);
-        }
-    }
-    get tag() {
-        return 'g';
-    }
-}
-
-class Polygon extends Element {
-    constructor(Element) {
-        super(Element);
-        this.attributes.set('points', Element.points);
-        if (Element.color) {
-            this.attributes.set('fill', Element.color);
-        }
-        if (Element.clipPath) {
-            this.attributes.set('clip-path', Element.clipPath);
-        }
-    }
-    get tag() {
-        return 'polygon';
-    }
-}
-
-class ClipPath extends Element {
-    constructor(Element) {
-        super();
-        this.attributes.set('id', Element.id);
-        if (Element.children) {
-            this.children = Element.children;
-        }
-    }
-    get tag() {
-        return 'clipPath';
-    }
-}
-
-class VectorialScalable extends StyleSheet {
-    element;
-    index;
-    constructor(width, height) {
-        super();
-        this.index = 0;
-        this.element = new Svg({
-            width: width,
-            height: height,
-            viewBox: `0 0 ${width} ${height}`,
-        });
->>>>>>> 12411245bab8266f5246baa802936f03143f0316
     }
     addPolygon(paths, color) {
         if (paths.length === 0) {
@@ -32996,12 +32603,24 @@ class VectorialScalable extends StyleSheet {
             values.push(points.trimEnd());
         }
         if (values.length > 0) {
-<<<<<<< HEAD
             this.elements.push(this.createPolygon(values, color));
         }
     }
     createClipPath(id, path) {
         return `<clipPath id="${id}"><polygon points="${path}" /></clipPath>`;
+    }
+    // public write(style: InstanceType<typeof Element.Style>): void {
+    //     style.backgroundImage = this.toString()
+    //     style.backgroundSize = 'cover'
+    //     style.backgroundPosition = 'center'
+    //     style.backgroundRepeat = 'no-repeat'
+    // }
+    toString() {
+        let svg = `<svg width="${this.width}" height="${this.height}" viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg">`;
+        svg += this.elements.join('');
+        svg += '</svg>';
+        console.log(svg);
+        return svg;
     }
     createPolygon(paths, color) {
         if (paths.length == 0) {
@@ -33017,83 +32636,9 @@ class VectorialScalable extends StyleSheet {
         }
         return `<g clip-path="url(#${id})">${this.createPolygon(paths.slice(1), color)}</g>`;
     }
-    toString() {
-        let svg = `<svg width="${this.width}" height="${this.height}" viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg">`;
-        svg += this.elements.join('');
-        svg += '</svg>';
-        console.log(svg);
-        return svg;
-    }
-}
-
-class Vector2 {
-    x;
-    y;
-    constructor(x = 0.0, y = 0.0) {
-        this.x = x;
-        this.y = y;
-    }
-}
-
-=======
-            this.element.children.push(this.createPolygon(values, color));
-        }
-    }
-    write(style) {
-        style.backgroundImage = this.toString();
-        style.backgroundSize = 'cover';
-        style.backgroundPosition = 'center';
-        style.backgroundRepeat = 'no-repeat';
-    }
-    toString() {
-        return `url('data:image/svg+xml,${encodeURIComponent(this.element.toString())}')`;
-    }
-    createClipPath(id, path) {
-        return new ClipPath({
-            id: id,
-            children: [
-                new Polygon({
-                    points: path,
-                }),
-            ],
-        });
-    }
-    createPolygon(paths, color) {
-        {
-            if (paths.length == 0) {
-                throw new Error('No paths provided');
-            }
-            else if (paths.length == 1) {
-                return new Polygon({
-                    color: color,
-                    points: paths[0],
-                });
-            }
-            else {
-                const id = `clip${this.index++}`;
-                this.element.children.push(this.createClipPath(id, paths[0]));
-                if (paths.length == 2) {
-                    return new Polygon({
-                        color: color,
-                        points: paths[1],
-                        clipPath: `url(#${id})`,
-                    });
-                }
-                else {
-                    return new Group({
-                        clipPath: `url(#${id})`,
-                        children: [
-                            this.createPolygon(paths.slice(1), color),
-                        ],
-                    });
-                }
-            }
-        }
-    }
 }
 
 // @ts-ignore
->>>>>>> 12411245bab8266f5246baa802936f03143f0316
 const agent = new Agent();
 let renderer = null;
 let camera = null;
@@ -33152,7 +32697,6 @@ app.render(new Document(function () {
                     this.width = 100;
                     this.height = 100;
                 }),
-<<<<<<< HEAD
                 new Object$1(function () {
                     const width = this.transform.width;
                     const mw = width / 2;
@@ -33180,6 +32724,34 @@ app.render(new Document(function () {
                         path.push(new Vector2(width, i + 1));
                         path.push(new Vector2(0, i + 1));
                         path.push(new Vector2(0, i));
+                        path = [];
+                        path.push(new Vector2(0, 15));
+                        path.push(new Vector2(mw - 170, 15));
+                        path.push(new Vector2(mw - 160, 5));
+                        path.push(new Vector2(mw - 50, 5));
+                        path.push(new Vector2(mw - 40, 15));
+                        path.push(new Vector2(mw + 40, 15));
+                        path.push(new Vector2(mw + 50, 5));
+                        path.push(new Vector2(mw + 160, 5));
+                        path.push(new Vector2(mw + 170, 15));
+                        path.push(new Vector2(width, 15));
+                        path.push(new Vector2(width, 17));
+                        path.push(new Vector2(mw + 169, 17));
+                        path.push(new Vector2(mw + 159, 7));
+                        path.push(new Vector2(mw + 51, 7));
+                        path.push(new Vector2(mw + 41, 17));
+                        path.push(new Vector2(mw - 41, 17));
+                        path.push(new Vector2(mw - 51, 7));
+                        path.push(new Vector2(mw - 159, 7));
+                        path.push(new Vector2(mw - 169, 17));
+                        path.push(new Vector2(0, 17));
+                        path.push(new Vector2(0, 15));
+                        clip.addPolygon(path, '#00f2ff');
+                        // if (element instanceof Object) {
+                        //     element.data = clip.toString()
+                        // } else {
+                        //     clip.write(element.style)
+                        // }
                     }
                     paths.push(path);
                     clip.addPolygon(paths, '#1a1a1a');
@@ -33207,73 +32779,9 @@ app.render(new Document(function () {
                     path.push(new Vector2(0, 15));
                     clip.addPolygon(path, '#00f2ff');
                     this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`;
-=======
-                new Div({
-                    onRender: function (event) {
-                        const element = event.target;
-                        const width = element.transform.width;
-                        const mw = width / 2;
-                        const clip = new VectorialScalable(width, 50);
-                        const paths = [];
-                        let path = [];
-                        path.push(new Vector2(0, 15));
-                        path.push(new Vector2(mw - 170, 15));
-                        path.push(new Vector2(mw - 160, 5));
-                        path.push(new Vector2(mw - 50, 5));
-                        path.push(new Vector2(mw - 40, 15));
-                        path.push(new Vector2(mw + 40, 15));
-                        path.push(new Vector2(mw + 50, 5));
-                        path.push(new Vector2(mw + 160, 5));
-                        path.push(new Vector2(mw + 170, 15));
-                        path.push(new Vector2(width, 15));
-                        path.push(new Vector2(width, 50));
-                        path.push(new Vector2(0, 50));
-                        path.push(new Vector2(0, 15));
-                        paths.push(path);
-                        path = [];
-                        for (let i = 0; i < 50; i += 2) {
-                            path.push(new Vector2(0, i));
-                            path.push(new Vector2(width, i));
-                            path.push(new Vector2(width, i + 1));
-                            path.push(new Vector2(0, i + 1));
-                            path.push(new Vector2(0, i));
-                        }
-                        paths.push(path);
-                        clip.addPolygon(paths, '#1a1a1a');
-                        path = [];
-                        path.push(new Vector2(0, 15));
-                        path.push(new Vector2(mw - 170, 15));
-                        path.push(new Vector2(mw - 160, 5));
-                        path.push(new Vector2(mw - 50, 5));
-                        path.push(new Vector2(mw - 40, 15));
-                        path.push(new Vector2(mw + 40, 15));
-                        path.push(new Vector2(mw + 50, 5));
-                        path.push(new Vector2(mw + 160, 5));
-                        path.push(new Vector2(mw + 170, 15));
-                        path.push(new Vector2(width, 15));
-                        path.push(new Vector2(width, 17));
-                        path.push(new Vector2(mw + 169, 17));
-                        path.push(new Vector2(mw + 159, 7));
-                        path.push(new Vector2(mw + 51, 7));
-                        path.push(new Vector2(mw + 41, 17));
-                        path.push(new Vector2(mw - 41, 17));
-                        path.push(new Vector2(mw - 51, 7));
-                        path.push(new Vector2(mw - 159, 7));
-                        path.push(new Vector2(mw - 169, 17));
-                        path.push(new Vector2(0, 17));
-                        path.push(new Vector2(0, 15));
-                        clip.addPolygon(path, '#00f2ff');
-                        if (element instanceof Object$1) {
-                            element.data = clip.toString();
-                        }
-                        else {
-                            clip.write(element.style);
-                        }
-                    }
->>>>>>> 12411245bab8266f5246baa802936f03143f0316
                 }),
             ];
-        })
+        }),
     ];
 }));
 

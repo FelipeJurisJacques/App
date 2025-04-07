@@ -1,19 +1,19 @@
-import Element, { IElement } from "./Element"
+import Stackable from './Stackable'
 
-interface IBody extends IElement {
-    children?: Element[]
-}
+export default class Body extends Stackable {
+    private _render: (this: Body) => void
 
-export default class Body extends Element {
-
-    constructor(Element: IBody = {}) {
-        super(Element)
-        if (Element.children) {
-            this.children = Element.children
-        }
+    public constructor(render: (this: Body) => void = () => { }) {
+        super()
+        this._render = render
     }
 
     public get tag(): string {
         return 'body'
+    }
+
+    public render(parent: HTMLElement): void {
+        this.dom = parent.ownerDocument.body
+        this._render.call(this)
     }
 }

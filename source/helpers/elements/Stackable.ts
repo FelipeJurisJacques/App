@@ -1,13 +1,16 @@
-import Component from './Component'
+import Element from './Element'
 
-export default abstract class Stackable extends Component {
-    public get children(): Component[] {
+export default abstract class Stackable extends Element {
+    public get children(): Element[] {
         return []
     }
 
-    public set children(children: Component[]) {
+    public set children(children: Element[]) {
         if (this.dom) {
-            for (let child of children) {
+            // while (this.dom.firstChild) {
+            //     this.dom.removeChild(this.dom.firstChild)
+            // }
+            for (const child of children) {
                 child.render(this.dom)
             }
         }

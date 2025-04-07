@@ -1,30 +1,25 @@
-import Element, { IElement } from "./Element"
+import Component from './Element'
 
-interface IObject extends IElement {
-    data?: string
-    children?: Element[]
-    onRender?: Function
-}
+export default class Object extends Component {
+    private _render: (this: Object) => void
 
-export default class Object extends Element {
-
-    constructor(element: IObject = {}) {
-        super(element)
-        if (element.data) {
-            this.attributes.set('data', element.data)
-        }
-        if (element.children) {
-            this.children = element.children
-        }
+    public constructor(render: (this: Object) => void = () => { }) {
+        super()
+        this._render = render
     }
 
-    public get data(): string|null {
-        const value = this.attributes.get('data')
-        return value ? value : null
+    public get data(): string {
+        return this.dom?.getAttribute('data') ?? ''
     }
 
     public set data(value: string) {
-        this.attributes.set('data', value)
+        this.dom?.setAttribute('data', value)
+    }
+
+    public render(parent: HTMLElement | SVGElement): void {
+        this.dom = parent.ownerDocument.createElement('object')
+        this._render.call(this)
+        parent.append(this.dom)
     }
 
     public get tag(): string {

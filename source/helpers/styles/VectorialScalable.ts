@@ -1,5 +1,5 @@
-import Vector2 from '../../utils/Vector2'
 import StyleSheet from './StyleSheet'
+import Vector2 from '../../utils/Vector2'
 
 export default class VectorialScalable extends StyleSheet {
     private index: number

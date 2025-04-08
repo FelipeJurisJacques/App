@@ -1,11 +1,15 @@
-import Component from './Element'
+import Stylizable from './Stylizable'
 
-export default class Canvas extends Component {
+export default class Canvas extends Stylizable {
     private _render: (this: Canvas) => void
 
     public constructor(render: (this: Canvas) => void = () => { }) {
         super()
         this._render = render
+    }
+
+    public get tag(): string {
+        return 'canvas'
     }
 
     public get width(): number {
@@ -42,9 +46,5 @@ export default class Canvas extends Component {
         this.dom = parent.ownerDocument.createElement('canvas')
         this._render.call(this)
         parent.append(this.dom)
-    }
-
-    public get tag(): string {
-        return 'canvas'
     }
 }

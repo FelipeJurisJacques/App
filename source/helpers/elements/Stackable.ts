@@ -1,6 +1,7 @@
 import Element from './Element'
+import Stylizable from './Stylizable'
 
-export default abstract class Stackable extends Element {
+export default abstract class Stackable extends Stylizable {
     public get children(): Element[] {
         return []
     }

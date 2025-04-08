@@ -32346,37 +32346,33 @@ class Agent {
 }
 
 class Element {
-    _style;
     dom;
     _handlers;
-    _attributes;
-    _transform;
     get id() {
-        if (this._attributes) {
-            const id = this._attributes.get('id');
-            if (id) {
-                return id;
-            }
-        }
-        return '';
-    }
-    get style() {
-        if (!this._style) {
-            this._style = new Element.Style(this);
-        }
-        return this._style;
-    }
-    get transform() {
-        if (!this._transform) {
-            this._transform = new Element.Transform(this);
-        }
-        return this._transform;
+        return this.dom?.id ?? '';
     }
     onRender(event) {
         if (!this._handlers) {
             this._handlers = new Map();
         }
         this._handlers.set('resize', event);
+    }
+}
+
+class Stylizable extends Element {
+    _style;
+    _transform;
+    get style() {
+        if (!this._style) {
+            this._style = new Stylizable.Style(this);
+        }
+        return this._style;
+    }
+    get transform() {
+        if (!this._transform) {
+            this._transform = new Stylizable.Transform(this);
+        }
+        return this._transform;
     }
     static Transform = class {
         _rect;
@@ -32425,10 +32421,31 @@ class Element {
         constructor(element) {
             this._style = element.dom?.style;
         }
+        set position(value) {
+            this._style.position = value;
+        }
+        set top(value) {
+            this._style.top = value;
+        }
+        set right(value) {
+            this._style.right = value;
+        }
+        set bottom(value) {
+            this._style.bottom = value;
+        }
+        set left(value) {
+            this._style.left = value;
+        }
+        set width(value) {
+            this._style.width = value;
+        }
+        set height(value) {
+            this._style.height = value;
+        }
     };
 }
 
-class Stackable extends Element {
+class Stackable extends Stylizable {
     get children() {
         return [];
     }
@@ -32441,6 +32458,22 @@ class Stackable extends Element {
                 child.render(this.dom);
             }
         }
+    }
+}
+
+class Div extends Stackable {
+    _render;
+    constructor(render = () => { }) {
+        super();
+        this._render = render;
+    }
+    get tag() {
+        return 'div';
+    }
+    render(parent) {
+        this.dom = parent.ownerDocument.createElement('div');
+        this._render.call(this);
+        parent.append(this.dom);
     }
 }
 
@@ -32459,11 +32492,14 @@ class Body extends Stackable {
     }
 }
 
-class Canvas extends Element {
+class Canvas extends Stylizable {
     _render;
     constructor(render = () => { }) {
         super();
         this._render = render;
+    }
+    get tag() {
+        return 'canvas';
     }
     get width() {
         if (this.dom) {
@@ -32496,32 +32532,7 @@ class Canvas extends Element {
         this._render.call(this);
         parent.append(this.dom);
     }
-    get tag() {
-        return 'canvas';
-    }
 }
-
-let Object$1 = class Object extends Element {
-    _render;
-    constructor(render = () => { }) {
-        super();
-        this._render = render;
-    }
-    get data() {
-        return this.dom?.getAttribute('data') ?? '';
-    }
-    set data(value) {
-        this.dom?.setAttribute('data', value);
-    }
-    render(parent) {
-        this.dom = parent.ownerDocument.createElement('object');
-        this._render.call(this);
-        parent.append(this.dom);
-    }
-    get tag() {
-        return 'object';
-    }
-};
 
 class Application {
     window;
@@ -32638,6 +32649,16 @@ class VectorialScalable extends StyleSheet {
     }
 }
 
+var Position;
+(function (Position) {
+    Position["Absolute"] = "absolute";
+    Position["Relative"] = "relative";
+    Position["Fixed"] = "fixed";
+    Position["Sticky"] = "sticky";
+    Position["Static"] = "static";
+})(Position || (Position = {}));
+var Position$1 = Position;
+
 // @ts-ignore
 const agent = new Agent();
 let renderer = null;
@@ -32694,91 +32715,105 @@ app.render(new Document(function () {
         new Body(function () {
             this.children = [
                 new Canvas(function () {
+                    this.style.position = Position$1.Fixed;
+                    this.style.width = '100vw';
+                    this.style.height = '100vh';
                     this.width = 100;
                     this.height = 100;
                 }),
-                new Object$1(function () {
-                    const width = this.transform.width;
-                    const mw = width / 2;
-                    const clip = new VectorialScalable(width, 50);
-                    const paths = [];
-                    let path = [];
-                    path.push(new Vector2(0, 15));
-                    path.push(new Vector2(mw - 170, 15));
-                    path.push(new Vector2(mw - 160, 5));
-                    path.push(new Vector2(mw - 50, 5));
-                    path.push(new Vector2(mw - 40, 15));
-                    path.push(new Vector2(mw + 40, 15));
-                    path.push(new Vector2(mw + 50, 5));
-                    path.push(new Vector2(mw + 160, 5));
-                    path.push(new Vector2(mw + 170, 15));
-                    path.push(new Vector2(width, 15));
-                    path.push(new Vector2(width, 50));
-                    path.push(new Vector2(0, 50));
-                    path.push(new Vector2(0, 15));
-                    paths.push(path);
-                    path = [];
-                    for (let i = 0; i < 50; i += 2) {
-                        path.push(new Vector2(0, i));
-                        path.push(new Vector2(width, i));
-                        path.push(new Vector2(width, i + 1));
-                        path.push(new Vector2(0, i + 1));
-                        path.push(new Vector2(0, i));
-                        path = [];
-                        path.push(new Vector2(0, 15));
-                        path.push(new Vector2(mw - 170, 15));
-                        path.push(new Vector2(mw - 160, 5));
-                        path.push(new Vector2(mw - 50, 5));
-                        path.push(new Vector2(mw - 40, 15));
-                        path.push(new Vector2(mw + 40, 15));
-                        path.push(new Vector2(mw + 50, 5));
-                        path.push(new Vector2(mw + 160, 5));
-                        path.push(new Vector2(mw + 170, 15));
-                        path.push(new Vector2(width, 15));
-                        path.push(new Vector2(width, 17));
-                        path.push(new Vector2(mw + 169, 17));
-                        path.push(new Vector2(mw + 159, 7));
-                        path.push(new Vector2(mw + 51, 7));
-                        path.push(new Vector2(mw + 41, 17));
-                        path.push(new Vector2(mw - 41, 17));
-                        path.push(new Vector2(mw - 51, 7));
-                        path.push(new Vector2(mw - 159, 7));
-                        path.push(new Vector2(mw - 169, 17));
-                        path.push(new Vector2(0, 17));
-                        path.push(new Vector2(0, 15));
-                        clip.addPolygon(path, '#00f2ff');
-                        // if (element instanceof Object) {
-                        //     element.data = clip.toString()
-                        // } else {
-                        //     clip.write(element.style)
-                        // }
-                    }
-                    paths.push(path);
-                    clip.addPolygon(paths, '#1a1a1a');
-                    path = [];
-                    path.push(new Vector2(0, 15));
-                    path.push(new Vector2(mw - 170, 15));
-                    path.push(new Vector2(mw - 160, 5));
-                    path.push(new Vector2(mw - 50, 5));
-                    path.push(new Vector2(mw - 40, 15));
-                    path.push(new Vector2(mw + 40, 15));
-                    path.push(new Vector2(mw + 50, 5));
-                    path.push(new Vector2(mw + 160, 5));
-                    path.push(new Vector2(mw + 170, 15));
-                    path.push(new Vector2(width, 15));
-                    path.push(new Vector2(width, 17));
-                    path.push(new Vector2(mw + 169, 17));
-                    path.push(new Vector2(mw + 159, 7));
-                    path.push(new Vector2(mw + 51, 7));
-                    path.push(new Vector2(mw + 41, 17));
-                    path.push(new Vector2(mw - 41, 17));
-                    path.push(new Vector2(mw - 51, 7));
-                    path.push(new Vector2(mw - 159, 7));
-                    path.push(new Vector2(mw - 169, 17));
-                    path.push(new Vector2(0, 17));
-                    path.push(new Vector2(0, 15));
-                    clip.addPolygon(path, '#00f2ff');
-                    this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`;
+                new Div(function () {
+                    this.style.width = '100vw';
+                    this.style.height = '100vh';
+                    this.style.position = Position$1.Fixed;
+                    this.children = [
+                        new Div(function () {
+                            this.style.bottom = '0px';
+                            this.style.width = '100vw';
+                            this.style.height = '100px';
+                            this.style.position = Position$1.Absolute;
+                            const width = this.transform.width;
+                            const mw = width / 2;
+                            const clip = new VectorialScalable(width, 50);
+                            const paths = [];
+                            let path = [];
+                            path.push(new Vector2(0, 15));
+                            path.push(new Vector2(mw - 170, 15));
+                            path.push(new Vector2(mw - 160, 5));
+                            path.push(new Vector2(mw - 50, 5));
+                            path.push(new Vector2(mw - 40, 15));
+                            path.push(new Vector2(mw + 40, 15));
+                            path.push(new Vector2(mw + 50, 5));
+                            path.push(new Vector2(mw + 160, 5));
+                            path.push(new Vector2(mw + 170, 15));
+                            path.push(new Vector2(width, 15));
+                            path.push(new Vector2(width, 50));
+                            path.push(new Vector2(0, 50));
+                            path.push(new Vector2(0, 15));
+                            paths.push(path);
+                            path = [];
+                            for (let i = 0; i < 50; i += 2) {
+                                path.push(new Vector2(0, i));
+                                path.push(new Vector2(width, i));
+                                path.push(new Vector2(width, i + 1));
+                                path.push(new Vector2(0, i + 1));
+                                path.push(new Vector2(0, i));
+                                path = [];
+                                path.push(new Vector2(0, 15));
+                                path.push(new Vector2(mw - 170, 15));
+                                path.push(new Vector2(mw - 160, 5));
+                                path.push(new Vector2(mw - 50, 5));
+                                path.push(new Vector2(mw - 40, 15));
+                                path.push(new Vector2(mw + 40, 15));
+                                path.push(new Vector2(mw + 50, 5));
+                                path.push(new Vector2(mw + 160, 5));
+                                path.push(new Vector2(mw + 170, 15));
+                                path.push(new Vector2(width, 15));
+                                path.push(new Vector2(width, 17));
+                                path.push(new Vector2(mw + 169, 17));
+                                path.push(new Vector2(mw + 159, 7));
+                                path.push(new Vector2(mw + 51, 7));
+                                path.push(new Vector2(mw + 41, 17));
+                                path.push(new Vector2(mw - 41, 17));
+                                path.push(new Vector2(mw - 51, 7));
+                                path.push(new Vector2(mw - 159, 7));
+                                path.push(new Vector2(mw - 169, 17));
+                                path.push(new Vector2(0, 17));
+                                path.push(new Vector2(0, 15));
+                                clip.addPolygon(path, '#00f2ff');
+                                // if (element instanceof Object) {
+                                //     element.data = clip.toString()
+                                // } else {
+                                //     clip.write(element.style)
+                                // }
+                            }
+                            paths.push(path);
+                            clip.addPolygon(paths, '#1a1a1a');
+                            path = [];
+                            path.push(new Vector2(0, 15));
+                            path.push(new Vector2(mw - 170, 15));
+                            path.push(new Vector2(mw - 160, 5));
+                            path.push(new Vector2(mw - 50, 5));
+                            path.push(new Vector2(mw - 40, 15));
+                            path.push(new Vector2(mw + 40, 15));
+                            path.push(new Vector2(mw + 50, 5));
+                            path.push(new Vector2(mw + 160, 5));
+                            path.push(new Vector2(mw + 170, 15));
+                            path.push(new Vector2(width, 15));
+                            path.push(new Vector2(width, 17));
+                            path.push(new Vector2(mw + 169, 17));
+                            path.push(new Vector2(mw + 159, 7));
+                            path.push(new Vector2(mw + 51, 7));
+                            path.push(new Vector2(mw + 41, 17));
+                            path.push(new Vector2(mw - 41, 17));
+                            path.push(new Vector2(mw - 51, 7));
+                            path.push(new Vector2(mw - 159, 7));
+                            path.push(new Vector2(mw - 169, 17));
+                            path.push(new Vector2(0, 17));
+                            path.push(new Vector2(0, 15));
+                            clip.addPolygon(path, '#00f2ff');
+                            // this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`
+                        }),
+                    ];
                 }),
             ];
         }),

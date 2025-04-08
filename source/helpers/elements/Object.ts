@@ -1,6 +1,6 @@
-import Component from './Element'
+import Stylizable from './Stylizable'
 
-export default class Object extends Component {
+export default class Object extends Stylizable {
     private _render: (this: Object) => void
 
     public constructor(render: (this: Object) => void = () => { }) {

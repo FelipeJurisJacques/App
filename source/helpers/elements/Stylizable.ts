@@ -1,15 +1,12 @@
-import Position from '../../enumeratos/style/Position'
 import Element from './Element'
+import Position from '../../enumeratos/style/Position'
 
 export default abstract class Stylizable extends Element {
-    private _style?: InstanceType<typeof Stylizable.Style>
+    // private _style?: InstanceType<typeof Stylizable.Style>
     private _transform?: InstanceType<typeof Stylizable.Transform>
 
-    public get style(): InstanceType<typeof Stylizable.Style> {
-        if (!this._style) {
-            this._style = new Stylizable.Style(this)
-        }
-        return this._style
+    public get style(): CSSStyleDeclaration {
+        return this.dom!.style
     }
 
     public get transform(): InstanceType<typeof Stylizable.Transform> {

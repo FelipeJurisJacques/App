@@ -1,7 +1,7 @@
-import StyleSheet from './StyleSheet'
+import Background from './Background'
 import Vector2 from '../../utils/Vector2'
 
-export default class VectorialScalable extends StyleSheet {
+export default class VectorialScalable extends Background {
     private index: number
     private width: number
     private height: number

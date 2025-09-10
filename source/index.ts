@@ -1,187 +1,64 @@
-// @ts-ignore
-import * as THREE from './libs/three/three.module.js'
-import Vector2 from './utils/Vector2'
-import { Agent } from './helpers/Agent'
-import Div from './helpers/elements/Div'
-import Body from './helpers/elements/Body'
-import Canvas from './helpers/elements/Canvas'
-import Application from './helpers/Application'
-import Document from './helpers/elements/Document'
-import VectorialScalable from './helpers/styles/VectorialScalable'
-import Position from './enumeratos/style/Position.js'
+import Bar from './templates/widgets/bar'
+import Dark from './templates/icons/dark'
+import View from './templates/widgets/view'
+import Light from './templates/icons/light'
+import Button from './templates/widgets/button'
+import HighContrast from './templates/icons/high_contrast'
 
-const agent = new Agent()
-let renderer: null | THREE.WebGLRendere = null
-let camera: null | THREE.PerspectiveCamera = null
+window.customElements.define('widget-bar', Bar)
+window.customElements.define('widget-view', View)
+window.customElements.define('widget-button', Button)
 
-function animate(): void {
-    if (renderer) {
-        agent.animate()
-        renderer.render(agent.Scene, camera)
-    }
-    requestAnimationFrame(animate)
-}
+window.customElements.define('icon-dark', Dark)
+window.customElements.define('icon-light', Light)
+window.customElements.define('icon-high-contrast', HighContrast)
 
-export function listenResize(helper: any) {
-    try {
-        helper.invokeMethodAsync('SetSize', window.innerWidth, window.innerHeight)
-        window.addEventListener('resize', () => {
-            helper.invokeMethodAsync('OnResize', window.innerWidth, window.innerHeight)
-            if (renderer) {
-                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                camera.position.set(0, -2, 0)
-                camera.lookAt(new THREE.Vector3(0, 0, 0))
-                renderer.setSize(window.innerWidth, window.innerHeight)
+const style = window.document.querySelector('style.theme')
+const container = window.document.querySelector('widget-view')
+
+if (style && container && container instanceof View) {
+    container.innerHTML = `<widget-bar>
+        <widget-button class="theme"></widget-button>
+    </widget-bar>`
+    const theme = window.document.querySelector('widget-button.theme')
+    if (theme) {
+        switch (window.localStorage.getItem('theme') ?? 'dark') {
+            case 'light':
+                theme.innerHTML = '<icon-light />'
+                window.document.body.setAttribute('theme', 'light')
+                break
+            case 'high_contrast':
+                theme.innerHTML = '<icon-high-contrast />'
+                window.document.body.setAttribute('theme', 'high_contrast')
+                break
+            default:
+                theme.innerHTML = '<icon-dark />'
+                window.document.body.setAttribute('theme', 'dark')
+                break
+        }
+        container.listen('widget-button.theme').onAction(() => {
+            switch (window.localStorage.getItem('theme') ?? 'dark') {
+                case 'light':
+                    theme.innerHTML = '<icon-high-contrast />'
+                    window.localStorage.setItem('theme', 'high_contrast')
+                    window.document.body.setAttribute('theme', 'high_contrast')
+                    break
+                case 'high_contrast':
+                    theme.innerHTML = '<icon-dark />'
+                    window.localStorage.setItem('theme', 'dark')
+                    window.document.body.setAttribute('theme', 'dark')
+                    break
+                default:
+                    theme.innerHTML = '<icon-light />'
+                    window.localStorage.setItem('theme', 'light')
+                    window.document.body.setAttribute('theme', 'light')
+                    break
             }
         })
-    } catch (error) {
-        console.error(error)
-        throw error
     }
 }
 
-export function initializeAgent(helper: any): Agent {
-    try {
-        renderer = new THREE.WebGLRenderer({
-            canvas: document.body.querySelector('#background') as HTMLCanvasElement,
-            antialias: true
-        })
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, -2, 0)
-        camera.lookAt(new THREE.Vector3(0, 0, 0))
-        renderer.setSize(window.innerWidth, window.innerHeight)
-        animate()
-        return agent
-    } catch (error) {
-        console.error(error)
-        throw error
-    }
-}
-
-declare global {
-    interface Window {
-        agent: Agent
-        listenResize: typeof listenResize
-        initializeAgent: typeof initializeAgent
-    }
-}
-
-window.agent = agent
-window.listenResize = listenResize
-window.initializeAgent = initializeAgent
-
-const app = new Application()
-app.render(new Document(function () {
-    this.children = [
-        new Body(function () {
-            this.children = [
-                new Canvas(function () {
-                    this.style.position = Position.Fixed
-                    this.style.width = '100vw'
-                    this.style.height = '100vh'
-                    this.width = 100
-                    this.height = 100
-                }),
-                new Div(function () {
-                    this.style.width = '100vw'
-                    this.style.height = '100vh'
-                    this.style.position = Position.Fixed
-                    this.children = [
-                        new Div(function () {
-                            this.style.bottom = '0px'
-                            this.style.width = '100vw'
-                            this.style.height = '100px'
-                            this.style.position = Position.Absolute
-                            const width = this.transform.width
-                            const mw = width / 2
-                            const clip = new VectorialScalable(width, 50)
-                            const paths: Vector2[][] = []
-                            let path: Vector2[] = []
-
-                            path.push(new Vector2(0, 15))
-                            path.push(new Vector2(mw - 170, 15))
-                            path.push(new Vector2(mw - 160, 5))
-                            path.push(new Vector2(mw - 50, 5))
-                            path.push(new Vector2(mw - 40, 15))
-                            path.push(new Vector2(mw + 40, 15))
-                            path.push(new Vector2(mw + 50, 5))
-                            path.push(new Vector2(mw + 160, 5))
-                            path.push(new Vector2(mw + 170, 15))
-                            path.push(new Vector2(width, 15))
-                            path.push(new Vector2(width, 50))
-                            path.push(new Vector2(0, 50))
-                            path.push(new Vector2(0, 15))
-                            paths.push(path)
-
-                            path = []
-                            for (let i = 0; i < 50; i += 2) {
-                                path.push(new Vector2(0, i))
-                                path.push(new Vector2(width, i))
-                                path.push(new Vector2(width, i + 1))
-                                path.push(new Vector2(0, i + 1))
-                                path.push(new Vector2(0, i))
-                                path = []
-                                path.push(new Vector2(0, 15))
-                                path.push(new Vector2(mw - 170, 15))
-                                path.push(new Vector2(mw - 160, 5))
-                                path.push(new Vector2(mw - 50, 5))
-                                path.push(new Vector2(mw - 40, 15))
-                                path.push(new Vector2(mw + 40, 15))
-                                path.push(new Vector2(mw + 50, 5))
-                                path.push(new Vector2(mw + 160, 5))
-                                path.push(new Vector2(mw + 170, 15))
-                                path.push(new Vector2(width, 15))
-                                path.push(new Vector2(width, 17))
-                                path.push(new Vector2(mw + 169, 17))
-                                path.push(new Vector2(mw + 159, 7))
-                                path.push(new Vector2(mw + 51, 7))
-                                path.push(new Vector2(mw + 41, 17))
-                                path.push(new Vector2(mw - 41, 17))
-                                path.push(new Vector2(mw - 51, 7))
-                                path.push(new Vector2(mw - 159, 7))
-                                path.push(new Vector2(mw - 169, 17))
-                                path.push(new Vector2(0, 17))
-                                path.push(new Vector2(0, 15))
-                                clip.addPolygon(path, '#00f2ff')
-
-                                // if (element instanceof Object) {
-                                //     element.data = clip.toString()
-                                // } else {
-                                //     clip.write(element.style)
-                                // }
-                            }
-                            paths.push(path)
-                            clip.addPolygon(paths, '#1a1a1a')
-
-                            path = []
-                            path.push(new Vector2(0, 15))
-                            path.push(new Vector2(mw - 170, 15))
-                            path.push(new Vector2(mw - 160, 5))
-                            path.push(new Vector2(mw - 50, 5))
-                            path.push(new Vector2(mw - 40, 15))
-                            path.push(new Vector2(mw + 40, 15))
-                            path.push(new Vector2(mw + 50, 5))
-                            path.push(new Vector2(mw + 160, 5))
-                            path.push(new Vector2(mw + 170, 15))
-                            path.push(new Vector2(width, 15))
-                            path.push(new Vector2(width, 17))
-                            path.push(new Vector2(mw + 169, 17))
-                            path.push(new Vector2(mw + 159, 7))
-                            path.push(new Vector2(mw + 51, 7))
-                            path.push(new Vector2(mw + 41, 17))
-                            path.push(new Vector2(mw - 41, 17))
-                            path.push(new Vector2(mw - 51, 7))
-                            path.push(new Vector2(mw - 159, 7))
-                            path.push(new Vector2(mw - 169, 17))
-                            path.push(new Vector2(0, 17))
-                            path.push(new Vector2(0, 15))
-                            clip.addPolygon(path, '#00f2ff')
-
-                            // this.data = `data:image/svg+xml;base64,${btoa(clip.toString())}`
-                        }),
-                    ]
-                }),
-            ]
-        }),
-    ]
-}))
+// window.document.body.insertAdjacentHTML(
+//     'beforeend',
+//     '<script type="module" src="dist/application.mjs" async></script>'
+// )

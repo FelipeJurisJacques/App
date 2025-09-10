@@ -1,14 +1,12 @@
-import Background from './Background'
 import Vector2 from '../../utils/Vector2'
 
-export default class VectorialScalable extends Background {
+export default class VectorialScalable {
     private index: number
     private width: number
     private height: number
     private elements: string[]
 
     public constructor(width: number, height: number) {
-        super()
         this.index = 0
         this.elements = []
         this.width = width

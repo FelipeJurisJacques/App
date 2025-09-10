@@ -12,7 +12,11 @@ export default {
     sourcemap: false,
     dir: 'dist/',
     entryFileNames: (chunkInfo) => {
-      return chunkInfo.name === 'index' ? 'index.mjs' : '[name].js';
+      if (chunkInfo.name === 'service-worker') {
+        return 'service-worker.js'
+      } else {
+        return '[name].mjs'
+      }
     },
   },
   plugins: [

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HUD Sci‑Fi – Arc Reactor</title>
+  <style>
+    :root{
+      --bg:#020404;
+      --aqua:#4de5df;
+      --aqua-dim:#2ea3a0;
+      --white:#eafcff;
+    }
+    *{box-sizing:border-box; margin:0; padding:0}
+    html,body{height:100%}
+    body{
+      background: radial-gradient(circle at center, #05282c 0%, var(--bg) 70%);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
+      color:var(--white);
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    /* Fundo hexagonal */
+    body::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image: linear-gradient(30deg, rgba(77,229,223,.08) 12%, transparent 12.5%, transparent 87%, rgba(77,229,223,.08) 87.5%, rgba(77,229,223,.08)),
+        linear-gradient(150deg, rgba(77,229,223,.08) 12%, transparent 12.5%, transparent 87%, rgba(77,229,223,.08) 87.5%, rgba(77,229,223,.08)),
+        linear-gradient(90deg, rgba(77,229,223,.08) 12%, transparent 12.5%, transparent 87%, rgba(77,229,223,.08) 87.5%, rgba(77,229,223,.08));
+      background-size:40px 70px;
+      opacity:.2;
+      z-index:0;
+    }
+
+    /* Reator central */
+    .reactor{
+      position:relative; width:min(80vmin, 500px); aspect-ratio:1/1;
+      display:grid; place-items:center;
+    }
+
+    /* anel externo pulsante */
+    .pulse{
+      position:absolute; inset:-15%; border-radius:50%;
+      border:3px solid rgba(77,229,223,.4);
+      animation:pulse 4s infinite ease-in-out;
+    }
+    @keyframes pulse{
+      0%,100%{transform:scale(1); opacity:.4}
+      50%{transform:scale(1.2); opacity:0}
+    }
+
+    /* camadas */
+    .ring{
+      position:absolute; inset:0; border-radius:50%;
+      border:2px solid rgba(77,229,223,.25);
+    }
+    .ring.inner{inset:18%; border:2px solid rgba(77,229,223,.5)}
+
+    .ring.dashed{inset:9%; border:2px dashed rgba(77,229,223,.55); animation:spin 30s linear infinite}
+
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* núcleo */
+    .core{
+      position:absolute; inset:30%; border-radius:50%;
+      background:
+        radial-gradient(circle at center, rgba(77,229,223,.3) 0%, transparent 70%),
+        repeating-conic-gradient(rgba(77,229,223,.18) 0deg 5deg, transparent 5deg 10deg);
+      display:grid; place-items:center;
+      border:2px solid var(--aqua);
+      box-shadow:0 0 20px rgba(77,229,223,.6), inset 0 0 20px rgba(77,229,223,.6);
+    }
+    .grid{
+      width:100%; height:100%; border-radius:50%;
+      background-image: repeating-linear-gradient(60deg, rgba(255,255,255,.15) 0 2px, transparent 2px 20px),
+        repeating-linear-gradient(-60deg, rgba(255,255,255,.15) 0 2px, transparent 2px 20px);
+      mask:radial-gradient(circle at center, #000 80%, transparent 81%);
+    }
+
+    /* Botões inferiores */
+    .bottombar{position:absolute; bottom:14px; left:0; right:0; display:flex; justify-content:center; gap:36px; z-index:5}
+    .btn{width:64px; height:64px; border:1px solid rgba(77,229,223,.4); border-radius:50%; display:grid; place-items:center; background:radial-gradient(circle at 50% 45%, rgba(77,229,223,.2), rgba(0,0,0,.6)); box-shadow:0 0 14px rgba(77,229,223,.25) inset}
+    .btn svg{width:28px; height:28px; stroke:var(--aqua); stroke-width:1.8; fill:none; opacity:.85}
+
+    /* top bar */
+    .topbar{position:absolute; top:8px; left:0; right:0; display:flex; justify-content:center; font-weight:600; letter-spacing:.15em; color:var(--aqua)}
+    .marvel{position:absolute; top:8px; left:14px; font-size:.7rem; opacity:.5}
+    .info{position:absolute; top:8px; right:14px; width:28px; height:28px; border-radius:50%; border:1px solid rgba(77,229,223,.4); display:grid; place-items:center; font-weight:bold; opacity:.6}
+  </style>
+</head>
+<body>
+  <div class="marvel">© 2013 MARVEL</div>
+  <div class="topbar">JARVIS</div>
+  <div class="info">i</div>
+
+  <div class="reactor">
+    <div class="pulse"></div>
+    <div class="ring"></div>
+    <div class="ring dashed"></div>
+    <div class="ring inner"></div>
+    <div class="core">
+      <div class="grid"></div>
+    </div>
+  </div>
+
+  <div class="bottombar">
+    <div class="btn" title="Relógio">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    </div>
+    <div class="btn" title="Compartilhar">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+    </div>
+    <div class="btn" title="Microfone">
+      <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v4"/></svg>
+    </div>
+    <div class="btn" title="Configurações">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+    <div class="btn" title="Armadura">
+      <svg viewBox="0 0 24 24"><path d="M12 1l3 5h4l-2 6-5 5-5-5-2-6h4z"/></svg>
+    </div>
+  </div>
+</body>
+</html>

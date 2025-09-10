@@ -1,0 +1,29 @@
+body[theme="dark"] {
+    --font-color: #0FF;
+    --primary-color: #2A5F5E;
+    --background-color: #000;
+}
+
+body[theme="light"] {
+    --font-color: #AAA;
+    --primary-color: #111;
+    --background-color: #222;
+}
+
+body[theme="high_contrast"] {
+    --font-color: #000;
+    --primary-color: #000;
+    --background-color: #FFF;
+}
+
+body {
+    background-color: var(--background-color);
+}
+
+* {
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: var(--font-color);
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 10px var(--font-color);
+}

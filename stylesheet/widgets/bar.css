@@ -1,3 +1,23 @@
+* {
+    z-index: 0;
+}
+
+::slotted(*) {
+    z-index: 1;
+}
+
+::slotted(:nth-child(1)) {
+    left: max(40px, calc(50% - 200px));
+    bottom: 5px;
+    position: fixed;
+}
+
+::slotted(:nth-child(2)) {
+    left: calc(50% - 100px);
+    bottom: 5px;
+    position: fixed;
+}
+
 div.bacground {
     left: 0px;
     width: 100%;

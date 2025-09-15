@@ -3,6 +3,7 @@ import Dark from './templates/icons/dark'
 import View from './templates/widgets/view'
 import Light from './templates/icons/light'
 import Button from './templates/widgets/button'
+import Calendar from './templates/icons/calendar'
 import HighContrast from './templates/icons/high_contrast'
 
 window.customElements.define('widget-bar', Bar)
@@ -11,6 +12,7 @@ window.customElements.define('widget-button', Button)
 
 window.customElements.define('icon-dark', Dark)
 window.customElements.define('icon-light', Light)
+window.customElements.define('icon-calendar', Calendar)
 window.customElements.define('icon-high-contrast', HighContrast)
 
 const style = window.document.querySelector('style.theme')
@@ -19,6 +21,9 @@ const container = window.document.querySelector('widget-view')
 if (style && container && container instanceof View) {
     container.innerHTML = `<widget-bar>
         <widget-button class="theme"></widget-button>
+        <widget-button class="calendar">
+            <icon-calendar>
+        </widget-button>
     </widget-bar>`
     const theme = window.document.querySelector('widget-button.theme')
     if (theme) {

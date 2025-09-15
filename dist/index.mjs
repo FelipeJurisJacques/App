@@ -153,14 +153,47 @@ class Light extends HTMLElement {
 class Button extends HTMLElement {
     constructor() {
         super();
+        const style = new CSSStyleSheet();
+        style.insertRule(':host(:hover) { cursor: pointer; }');
         const shadow = this.attachShadow({
             mode: 'closed',
         });
-        shadow.innerHTML = '<slot></slot>';
-        shadow.adoptedStyleSheets = this.getStyle();
+        shadow.innerHTML = '<slot></slot><style>:host(:hover) { cursor: pointer; }</style>';
+        shadow.adoptedStyleSheets = [style];
     }
     getStyle() {
         return [];
+    }
+}
+
+class Calendar extends HTMLElement {
+    constructor() {
+        super();
+        const shadow = this.attachShadow({
+            mode: 'closed',
+        });
+        const width = this.getAttribute('width') ?? '30';
+        const height = this.getAttribute('height') ?? '30';
+        shadow.innerHTML = `
+            <svg
+                width="${width}"
+                height="${height}"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+                <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
+                <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
+                <rect x="7" y="13" width="2" height="2" fill="currentColor"/>
+                <rect x="11" y="13" width="2" height="2" fill="currentColor"/>
+                <rect x="15" y="13" width="2" height="2" fill="currentColor"/>
+                <rect x="7" y="17" width="2" height="2" fill="currentColor"/>
+                <rect x="11" y="17" width="2" height="2" fill="currentColor"/>
+                <rect x="15" y="17" width="2" height="2" fill="currentColor"/>
+            </svg>
+        `;
     }
 }
 
@@ -207,12 +240,16 @@ window.customElements.define('widget-view', View);
 window.customElements.define('widget-button', Button);
 window.customElements.define('icon-dark', Dark);
 window.customElements.define('icon-light', Light);
+window.customElements.define('icon-calendar', Calendar);
 window.customElements.define('icon-high-contrast', HighContrast);
 const style = window.document.querySelector('style.theme');
 const container = window.document.querySelector('widget-view');
 if (style && container && container instanceof View) {
     container.innerHTML = `<widget-bar>
         <widget-button class="theme"></widget-button>
+        <widget-button class="calendar">
+            <icon-calendar>
+        </widget-button>
     </widget-bar>`;
     const theme = window.document.querySelector('widget-button.theme');
     if (theme) {

@@ -4,8 +4,7 @@ export default class Button extends HTMLElement {
         const shadow = this.attachShadow({
             mode: 'closed',
         })
-        shadow.innerHTML = '<slot></slot>'
-        shadow.adoptedStyleSheets = this.getStyle()
+        shadow.innerHTML = '<style>:host(:hover) { cursor: pointer; }</style><slot></slot>'
     }
 
     protected getStyle(): Array<CSSStyleSheet> {

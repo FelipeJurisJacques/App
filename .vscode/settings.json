@@ -1,0 +1,12 @@
+{
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "extensions.recommendations": [
+        "ms-vscode-remote.remote-containers",
+        "ms-dotnettools.csharp",
+        "formulahendry.code-runner"
+    ],
+    "command-runner.commands": {
+        "Abrir no Dev Container": "Dev Containers: Reopen in Container"
+    }
+}

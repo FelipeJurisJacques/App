@@ -1,0 +1,9 @@
+services:
+  app-typescript-compiler:
+    image: node:alpine
+    tty: true
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: sh -c "npm install && tail -f /dev/null"
+    container_name: app-typescript-compiler-container

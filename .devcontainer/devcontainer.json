@@ -1,0 +1,17 @@
+{
+    "dockerComposeFile": [
+        "./docker-compose.yml"
+    ],
+    "workspaceFolder": "/workspace",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ritwickdey.liveserver",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode"
+            ]
+        }
+    },
+    "service": "app-typescript-compiler",
+    "name": "TS DevContainer via Docker Compose"
+}

@@ -1,4 +1,6 @@
+import Theread from './helpers/Theread'
 import Bar from './templates/widgets/bar'
+import Top from './templates/widgets/top'
 import Dark from './templates/icons/dark'
 import View from './templates/widgets/view'
 import Light from './templates/icons/light'
@@ -7,6 +9,7 @@ import Calendar from './templates/icons/calendar'
 import HighContrast from './templates/icons/high_contrast'
 
 window.customElements.define('widget-bar', Bar)
+window.customElements.define('widget-top', Top)
 window.customElements.define('widget-view', View)
 window.customElements.define('widget-button', Button)
 
@@ -19,12 +22,15 @@ const style = window.document.querySelector('style.theme')
 const container = window.document.querySelector('widget-view')
 
 if (style && container && container instanceof View) {
-    container.innerHTML = `<widget-bar>
-        <widget-button class="theme"></widget-button>
-        <widget-button class="calendar">
-            <icon-calendar>
-        </widget-button>
-    </widget-bar>`
+    container.innerHTML = `
+        <widget-top></widget-top>
+        <widget-bar>
+            <widget-button class="theme"></widget-button>
+            <widget-button class="calendar">
+                <icon-calendar>
+            </widget-button>
+        </widget-bar>
+    `
     const theme = window.document.querySelector('widget-button.theme')
     if (theme) {
         switch (window.localStorage.getItem('theme') ?? 'dark') {
@@ -59,6 +65,17 @@ if (style && container && container instanceof View) {
                     window.document.body.setAttribute('theme', 'light')
                     break
             }
+        })
+    }
+    const top = window.document.querySelector('widget-top')
+    if (top) {
+        Theread.loop(60000, () => {
+            const date = new Date()
+            top.innerHTML = `
+                ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}
+                <br>
+                ${date.toLocaleDateString()}
+            `
         })
     }
 }

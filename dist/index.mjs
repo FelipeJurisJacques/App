@@ -1,3 +1,13 @@
+class Theread {
+    static loop(ms, event) {
+        event();
+        return window.setInterval(event, ms);
+    }
+    static stop(id) {
+        window.clearInterval(id);
+    }
+}
+
 class Bar extends HTMLElement {
     constructor() {
         super();
@@ -10,6 +20,44 @@ class Bar extends HTMLElement {
             <div class="bacground">
                 <div class="customization"></dv>
             </div>
+        `;
+    }
+}
+
+class Top extends HTMLElement {
+    constructor() {
+        super();
+        const shadow = this.attachShadow({
+            mode: 'closed',
+        });
+        const path = [];
+        const positions = [
+            '50% -',
+            '50% +',
+        ];
+        path.push(`0px 0px`);
+        for (let i = 0; i < 20; i++) {
+            let size = Math.round(1 * (i * 0.3 + 1));
+            for (let position of positions) {
+                path.push(`calc(${position} ${i * 10 + size + 70}px) 0px`);
+                path.push(`calc(${position} ${i * 10 + size + 70 + size}px) 0px`);
+                path.push(`calc(${position} ${i * 10 + size + 60 + size}px) 30px`);
+                path.push(`calc(${position} ${i * 10 + size + 60}px) 30px`);
+                path.push(`calc(${position} ${i * 10 + size + 70}px) 0px`);
+            }
+        }
+        path.push(`0px 0px`);
+        shadow.innerHTML = `
+            <style>
+                div.bacground {
+                    clip-path: polygon(${path.join(', ')});
+                }
+            </style>
+            <link rel="stylesheet" href="stylesheet/widgets/top.css">
+            <div class="content">
+                <slot></slot>
+            </div>
+            <div class="bacground"></div>
         `;
     }
 }
@@ -153,16 +201,10 @@ class Light extends HTMLElement {
 class Button extends HTMLElement {
     constructor() {
         super();
-        const style = new CSSStyleSheet();
-        style.insertRule(':host(:hover) { cursor: pointer; }');
         const shadow = this.attachShadow({
             mode: 'closed',
         });
-        shadow.innerHTML = '<slot></slot><style>:host(:hover) { cursor: pointer; }</style>';
-        shadow.adoptedStyleSheets = [style];
-    }
-    getStyle() {
-        return [];
+        shadow.innerHTML = '<style>:host(:hover) { cursor: pointer; }</style><slot></slot>';
     }
 }
 
@@ -236,6 +278,7 @@ class HighContrast extends HTMLElement {
 }
 
 window.customElements.define('widget-bar', Bar);
+window.customElements.define('widget-top', Top);
 window.customElements.define('widget-view', View);
 window.customElements.define('widget-button', Button);
 window.customElements.define('icon-dark', Dark);
@@ -245,12 +288,15 @@ window.customElements.define('icon-high-contrast', HighContrast);
 const style = window.document.querySelector('style.theme');
 const container = window.document.querySelector('widget-view');
 if (style && container && container instanceof View) {
-    container.innerHTML = `<widget-bar>
-        <widget-button class="theme"></widget-button>
-        <widget-button class="calendar">
-            <icon-calendar>
-        </widget-button>
-    </widget-bar>`;
+    container.innerHTML = `
+        <widget-top></widget-top>
+        <widget-bar>
+            <widget-button class="theme"></widget-button>
+            <widget-button class="calendar">
+                <icon-calendar>
+            </widget-button>
+        </widget-bar>
+    `;
     const theme = window.document.querySelector('widget-button.theme');
     if (theme) {
         switch (window.localStorage.getItem('theme') ?? 'dark') {
@@ -285,6 +331,17 @@ if (style && container && container instanceof View) {
                     window.document.body.setAttribute('theme', 'light');
                     break;
             }
+        });
+    }
+    const top = window.document.querySelector('widget-top');
+    if (top) {
+        Theread.loop(60000, () => {
+            const date = new Date();
+            top.innerHTML = `
+                ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}
+                <br>
+                ${date.toLocaleDateString()}
+            `;
         });
     }
 }

@@ -1,4 +1,4 @@
-export default class Button extends HTMLElement {
+export default class Text extends HTMLElement {
     public constructor() {
         super()
         const shadow = this.attachShadow({

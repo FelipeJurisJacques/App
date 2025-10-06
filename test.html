@@ -1,177 +1,620 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HUD Sci‑Fi – JARVIS style</title>
-  <style>
-    :root{
-      --bg:#06171a;
-      --aqua:#4de5df;
-      --aqua-dim:#2ea3a0;
-      --white:#eafcff;
-      --glass:rgba(77,229,223,.12);
-      --glass-2:rgba(77,229,223,.07);
-      --warning:#ff8a3d;
-      --good:#6aff7e;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; background: radial-gradient(1200px 800px at 80% 15%, #0b2b31 0%, var(--bg) 55%), #000;
-      color:var(--white); font: 16px/1.4 "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial, system-ui, sans-serif;
-      overflow:hidden;
-    }
-    /* subtle background grid / particles */
-    .noise{position:fixed; inset:0; pointer-events:none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><g fill="none" stroke="%232a9fa0" stroke-opacity="0.08"><path d="M0 30h60M30 0v60"/><circle cx="30" cy="30" r="29"/></g></svg>'); opacity:.6; mix-blend-mode:screen}
-
-    .wrap{position:relative; height:100%; width:100%; display:grid; place-items:center}
-
-    /* TOP BAR */
-    .topbar{position:absolute; top:10px; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:0 22px; text-transform:uppercase; letter-spacing:.18em}
-    .brand{font-weight:700; opacity:.9}
-    .status{color:var(--aqua); opacity:.85}
-    .version{opacity:.5; font-size:.8rem}
-
-    /* CENTRAL HUD */
-    .hud{
-      position:relative; width:min(82vmin, 780px); aspect-ratio:1/1; display:grid; place-items:center;
-      filter: drop-shadow(0 0 12px rgba(77,229,223,.25));
-    }
-    .ring{position:absolute; inset:0; border-radius:50%;}
-    .ring.outer{ box-shadow: 0 0 0 1px rgba(77,229,223,.25) inset, 0 0 20px rgba(77,229,223,.25) inset;}
-
-    /* rotating ticks */
-    .ticks, .ticks:before, .ticks:after{position:absolute; inset:7%; border-radius:50%;}
-    .ticks{border:2px solid rgba(77,229,223,.22); mask: radial-gradient(circle at center, transparent 64%, #000 65%);}
-    .ticks:before{content:""; border:2px dashed rgba(77,229,223,.55); animation:spin 48s linear infinite;}
-    .ticks:after{content:""; inset:12%; border:1px dashed rgba(77,229,223,.35); animation:spin-rev 36s linear infinite;}
-
-    /* conic gradient sweep */
-    .sweep{position:absolute; inset:0; border-radius:50%; background:
-      conic-gradient(from -90deg, transparent 0 78deg, rgba(255,138,61,.92) 78deg 82deg, transparent 82deg 360deg);
-      filter: blur(0.4px) drop-shadow(0 0 6px rgba(255,138,61,.5));
-      mask: radial-gradient(circle at center, transparent 60%, #000 61%);
-    }
-
-    /* inner disc */
-    .disc{position:absolute; inset:18%; border-radius:50%; background:
-      radial-gradient(60% 60% at 50% 50%, rgba(77,229,223,.08), transparent 60%),
-      repeating-radial-gradient(circle at 50% 50%, rgba(77,229,223,.1) 0 2px, transparent 2px 4px),
-      radial-gradient(closest-side, rgba(0,0,0,.45), rgba(0,0,0,.1));
-      border:1px solid rgba(77,229,223,.18);
-      box-shadow: 0 0 0 1px rgba(77,229,223,.12) inset;
-    }
-
-    /* center time */
-    .time{position:relative; z-index:2; display:flex; align-items:baseline; gap:.6rem; font-variant-numeric:tabular-nums;}
-    .time h1{margin:0; font-size:min(12vmin, 110px); font-weight:300; letter-spacing:.02em}
-    .time small{font-size:min(3.5vmin, 28px); opacity:.85; margin-left:.2rem}
-
-    /* glass cards */
-    .cards{position:absolute; bottom:60px; width:min(90vw, 920px); display:flex; justify-content:space-between; gap:24px}
-    .card{flex:1; background:linear-gradient(180deg, var(--glass), var(--glass-2)); border:1px solid rgba(77,229,223,.25); border-radius:18px; padding:18px 20px; box-shadow:0 8px 40px rgba(0,0,0,.35) inset, 0 0 28px rgba(77,229,223,.08) inset; backdrop-filter: blur(10px);} 
-    .card h3{margin:0 0 4px; text-transform:uppercase; font-size:.8rem; letter-spacing:.18em; color:var(--aqua)}
-    .big{font-size:58px; font-weight:300}
-    .muted{opacity:.65}
-
-    /* bottom bar icons */
-    .bottombar{position:absolute; left:0; right:0; bottom:14px; display:flex; align-items:center; justify-content:center; gap:32px; opacity:.9}
-    .btn{width:58px; height:58px; border:1px solid rgba(77,229,223,.35); border-radius:50%; display:grid; place-items:center; background:radial-gradient(60% 60% at 50% 45%, rgba(77,229,223,.15), rgba(0,0,0,.4)); box-shadow:0 0 22px rgba(77,229,223,.15) inset}
-    .btn svg{width:26px; height:26px; opacity:.9}
-
-    /* right widgets */
-    .widgets{position:absolute; right:26px; bottom:80px; display:flex; flex-direction:column; gap:12px}
-    .chip{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid rgba(77,229,223,.25); border-radius:14px; background:linear-gradient(180deg, var(--glass), transparent)}
-    .dot{width:10px; height:10px; border-radius:50%; background:var(--good); box-shadow:0 0 12px var(--good)}
-
-    /* subtle indicator triangles */
-    .triangle{position:absolute; top:8px; left:50%; width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-top:14px solid rgba(255,255,255,.6); transform:translateX(-50%)}
-
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes spin-rev{to{transform:rotate(-360deg)}}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador de Janelas do Navegador</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 8px;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .icon {
+            font-size: 1.2rem;
+        }
+        
+        .status {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .status h3 {
+            margin-bottom: 10px;
+        }
+        
+        .status p {
+            line-height: 1.6;
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .info h2 {
+            margin-bottom: 15px;
+        }
+        
+        .info ul {
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+        
+        .info li {
+            margin-bottom: 8px;
+        }
+        
+        .warning {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        .fullscreen-active {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: #1a2a6c;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .fullscreen-content {
+            text-align: center;
+            max-width: 600px;
+        }
+        
+        .fullscreen-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .fullscreen-content p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .custom-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 300px;
+            background: white;
+            color: #333;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .window-header {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .window-title {
+            font-weight: bold;
+        }
+        
+        .window-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .window-content {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="noise"></div>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brand">JARVIS</div>
-      <div class="status">LISTENING OFF</div>
-      <div class="version">v1.0 · build 31</div>
+    <div class="container">
+        <header>
+            <h1>Explorador de Janelas</h1>
+            <p class="subtitle">Demonstração interativa de todas as possibilidades de abertura de janelas no navegador</p>
+        </header>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h2>Modos de Abertura Básicos</h2>
+                <div class="button-grid">
+                    <button onclick="abrirNovaGuia()">
+                        <span class="icon">📑</span>
+                        Nova Guia
+                    </button>
+                    <button onclick="abrirNovaJanela()">
+                        <span class="icon">🪟</span>
+                        Nova Janela
+                    </button>
+                    <button onclick="abrirMesmaJanela()">
+                        <span class="icon">↩️</span>
+                        Mesma Janela
+                    </button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h2>Janelas Personalizadas</h2>
+                <div class="button-grid">
+                    <button onclick="abrirPopupPequeno()">
+                        <span class="icon">📱</span>
+                        Popup Pequeno
+                    </button>
+                    <button onclick="abrirSemBarras()">
+                        <span class="icon">🚫</span>
+                        Sem Barras
+                    </button>
+                    <button onclick="abrirCentralizada()">
+                        <span class="icon">🎯</span>
+                        Centralizada
+                    </button>
+                    <button onclick="abrirModalCustomizado()">
+                        <span class="icon">💎</span>
+                        Modal Custom
+                    </button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h2>Modos de Tela</h2>
+                <div class="button-grid">
+                    <button onclick="ativarTelaCheia()">
+                        <span class="icon">⛶</span>
+                        Tela Cheia
+                    </button>
+                    <button onclick="pictureInPicture()">
+                        <span class="icon">📺</span>
+                        Picture-in-Picture
+                    </button>
+                </div>
+            </div>
+            
+            <div class="status">
+                <h3>Status do Sistema</h3>
+                <p id="statusText">Nenhuma ação executada ainda. Clique em um dos botões acima para testar as diferentes formas de abrir janelas.</p>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h2>Informações Técnicas</h2>
+            <ul>
+                <li><span class="warning">Atenção:</span> Bloqueadores de popup podem impedir a abertura de algumas janelas</li>
+                <li>As janelas personalizadas podem ter seu comportamento variável entre navegadores</li>
+                <li>O modo Picture-in-Picture funciona melhor com elementos de vídeo</li>
+                <li>Recursos avançados como tela cheia exigem interação do usuário</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Janela customizada simulada -->
+    <div id="customModal" class="custom-window hidden">
+        <div class="window-header">
+            <div class="window-title">Janela Customizada</div>
+            <button class="window-close" onclick="fecharModalCustomizado()">×</button>
+        </div>
+        <div class="window-content">
+            <h3>Esta é uma janela customizada</h3>
+            <p>Ela foi criada usando HTML, CSS e JavaScript puros, simulando o comportamento de uma janela do navegador.</p>
+            <p>Você pode arrastar, redimensionar e fechar esta janela.</p>
+        </div>
     </div>
 
-    <section class="hud" aria-label="relogio futurista">
-      <div class="ring outer"></div>
-      <div class="ticks"></div>
-      <div class="sweep" aria-hidden="true"></div>
-      <div class="disc"></div>
-      <div class="triangle"></div>
-
-      <div class="time" id="time">
-        <h1>9:24</h1><small><span id="ampm">AM</span>&nbsp;<span class="muted" id="sec">52</span></small>
-      </div>
-
-      <div class="cards">
-        <div class="card" role="group" aria-label="tempo e clima">
-          <h3>Dousman</h3>
-          <div style="display:flex; align-items:baseline; gap:16px">
-            <div class="big" id="temp">63°</div>
-            <div class="muted">F</div>
-          </div>
-          <div class="muted" style="margin-top:6px">83° | 85° | 80° | 78°</div>
-        </div>
-        <div class="card" role="group" aria-label="data">
-          <h3 id="month">June <span class="muted">2014</span></h3>
-          <div class="big" id="day">15</div>
-        </div>
-      </div>
-
-      <div class="widgets">
-        <div class="chip"><div class="dot"></div> 100%</div>
-      </div>
-
-      <div class="bottombar">
-        <div class="btn" title="Opções">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
-        </div>
-        <div class="btn" title="Microfone">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v4"/></svg>
-        </div>
-        <div class="btn" title="Conexões">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a10 10 0 0 1 20 0"/><path d="M5 12a7 7 0 0 1 14 0"/><circle cx="12" cy="12" r="1.5"/></svg>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    // Atualiza hora em tempo real
-    const timeEl = document.getElementById('time');
-    const ampmEl = document.getElementById('ampm');
-    const secEl = document.getElementById('sec');
-    const dayEl = document.getElementById('day');
-    const monthEl = document.getElementById('month');
-
-    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
-    function pad(n){ return String(n).padStart(2,'0'); }
-
-    function tick(){
-      const d = new Date();
-      let h = d.getHours();
-      const m = pad(d.getMinutes());
-      const s = pad(d.getSeconds());
-      const ampm = h >= 12 ? 'PM' : 'AM';
-      h = h % 12; h = h ? h : 12;
-      timeEl.querySelector('h1').textContent = `${h}:${m}`;
-      ampmEl.textContent = ampm;
-      secEl.textContent = s;
-      dayEl.textContent = d.getDate();
-      monthEl.innerHTML = `${MONTHS[d.getMonth()]} <span class="muted">${d.getFullYear()}</span>`;
-    }
-    tick();
-    setInterval(tick, 1000);
-  </script>
+    <script>
+        let statusText = document.getElementById('statusText');
+        let customModal = document.getElementById('customModal');
+        let isFullscreen = false;
+        
+        function atualizarStatus(mensagem) {
+            statusText.textContent = mensagem;
+            console.log(mensagem);
+        }
+        
+        function abrirNovaGuia() {
+            const novaAba = window.open('', '_blank');
+            if (novaAba) {
+                novaAba.document.write(`
+                    <html>
+                    <head><title>Nova Guia</title></head>
+                    <body style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h1>Nova Guia Aberta!</h1>
+                        <p>Esta é uma nova guia aberta programaticamente.</p>
+                        <button onclick="window.close()">Fechar esta guia</button>
+                    </body>
+                    </html>
+                `);
+                novaAba.document.close();
+                atualizarStatus("Nova guia aberta com sucesso!");
+            } else {
+                atualizarStatus("Falha ao abrir nova guia. Verifique se os popups estão bloqueados.");
+            }
+        }
+        
+        function abrirNovaJanela() {
+            const novaJanela = window.open('', '_blank', 'width=600,height=400,left=200,top=100');
+            if (novaJanela) {
+                novaJanela.document.write(`
+                    <html>
+                    <head><title>Nova Janela</title></head>
+                    <body style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h1>Nova Janela Aberta!</h1>
+                        <p>Esta é uma nova janela com dimensões personalizadas.</p>
+                        <p>Dimensões: 600x400 pixels</p>
+                        <button onclick="window.close()">Fechar esta janela</button>
+                    </body>
+                    </html>
+                `);
+                novaJanela.document.close();
+                atualizarStatus("Nova janela aberta com dimensões 600x400!");
+            } else {
+                atualizarStatus("Falha ao abrir nova janela. Verifique se os popups estão bloqueados.");
+            }
+        }
+        
+        function abrirMesmaJanela() {
+            window.location.href = 'https://www.example.com';
+            atualizarStatus("Redirecionando para example.com na mesma janela...");
+        }
+        
+        function abrirPopupPequeno() {
+            const popup = window.open('', 'popup', 'width=300,height=200,left=500,top=300,scrollbars=yes');
+            if (popup) {
+                popup.document.write(`
+                    <html>
+                    <head><title>Popup Pequeno</title></head>
+                    <body style="font-family: Arial, sans-serif; padding: 15px;">
+                        <h3>Popup Pequeno</h3>
+                        <p>Esta é uma janela popup de tamanho reduzido.</p>
+                        <button onclick="window.close()">Fechar</button>
+                    </body>
+                    </html>
+                `);
+                popup.document.close();
+                atualizarStatus("Popup pequeno aberto (300x200 pixels)!");
+            } else {
+                atualizarStatus("Falha ao abrir popup. Verifique se os popups estão bloqueados.");
+            }
+        }
+        
+        function abrirSemBarras() {
+            const janelaLimpa = window.open('', 'semBarras', 'width=500,height=350,left=300,top=200,toolbar=no,menubar=no,location=no,status=no');
+            if (janelaLimpa) {
+                janelaLimpa.document.write(`
+                    <html>
+                    <head>
+                        <title>Sem Barras</title>
+                        <style>
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                padding: 20px; 
+                                background: linear-gradient(135deg, #667eea, #764ba2);
+                                color: white;
+                            }
+                            button { 
+                                padding: 8px 15px; 
+                                background: white; 
+                                border: none; 
+                                border-radius: 4px; 
+                                cursor: pointer;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Janela sem Barras</h2>
+                        <p>Esta janela não possui barra de ferramentas, menu, barra de endereço ou barra de status.</p>
+                        <button onclick="window.close()">Fechar Janela</button>
+                    </body>
+                    </html>
+                `);
+                janelaLimpa.document.close();
+                atualizarStatus("Janela sem barras de ferramentas aberta!");
+            } else {
+                atualizarStatus("Falha ao abrir janela sem barras. Verifique se os popups estão bloqueados.");
+            }
+        }
+        
+        function abrirCentralizada() {
+            const width = 600;
+            const height = 450;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            const janelaCentralizada = window.open('', 'centralizada', `width=${width},height=${height},left=${left},top=${top},resizable=yes`);
+            if (janelaCentralizada) {
+                janelaCentralizada.document.write(`
+                    <html>
+                    <head><title>Janela Centralizada</title></head>
+                    <body style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h1>Janela Centralizada</h1>
+                        <p>Esta janela foi aberta no centro da tela.</p>
+                        <p>Posição calculada: ${Math.round(left)}x${Math.round(top)}</p>
+                        <button onclick="window.close()">Fechar Janela</button>
+                    </body>
+                    </html>
+                `);
+                janelaCentralizada.document.close();
+                atualizarStatus(`Janela centralizada aberta (${width}x${height} pixels)!`);
+            } else {
+                atualizarStatus("Falha ao abrir janela centralizada. Verifique se os popups estão bloqueados.");
+            }
+        }
+        
+        function abrirModalCustomizado() {
+            customModal.classList.remove('hidden');
+            atualizarStatus("Modal customizado aberto! Esta é uma simulação com HTML/CSS/JS puro.");
+            
+            // Adicionar funcionalidade de arrastar
+            tornarArrastavel(customModal);
+        }
+        
+        function fecharModalCustomizado() {
+            customModal.classList.add('hidden');
+            atualizarStatus("Modal customizado fechado.");
+        }
+        
+        function ativarTelaCheia() {
+            const elemento = document.documentElement;
+            
+            if (!isFullscreen) {
+                if (elemento.requestFullscreen) {
+                    elemento.requestFullscreen();
+                } else if (elemento.webkitRequestFullscreen) {
+                    elemento.webkitRequestFullscreen();
+                } else if (elemento.msRequestFullscreen) {
+                    elemento.msRequestFullscreen();
+                }
+                
+                document.body.classList.add('fullscreen-active');
+                document.body.innerHTML += `
+                    <div class="fullscreen-content">
+                        <h2>Modo Tela Cheia Ativo</h2>
+                        <p>Você está no modo de tela cheia. Pressione ESC ou clique no botão abaixo para sair.</p>
+                        <button onclick="sairTelaCheia()">Sair do Modo Tela Cheia</button>
+                    </div>
+                `;
+                
+                isFullscreen = true;
+                atualizarStatus("Modo tela cheia ativado!");
+            } else {
+                sairTelaCheia();
+            }
+        }
+        
+        function sairTelaCheia() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            
+            document.body.classList.remove('fullscreen-active');
+            isFullscreen = false;
+            location.reload(); // Recarregar para voltar ao estado normal
+        }
+        
+        function pictureInPicture() {
+            // Criar um elemento de vídeo para demonstrar Picture-in-Picture
+            const video = document.createElement('video');
+            video.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+            video.controls = true;
+            video.width = 320;
+            
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.top = '20px';
+            container.style.right = '20px';
+            container.style.background = 'white';
+            container.style.padding = '10px';
+            container.style.borderRadius = '8px';
+            container.style.zIndex = '1000';
+            container.style.color = 'black';
+            
+            const title = document.createElement('p');
+            title.textContent = 'Demonstração Picture-in-Picture';
+            title.style.marginBottom = '10px';
+            title.style.fontWeight = 'bold';
+            
+            const pipButton = document.createElement('button');
+            pipButton.textContent = 'Ativar PiP';
+            pipButton.onclick = () => {
+                if (document.pictureInPictureElement) {
+                    document.exitPictureInPicture();
+                } else if (video.readyState >= 2) {
+                    video.requestPictureInPicture();
+                }
+            };
+            
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Fechar';
+            closeButton.onclick = () => {
+                document.body.removeChild(container);
+            };
+            closeButton.style.marginLeft = '10px';
+            
+            container.appendChild(title);
+            container.appendChild(video);
+            container.appendChild(pipButton);
+            container.appendChild(closeButton);
+            
+            document.body.appendChild(container);
+            
+            atualizarStatus("Demonstração de Picture-in-Picture criada. Use o botão 'Ativar PiP' no player de vídeo.");
+        }
+        
+        // Função para tornar elementos arrastáveis
+        function tornarArrastavel(elemento) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            elemento.onmousedown = arrastarMouse;
+            
+            function arrastarMouse(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // Obter a posição inicial do cursor
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = pararArrastar;
+                // Chamar função sempre que o cursor se mover
+                document.onmousemove = elementoArrastado;
+            }
+            
+            function elementoArrastado(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // Calcular a nova posição
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                // Definir a nova posição do elemento
+                elemento.style.top = (elemento.offsetTop - pos2) + "px";
+                elemento.style.left = (elemento.offsetLeft - pos1) + "px";
+            }
+            
+            function pararArrastar() {
+                // Parar de arrastar quando o botão do mouse for solto
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+        
+        // Detectar saída do modo tela cheia pela tecla ESC
+        document.addEventListener('fullscreenchange', sairHandler);
+        document.addEventListener('webkitfullscreenchange', sairHandler);
+        document.addEventListener('mozfullscreenchange', sairHandler);
+        document.addEventListener('MSFullscreenChange', sairHandler);
+        
+        function sairHandler() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                !document.mozFullScreenElement && !document.msFullscreenElement) {
+                document.body.classList.remove('fullscreen-active');
+                isFullscreen = false;
+                location.reload();
+            }
+        }
+    </script>
 </body>
 </html>

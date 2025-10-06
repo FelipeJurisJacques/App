@@ -1,3 +1,135 @@
+class Dispatcher {
+    origin;
+    type_enum;
+    element;
+    constructor(event, type, target) {
+        this.type_enum = type;
+        this.origin = event;
+        this.element = target;
+    }
+    get type() {
+        return this.type_enum;
+    }
+    get target() {
+        return this.element;
+    }
+}
+
+var Type;
+(function (Type) {
+    Type[Type["TAP"] = 0] = "TAP";
+    Type[Type["CLICK"] = 1] = "CLICK";
+    Type[Type["ACTION"] = 2] = "ACTION";
+})(Type || (Type = {}));
+var Type$1 = Type;
+
+let Listener$1 = class Listener {
+    type;
+    queryes;
+    event;
+    static listeners = [];
+    static documents = [];
+    static notify(event) {
+        for (let listener of Listener.listeners) {
+            listener.handler(event);
+        }
+    }
+    constructor(type, query, event) {
+        this.type = type;
+        this.event = event;
+        this.queryes = Array.isArray(query) ? query : [
+            query,
+        ];
+        for (let query of this.queryes) {
+            if (query instanceof HTMLElement
+                && query.ownerDocument
+                && !Listener.documents.includes(query.ownerDocument)) {
+                Listener.documents.push(query.ownerDocument);
+                query.ownerDocument.addEventListener('click', Listener.notify);
+            }
+        }
+        if (Listener.documents.length === 0) {
+            Listener.documents.push(window.document);
+            window.document.addEventListener('click', Listener.notify);
+        }
+        Listener.listeners.push(this);
+    }
+    handler(event) {
+        if (this.is_type(event) && this.is_query(event)) {
+            this.event(new Dispatcher(event, this.type, this.target(event)));
+        }
+    }
+    is_type(event) {
+        switch (this.type) {
+            case Type$1.ACTION:
+                return event.type === 'click';
+            default:
+                return false;
+        }
+    }
+    is_query(event) {
+        if (event.target && event.target instanceof HTMLElement && event.target.ownerDocument) {
+            for (let query of this.queryes) {
+                if (typeof query === 'string') {
+                    if (event.target.closest(query)) {
+                        return true;
+                    }
+                }
+                else if (query.ownerDocument && query.ownerDocument === event.target.ownerDocument) {
+                    if (query === event.target || query.contains(event.target)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    target(event) {
+        if (event.target && event.target instanceof HTMLElement && event.target.ownerDocument) {
+            for (let query of this.queryes) {
+                if (typeof query === 'string') {
+                    let target = event.target.closest(query);
+                    if (target) {
+                        return target;
+                    }
+                }
+                else if (query.ownerDocument && query.ownerDocument === event.target.ownerDocument) {
+                    if (query === event.target || query.contains(event.target)) {
+                        return query;
+                    }
+                }
+            }
+        }
+        return event.target;
+    }
+};
+
+class Listener {
+    query;
+    static listen(query) {
+        return new Listener(query);
+    }
+    constructor(query) {
+        this.query = query;
+    }
+    onAction(event) {
+        return new Listener$1(Type$1.ACTION, this.query, event);
+    }
+}
+
+let View$1 = class View {
+    node;
+    constructor(view) {
+        this.node = view;
+    }
+    get element() {
+        return this.node;
+    }
+    listen(selector) {
+        return Listener.listen(selector);
+    }
+};
+
 class Theread {
     static loop(ms, event) {
         event();
@@ -5,6 +137,117 @@ class Theread {
     }
     static stop(id) {
         window.clearInterval(id);
+    }
+}
+
+class Main extends View$1 {
+    loop;
+    constructor(view) {
+        super(view);
+        this.loop = null;
+    }
+    handler() {
+        const top = this.element.querySelector('widget-top');
+        if (top) {
+            this.loop = Theread.loop(60000, () => {
+                const date = new Date();
+                top.innerHTML = `
+                    ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}
+                    <br>
+                    ${date.toLocaleDateString()}
+                `;
+            });
+        }
+        const theme = this.element.querySelector('widget-button.theme');
+        if (theme) {
+            this.listen('widget-button.theme').onAction(() => {
+                switch (window.localStorage.getItem('theme') ?? 'dark') {
+                    case 'light':
+                        theme.innerHTML = '<icon-high-contrast />';
+                        window.localStorage.setItem('theme', 'high_contrast');
+                        this.element.ownerDocument.body.setAttribute('theme', 'high_contrast');
+                        break;
+                    case 'high_contrast':
+                        theme.innerHTML = '<icon-dark />';
+                        window.localStorage.setItem('theme', 'dark');
+                        this.element.ownerDocument.body.setAttribute('theme', 'dark');
+                        break;
+                    default:
+                        theme.innerHTML = '<icon-light />';
+                        window.localStorage.setItem('theme', 'light');
+                        this.element.ownerDocument.body.setAttribute('theme', 'light');
+                        break;
+                }
+            });
+        }
+    }
+    render() {
+        let icon = '';
+        switch (window.localStorage.getItem('theme') ?? 'dark') {
+            case 'light':
+                icon = '<icon-light></icon-light>';
+                this.element.ownerDocument.body.setAttribute('theme', 'light');
+                break;
+            case 'high_contrast':
+                icon = '<icon-high-contrast></icon-high-contrast>';
+                this.element.ownerDocument.body.setAttribute('theme', 'high_contrast');
+                break;
+            default:
+                icon = '<icon-dark></icon-dark>';
+                this.element.ownerDocument.body.setAttribute('theme', 'dark');
+                break;
+        }
+        return `
+            <widget-top></widget-top>
+            <widget-bar>
+                <widget-button class="theme">
+                    ${icon}
+                </widget-button>
+                <widget-button class="calendar" type="link" action="/calendar">
+                    <icon-calendar>
+                </widget-button>
+            </widget-bar>
+        `;
+    }
+    destroy() {
+        if (this.loop) {
+            Theread.stop(this.loop);
+            this.loop = null;
+        }
+    }
+}
+
+class Route {
+    static routes = [];
+    static view = null;
+    static push(path, view) {
+        Route.routes.push({ path, view });
+        Route.check();
+    }
+    static check() {
+        const route = this.routes.find(r => r.path === window.location.pathname);
+        if (route
+            && route.view !== View$1
+            && Object.getPrototypeOf(route.view) === View$1
+            && (!Route.view || Route.view instanceof route.view)) {
+            if (Route.view) {
+                Route.view.destroy();
+            }
+            window.document.querySelectorAll('widget-view').forEach(element => element.remove());
+            Route.build(route.view);
+            // window.document.body.insertAdjacentHTML(
+            //     'beforeend',
+            //     '<script type="module" src="dist/application.mjs" async></script>'
+            // )
+        }
+    }
+    static build(view) {
+        const element = window.document.createElement('widget-view');
+        window.document.body.appendChild(element);
+        const instance = new view(element);
+        Route.view = instance;
+        element.innerHTML = instance.render();
+        instance.handler();
     }
 }
 
@@ -84,88 +327,13 @@ class Dark extends HTMLElement {
     }
 }
 
-var Type;
-(function (Type) {
-    Type[Type["NONE"] = 0] = "NONE";
-    Type[Type["ACTION"] = 1] = "ACTION";
-})(Type || (Type = {}));
-class Listner {
-    view;
-    type;
-    query;
-    event;
-    constructor(view, query) {
-        this.view = view;
-        this.event = null;
-        this.query = query;
-        this.type = Type.NONE;
-    }
-    onAction(event) {
-        this.push(Type.ACTION, event);
-    }
-    notify(event) {
-        switch (this.type) {
-            case Type.ACTION:
-                if (event.type === 'click') {
-                    this.handler(event);
-                }
-                break;
-            case Type.NONE:
-        }
-    }
-    push(type, event) {
-        this.type = type;
-        this.event = event;
-        this.view.listners.push(this);
-    }
-    handler(event) {
-        if (this.event
-            && event.target
-            && event.target instanceof HTMLElement
-            && this.view.contains(event.target)
-            && event.target.closest(this.query)) {
-            this.event(event);
-        }
-    }
-}
 class View extends HTMLElement {
-    listners;
-    static views = [];
-    static documents = [];
     constructor() {
         super();
         const shadow = this.attachShadow({
             mode: 'closed',
         });
         shadow.innerHTML = '<slot></slot>';
-        this.listners = [];
-    }
-    listen(query) {
-        return new Listner(this, query);
-    }
-    connectedCallback() {
-        View.views.push(this);
-        for (let document of View.documents) {
-            if (document === this.ownerDocument) {
-                return;
-            }
-        }
-        this.ownerDocument.addEventListener('click', event => {
-            for (let listner of this.listners) {
-                if (listner instanceof Listner) {
-                    try {
-                        listner.notify(event);
-                    }
-                    catch (error) {
-                        console.error(error);
-                    }
-                }
-            }
-        });
-        View.documents.push(this.ownerDocument);
-    }
-    disconnectedCallback() {
-        this.listners.length = 0;
     }
 }
 
@@ -199,12 +367,54 @@ class Light extends HTMLElement {
 }
 
 class Button extends HTMLElement {
+    static listener = null;
     constructor() {
         super();
         const shadow = this.attachShadow({
             mode: 'closed',
         });
         shadow.innerHTML = '<style>:host(:hover) { cursor: pointer; }</style><slot></slot>';
+        if (Button.listener === null) {
+            Button.listener = new Listener$1(Type$1.ACTION, 'widget-button[type=link]', event => {
+                const action = event.target.getAttribute('action');
+                if (action) {
+                    const method = event.target.getAttribute('method') || 'GET';
+                    const target = event.target.getAttribute('target') || 'self';
+                    switch (method) {
+                        case 'GET':
+                            switch (target) {
+                                case 'self':
+                                    window.open(action, '_self');
+                                    break;
+                                case 'blank':
+                                    window.open(action, '_blank');
+                                    break;
+                                case 'parent':
+                                    window.open(action, '_parent');
+                                    break;
+                                case 'top':
+                                    window.open(action, '_top');
+                                    break;
+                                case 'popup':
+                                    const width = event.target.getAttribute('width') || '600';
+                                    const height = event.target.getAttribute('height') || '400';
+                                    window.open(action, '_blank', `
+                                        status=no,
+                                        toolbar=no,
+                                        menubar=no,
+                                        location=no,
+                                        resizable=yes,
+                                        scrollbars=yes,
+                                        left=100,top=100,
+                                        width=${width},height=${height}
+                                    `);
+                                    break;
+                            }
+                            break;
+                    }
+                }
+            });
+        }
     }
 }
 
@@ -285,67 +495,4 @@ window.customElements.define('icon-dark', Dark);
 window.customElements.define('icon-light', Light);
 window.customElements.define('icon-calendar', Calendar);
 window.customElements.define('icon-high-contrast', HighContrast);
-const style = window.document.querySelector('style.theme');
-const container = window.document.querySelector('widget-view');
-if (style && container && container instanceof View) {
-    container.innerHTML = `
-        <widget-top></widget-top>
-        <widget-bar>
-            <widget-button class="theme"></widget-button>
-            <widget-button class="calendar">
-                <icon-calendar>
-            </widget-button>
-        </widget-bar>
-    `;
-    const theme = window.document.querySelector('widget-button.theme');
-    if (theme) {
-        switch (window.localStorage.getItem('theme') ?? 'dark') {
-            case 'light':
-                theme.innerHTML = '<icon-light />';
-                window.document.body.setAttribute('theme', 'light');
-                break;
-            case 'high_contrast':
-                theme.innerHTML = '<icon-high-contrast />';
-                window.document.body.setAttribute('theme', 'high_contrast');
-                break;
-            default:
-                theme.innerHTML = '<icon-dark />';
-                window.document.body.setAttribute('theme', 'dark');
-                break;
-        }
-        container.listen('widget-button.theme').onAction(() => {
-            switch (window.localStorage.getItem('theme') ?? 'dark') {
-                case 'light':
-                    theme.innerHTML = '<icon-high-contrast />';
-                    window.localStorage.setItem('theme', 'high_contrast');
-                    window.document.body.setAttribute('theme', 'high_contrast');
-                    break;
-                case 'high_contrast':
-                    theme.innerHTML = '<icon-dark />';
-                    window.localStorage.setItem('theme', 'dark');
-                    window.document.body.setAttribute('theme', 'dark');
-                    break;
-                default:
-                    theme.innerHTML = '<icon-light />';
-                    window.localStorage.setItem('theme', 'light');
-                    window.document.body.setAttribute('theme', 'light');
-                    break;
-            }
-        });
-    }
-    const top = window.document.querySelector('widget-top');
-    if (top) {
-        Theread.loop(60000, () => {
-            const date = new Date();
-            top.innerHTML = `
-                ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}
-                <br>
-                ${date.toLocaleDateString()}
-            `;
-        });
-    }
-}
-// window.document.body.insertAdjacentHTML(
-//     'beforeend',
-//     '<script type="module" src="dist/application.mjs" async></script>'
-// )
+Route.push('/', Main);

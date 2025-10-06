@@ -217,37 +217,66 @@ class Main extends View$1 {
     }
 }
 
-class Route {
-    static routes = [];
-    static view = null;
-    static push(path, view) {
-        Route.routes.push({ path, view });
-        Route.check();
-    }
-    static check() {
-        const route = this.routes.find(r => r.path === window.location.pathname);
-        if (route
-            && route.view !== View$1
-            && Object.getPrototypeOf(route.view) === View$1
-            && (!Route.view || Route.view instanceof route.view)) {
-            if (Route.view) {
-                Route.view.destroy();
-            }
-            window.document.querySelectorAll('widget-view').forEach(element => element.remove());
-            Route.build(route.view);
-            // window.document.body.insertAdjacentHTML(
-            //     'beforeend',
-            //     '<script type="module" src="dist/application.mjs" async></script>'
-            // )
+let Route$1 = class Route {
+    builder;
+    compatible;
+    constructor(view, paths) {
+        if (view === View$1 || Object.getPrototypeOf(view) !== View$1) {
+            throw new Error('Invalid view class');
+        }
+        else {
+            this.builder = view;
+            this.compatible = paths;
         }
     }
-    static build(view) {
+    get view() {
+        return this.builder;
+    }
+    get paths() {
+        return this.compatible;
+    }
+    build() {
+        const view = this.builder;
+        window.document.querySelectorAll('widget-view').forEach(element => element.remove());
         const element = window.document.createElement('widget-view');
         window.document.body.appendChild(element);
         const instance = new view(element);
-        Route.view = instance;
         element.innerHTML = instance.render();
         instance.handler();
+        return instance;
+    }
+};
+
+class Route {
+    static routes = [];
+    static displaying = null;
+    static push(path, view) {
+        for (const route of Route.routes) {
+            if (view === route.view) {
+                if (!route.paths.includes(path)) {
+                    route.paths.push(path);
+                    Route.check();
+                    return;
+                }
+            }
+        }
+        Route.routes.push(new Route$1(view, [path]));
+        Route.check();
+    }
+    static check() {
+        const path = window.location.pathname;
+        for (let route of Route.routes) {
+            if (route.paths.find(p => p === path)) {
+                if (Route.displaying) {
+                    Route.displaying.destroy();
+                }
+                Route.displaying = route.build();
+                // window.document.body.insertAdjacentHTML(
+                //     'beforeend',
+                //     '<script type="module" src="dist/application.mjs" async></script>'
+                // )
+            }
+        }
     }
 }
 
@@ -496,3 +525,4 @@ window.customElements.define('icon-light', Light);
 window.customElements.define('icon-calendar', Calendar);
 window.customElements.define('icon-high-contrast', HighContrast);
 Route.push('/', Main);
+Route.push('/index.html', Main);

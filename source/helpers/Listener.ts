@@ -1,6 +1,6 @@
-import Util from '../../utils/events/Listener'
-import Type from '../../enumeratos/events/type'
-import Dispatcher from '../../utils/events/dispatcher'
+import Util from '../utils/events/listener'
+import Type from '../enumeratos/events/type'
+import Dispatcher from '../utils/events/dispatcher'
 
 export default class Listener {
     private readonly query: HTMLElement | string | Array<string | HTMLElement>

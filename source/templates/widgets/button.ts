@@ -1,5 +1,5 @@
 import Type from '../../enumeratos/events/type'
-import Listener from '../../utils/events/Listener'
+import Listener from '../../utils/events/listener'
 
 export default class Button extends HTMLElement {
     private static listener: Listener | null = null

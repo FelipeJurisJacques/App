@@ -1,4 +1,4 @@
-import Listener from '../helpers/events/Listener'
+import Listener from '../helpers/listener'
 
 export default abstract class View {
     private node: HTMLElement

@@ -19,10 +19,31 @@ export default class Route {
         Route.check()
     }
 
+    public static has(path: string): boolean {
+        for (const route of Route.routes) {
+            if (route.paths.includes(path)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    public static go(path: string): void {
+        for (let route of Route.routes) {
+            if (route.paths.includes(path)) {
+                if (Route.displaying) {
+                    Route.displaying.destroy()
+                }
+                window.history.pushState({}, '', path)
+                Route.displaying = route.build()
+            }
+        }
+    }
+
     private static check(): void {
         const path = window.location.pathname
         for (let route of Route.routes) {
-            if (route.paths.find(p => p === path)) {
+            if (route.paths.includes(path)) {
                 if (Route.displaying) {
                     Route.displaying.destroy()
                 }

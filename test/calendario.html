@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendário Sci‑Fi — Responsive</title>
+  <style>
+    :root{
+      --bg-1: #05030a;
+      --bg-2: #081026;
+      --accent: #00e6ff;
+      --accent-2: #8a2be2;
+      --glass: rgba(255,255,255,0.04);
+      --card: rgba(255,255,255,0.03);
+      --muted: rgba(255,255,255,0.12);
+      --neon: 0 0 20px rgba(0,230,255,0.12), 0 0 40px rgba(138,43,226,0.06);
+      --radius: 14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-1),var(--bg-2));color:#e6f7ff}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+
+    /* container */
+    .calendar {
+      width:100%;
+      max-width:980px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow: var(--neon), 0 10px 30px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(6px) saturate(120%);
+    }
+
+    /* header */
+    .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .title{display:flex;gap:12px;align-items:center}
+    .logo {
+      width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#021;
+      box-shadow:0 6px 24px rgba(138,43,226,0.12);
+    }
+    .month-year{font-size:1.35rem;letter-spacing:0.6px}
+    .controls{display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;cursor:pointer;color:inherit}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021;border:none;box-shadow:var(--neon)}
+
+    /* week names */
+    .weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:6px}
+    .weekday{padding:8px 6px;text-align:center;font-size:0.8rem;color:var(--muted);text-transform:uppercase}
+
+    /* days grid */
+    .days{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-top:10px}
+    .day{min-height:82px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02);position:relative;overflow:hidden}
+    .day .num{font-weight:700}
+    .day.today{outline:2px solid rgba(0,230,255,0.14);box-shadow:0 6px 18px rgba(0,230,255,0.06) inset}
+    .day.inactive{opacity:0.32}
+
+    .events{position:absolute;left:10px;right:10px;bottom:10px;display:flex;flex-direction:column;gap:6px}
+    .evt{background:linear-gradient(90deg, rgba(0,230,255,0.12), rgba(138,43,226,0.08));padding:6px 8px;border-radius:8px;font-size:0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* sidebar for mobile the events list */
+    .sidebar{margin-top:16px;background:var(--card);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+    .sidebar h4{margin:0 0 8px 0}
+
+    /* responsive adjustments */
+    @media (max-width:720px){
+      .calendar{padding:14px;border-radius:12px}
+      .day{min-height:66px;padding:8px}
+      .logo{width:44px;height:44px}
+      .month-year{font-size:1.05rem}
+      .weekdays{gap:6px}
+    }
+
+    /* modal */
+    .modal{position:fixed;left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.85));z-index:50}
+    .modal.show{display:flex}
+    .modal-card{width:92%;max-width:420px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:12px}
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+    .input{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+
+    .footer-actions{display:flex;gap:8px;justify-content:flex-end}
+
+    /* futuristic grid lines */
+    .grid-lines{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(transparent 70%, rgba(0,0,0,0.08) 70%), linear-gradient(90deg, transparent 70%, rgba(0,0,0,0.06) 70%);opacity:0.04;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="calendar" id="calendarRoot">
+      <div class="cal-header">
+        <div class="title">
+          <div class="logo">SF</div>
+          <div>
+            <div class="month-year" id="monthYear">Mês Ano</div>
+            <div style="font-size:0.85rem;color:var(--muted)" id="subtitle">Interface sci-fi — responsivo</div>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="btn" id="prevBtn" aria-label="mês anterior">◀</button>
+          <button class="btn" id="todayBtn">Hoje</button>
+          <button class="btn" id="nextBtn" aria-label="próximo mês">▶</button>
+          <button class="btn primary" id="addQuick">+ Evento</button>
+        </div>
+      </div>
+
+      <div class="weekdays" id="weekdays"></div>
+      <div class="days" id="daysGrid"></div>
+      <div class="grid-lines" aria-hidden="true"></div>
+
+      <div class="sidebar" id="sidebar">
+        <h4>Eventos do dia</h4>
+        <div id="eventList">Selecione um dia para ver eventos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- modal -->
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <h3 id="modalTitle">Adicionar evento</h3>
+      <div class="field">
+        <label>Título</label>
+        <input class="input" id="evtTitle" placeholder="Nome do evento" />
+      </div>
+      <div class="field">
+        <label>Hora (opcional)</label>
+        <input class="input" id="evtTime" placeholder="HH:MM" />
+      </div>
+      <div class="footer-actions">
+        <button class="btn" id="closeModal">Cancelar</button>
+        <button class="btn primary" id="saveEvt">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // localization
+    const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const WEEKDAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+    // state
+    let viewDate = new Date();
+    let selectedDate = null;
+
+    const daysGrid = document.getElementById('daysGrid');
+    const monthYear = document.getElementById('monthYear');
+    const weekdaysRow = document.getElementById('weekdays');
+    const eventList = document.getElementById('eventList');
+    const sidebar = document.getElementById('sidebar');
+
+    // storage helpers
+    const STORAGE_KEY = 'sf_calendar_events_v1';
+    function loadEvents(){
+      try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }catch(e){return{}}}
+    function saveEvents(obj){localStorage.setItem(STORAGE_KEY, JSON.stringify(obj))}
+
+    // render weekdays
+    function renderWeekdays(){
+      weekdaysRow.innerHTML = '';
+      for(const d of WEEKDAYS){
+        const el = document.createElement('div'); el.className='weekday'; el.textContent=d; weekdaysRow.appendChild(el);
+      }
+    }
+
+    function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1) }
+    function endOfMonth(d){ return new Date(d.getFullYear(), d.getMonth()+1, 0) }
+
+    function render(){
+      daysGrid.innerHTML='';
+      monthYear.textContent = `${MONTHS[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+
+      const first = startOfMonth(viewDate);
+      const last = endOfMonth(viewDate);
+      const startWeekday = first.getDay();
+      const total = last.getDate();
+
+      // days from previous month to fill grid
+      const prevFill = startWeekday;
+      const prevMonthLast = new Date(viewDate.getFullYear(), viewDate.getMonth(), 0).getDate();
+
+      const events = loadEvents();
+
+      // fill prev
+      for(let i=prevFill-1;i>=0;i--){
+        const dayNumber = prevMonthLast - i;
+        const el = makeDayElement(dayNumber, true, viewDate.getMonth()-1);
+        daysGrid.appendChild(el);
+      }
+
+      // current month
+      for(let d=1; d<=total; d++){
+        const el = makeDayElement(d, false, viewDate.getMonth());
+        daysGrid.appendChild(el);
+      }
+
+      // fill next to complete 6 rows if necessary
+      while(daysGrid.children.length % 7 !== 0){
+        const el = makeDayElement(daysGrid.children.length%7+1, true, viewDate.getMonth()+1);
+        el.classList.add('inactive');
+        daysGrid.appendChild(el);
+      }
+
+      // highlight today if in view
+      const today = new Date();
+      for(const ch of daysGrid.children){
+        const data = ch.dataset;
+        if(data.y && +data.y === today.getFullYear() && +data.m === today.getMonth() && +data.d === today.getDate()){
+          ch.classList.add('today');
+        }
+      }
+
+      // if a selected date exists, show its events
+      if(selectedDate) renderEventsForDate(selectedDate);
+    }
+
+    function makeDayElement(dayNumber, isOtherMonth=false, monthIndex=viewDate.getMonth()){
+      // compute real date
+      const year = viewDate.getFullYear();
+      // handle month overflow/underflow
+      const realMonth = (monthIndex + 12) % 12;
+      const realYear = year + Math.floor((monthIndex)/12);
+
+      const el = document.createElement('div'); el.className='day';
+      el.dataset.d = dayNumber; el.dataset.m = realMonth; el.dataset.y = realYear;
+
+      const num = document.createElement('div'); num.className='num'; num.textContent = dayNumber; el.appendChild(num);
+
+      // small event preview
+      const evs = loadEvents();
+      const key = `${realYear}-${String(realMonth+1).padStart(2,'0')}-${String(dayNumber).padStart(2,'0')}`;
+      const container = document.createElement('div'); container.className='events';
+      if(evs[key]){
+        for(const e of evs[key].slice(0,2)){
+          const y = document.createElement('div'); y.className='evt'; y.textContent = e.time? `${e.time} — ${e.title}` : e.title; container.appendChild(y);
+        }
+      }
+      el.appendChild(container);
+
+      el.addEventListener('click', ()=>{
+        selectedDate = {y:realYear,m:realMonth,d:dayNumber};
+        renderEventsForDate(selectedDate);
+        showModalFor(selectedDate);
+      });
+
+      if(isOtherMonth) el.classList.add('inactive');
+      return el;
+    }
+
+    function renderEventsForDate(date){
+      const events = loadEvents();
+      const key = `${date.y}-${String(date.m+1).padStart(2,'0')}-${String(date.d).padStart(2,'0')}`;
+      const list = events[key] || [];
+      if(list.length===0){ eventList.innerHTML = '<div style="color:var(--muted)">Sem eventos</div>'; return; }
+      eventList.innerHTML = '';
+      for(const e of list){
+        const item = document.createElement('div'); item.style.padding='8px'; item.style.borderBottom='1px solid rgba(255,255,255,0.02)';
+        item.innerHTML = `<strong>${e.time?e.time+' — ':''}${e.title}</strong>`;
+        eventList.appendChild(item);
+      }
+    }
+
+    // modal interactions
+    const modal = document.getElementById('modal');
+    const evtTitle = document.getElementById('evtTitle');
+    const evtTime = document.getElementById('evtTime');
+
+    function showModalFor(date){
+      modal.classList.add('show');
+      document.getElementById('modalTitle').textContent = `Adicionar evento — ${String(date.d).padStart(2,'0')}/${String(date.m+1).padStart(2,'0')}/${date.y}`;
+      evtTitle.value = '';
+      evtTime.value = '';
+      evtTitle.focus();
+    }
+    function closeModal(){ modal.classList.remove('show'); }
+
+    document.getElementById('closeModal').addEventListener('click', closeModal);
+    document.getElementById('saveEvt').addEventListener('click', ()=>{
+      if(!selectedDate) return closeModal();
+      const title = evtTitle.value.trim();
+      if(!title){ alert('Digite um título'); evtTitle.focus(); return; }
+      const time = evtTime.value.trim();
+      const key = `${selectedDate.y}-${String(selectedDate.m+1).padStart(2,'0')}-${String(selectedDate.d).padStart(2,'0')}`;
+      const evs = loadEvents(); evs[key] = evs[key]||[]; evs[key].unshift({title, time}); saveEvents(evs);
+      closeModal(); render();
+    });
+
+    // header buttons
+    document.getElementById('prevBtn').addEventListener('click', ()=>{ viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1,1); render(); });
+    document.getElementById('nextBtn').addEventListener('click', ()=>{ viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1,1); render(); });
+    document.getElementById('todayBtn').addEventListener('click', ()=>{ viewDate = new Date(); render(); });
+    document.getElementById('addQuick').addEventListener('click', ()=>{
+      // quick add for today
+      selectedDate = {y: (new Date()).getFullYear(), m: (new Date()).getMonth(), d: (new Date()).getDate()};
+      showModalFor(selectedDate);
+    });
+
+    // init
+    renderWeekdays(); render();
+
+    // close modal on outside click
+    modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
+
+    // keyboard shortcuts: n/p/t
+    window.addEventListener('keydown', (e)=>{
+      if(e.key==='ArrowLeft') document.getElementById('prevBtn').click();
+      if(e.key==='ArrowRight') document.getElementById('nextBtn').click();
+      if(e.key.toLowerCase()==='t') document.getElementById('todayBtn').click();
+    });
+  </script>
+</body>
+</html>

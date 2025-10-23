@@ -1,58 +1,61 @@
-import View from '../utils/view'
 import Util from '../utils/route'
 
-export default class Route {
+export default abstract class Route {
     private static routes: Util[] = []
-    private static displaying: View | null = null
+    private static current: null | Util = null
+    private static displaying: null | HTMLElement
 
-    public static push(path: string, view: typeof View): void {
-        for (const route of Route.routes) {
-            if (view === route.view) {
-                if (!route.paths.includes(path)) {
-                    route.paths.push(path)
-                    Route.check()
-                    return
-                }
+    public static go(path: string): void {
+        for (let route of Route.routes) {
+            if (route !== Route.current && route.checkPath(path)) {
+                console.info(`ROUTE: ${path}`)
+                Route.render(route)
+                window.history.pushState({}, '', path)
+                break
             }
         }
-        Route.routes.push(new Util(view, [path]))
+    }
+
+    public static push(
+        path: string | string[],
+        render: (documento: Document) => HTMLElement
+    ): void {
+        const util = new Util(typeof path === 'string' ? [path] : path, render)
+        Route.routes.push(util)
         Route.check()
     }
 
-    public static has(path: string): boolean {
-        for (const route of Route.routes) {
-            if (route.paths.includes(path)) {
+    public static checkPath(path: string): boolean {
+        for (let route of Route.routes) {
+            if (route.checkPath(path)) {
                 return true
             }
         }
         return false
     }
 
-    public static go(path: string): void {
+    private static check(): void {
+        const path = window.location.pathname
         for (let route of Route.routes) {
-            if (route.paths.includes(path)) {
-                if (Route.displaying) {
-                    Route.displaying.destroy()
-                }
-                window.history.pushState({}, '', path)
-                Route.displaying = route.build()
+            if (route !== Route.current && route.checkPath(path)) {
+                console.info(`ROUTE: ${path}`)
+                Route.render(route)
+                break
             }
         }
     }
 
-    private static check(): void {
-        const path = window.location.pathname
-        for (let route of Route.routes) {
-            if (route.paths.includes(path)) {
-                if (Route.displaying) {
-                    Route.displaying.destroy()
-                }
-                Route.displaying = route.build()
-                // window.document.body.insertAdjacentHTML(
-                //     'beforeend',
-                //     '<script type="module" src="dist/application.mjs" async></script>'
-                // )
-            }
+    private static render(route: Util): void {
+        Route.current = route
+        if (Route.displaying && Route.displaying.isConnected) {
+            Route.displaying.remove()
         }
+        const element = route.build(window.document)
+        Route.displaying = element
+        document.body.append(element)
+        // window.document.body.insertAdjacentHTML(
+        //     'beforeend',
+        //     '<script type="module" src="dist/application.mjs" async></script>'
+        // )
     }
 }

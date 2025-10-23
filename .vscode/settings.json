@@ -8,5 +8,6 @@
     ],
     "command-runner.commands": {
         "Abrir no Dev Container": "Dev Containers: Reopen in Container"
-    }
+    },
+    "liveServer.settings.multiRootWorkspaceName": "workspace"
 }

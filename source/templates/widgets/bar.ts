@@ -6,7 +6,7 @@ export default class Bar extends HTMLElement {
         })
         shadow.innerHTML = `
             <slot></slot>
-            <link rel="stylesheet" href="stylesheet/widgets/bar.css">
+            <link rel="stylesheet" href="assets/stylesheet/widgets/bar.css">
             <div class="bacground">
                 <div class="customization"></dv>
             </div>

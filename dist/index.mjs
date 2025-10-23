@@ -1,3 +1,85 @@
+let Route$1 = class Route {
+    paths;
+    render;
+    constructor(paths, render) {
+        this.paths = paths;
+        this.render = render;
+    }
+    checkPath(path) {
+        return this.paths.includes(path);
+    }
+    build(document) {
+        return this.render(document);
+    }
+};
+
+class Route {
+    static routes = [];
+    static current = null;
+    static displaying;
+    static go(path) {
+        for (let route of Route.routes) {
+            if (route !== Route.current && route.checkPath(path)) {
+                console.info(`ROUTE: ${path}`);
+                Route.render(route);
+                window.history.pushState({}, '', path);
+                break;
+            }
+        }
+    }
+    static push(path, render) {
+        const util = new Route$1(typeof path === 'string' ? [path] : path, render);
+        Route.routes.push(util);
+        Route.check();
+    }
+    static checkPath(path) {
+        for (let route of Route.routes) {
+            if (route.checkPath(path)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    static check() {
+        const path = window.location.pathname;
+        for (let route of Route.routes) {
+            if (route !== Route.current && route.checkPath(path)) {
+                console.info(`ROUTE: ${path}`);
+                Route.render(route);
+                break;
+            }
+        }
+    }
+    static render(route) {
+        Route.current = route;
+        if (Route.displaying && Route.displaying.isConnected) {
+            Route.displaying.remove();
+        }
+        const element = route.build(window.document);
+        Route.displaying = element;
+        document.body.append(element);
+        // window.document.body.insertAdjacentHTML(
+        //     'beforeend',
+        //     '<script type="module" src="dist/application.mjs" async></script>'
+        // )
+    }
+}
+
+class Widget extends HTMLElement {
+    shadow;
+    constructor(opened) {
+        super();
+        this.shadow = this.attachShadow({
+            mode: opened ? 'open' : 'closed',
+        });
+    }
+    adoptedCallback() { }
+    connectedCallback() { }
+    disconnectedCallback() { }
+    connectedMoveCallback() { }
+    attributeChangedCallback(name, old, value) { }
+}
+
 class Dispatcher {
     origin;
     type_enum;
@@ -15,6 +97,79 @@ class Dispatcher {
     }
 }
 
+class Target {
+    ownerView;
+    ownerQuery;
+    ownerTarget;
+    constructor(view) {
+        this.ownerView = view;
+        this.ownerQuery = null;
+        this.ownerTarget = null;
+    }
+    get view() { return this.ownerView; }
+    onTarget(element) {
+        this.ownerQuery = null;
+        this.ownerTarget = element;
+    }
+    onQuery(query) {
+        this.ownerQuery = query;
+        this.ownerTarget = null;
+    }
+    handler(event, type, dispatcher) {
+        if (event.target instanceof HTMLElement) {
+            if (this.ownerQuery) {
+                if (this.ownerTarget) {
+                    if (this.ownerTarget.contains(event.target)) {
+                        this.invoke(type, event, event.target, dispatcher);
+                    }
+                }
+                else {
+                    this.invoke(type, event, event.target, dispatcher);
+                }
+            }
+            else if (this.ownerTarget) {
+                if (this.ownerTarget === event.target
+                    || this.ownerTarget.contains(event.target)) {
+                    this.invoke(type, event, event.target, dispatcher);
+                }
+            }
+        }
+    }
+    invoke(type, event, target, dispatcher) {
+        if (this.ownerQuery) {
+            const element = target.closest(this.ownerQuery);
+            if (element && element instanceof HTMLElement) {
+                console.info(`DISPACH[${type}]`, dispatcher);
+                dispatcher(new Dispatcher(event, type, element));
+            }
+        }
+        else if (this.ownerTarget) {
+            console.info(`DISPACH[${type}]`, dispatcher);
+            dispatcher(new Dispatcher(event, type, this.ownerTarget));
+        }
+    }
+}
+
+class Group {
+    origin;
+    listeners;
+    constructor(view, listener) {
+        this.listeners = [
+            listener,
+        ];
+        this.origin = view;
+        view.shadowRoot.addEventListener('click', event => {
+            for (let listener of this.listeners) {
+                listener.handler(event);
+            }
+        });
+    }
+    push(listener) {
+        this.listeners.push(listener);
+    }
+    get view() { return this.origin; }
+}
+
 var Type;
 (function (Type) {
     Type[Type["TAP"] = 0] = "TAP";
@@ -23,43 +178,33 @@ var Type;
 })(Type || (Type = {}));
 var Type$1 = Type;
 
-let Listener$1 = class Listener {
+class Listener {
+    static groups = [];
     type;
-    queryes;
+    signatured;
     event;
-    static listeners = [];
-    static documents = [];
-    static notify(event) {
-        for (let listener of Listener.listeners) {
-            listener.handler(event);
-        }
-    }
-    constructor(type, query, event) {
-        this.type = type;
-        this.event = event;
-        this.queryes = Array.isArray(query) ? query : [
-            query,
-        ];
-        for (let query of this.queryes) {
-            if (query instanceof HTMLElement
-                && query.ownerDocument
-                && !Listener.documents.includes(query.ownerDocument)) {
-                Listener.documents.push(query.ownerDocument);
-                query.ownerDocument.addEventListener('click', Listener.notify);
+    static push(view, listener) {
+        console.info('LISTEN: ', listener);
+        for (let group of Listener.groups) {
+            if (view === group.view) {
+                group.push(listener);
+                return;
             }
         }
-        if (Listener.documents.length === 0) {
-            Listener.documents.push(window.document);
-            window.document.addEventListener('click', Listener.notify);
-        }
-        Listener.listeners.push(this);
+        Listener.groups.push(new Group(view, listener));
     }
+    constructor(signature, type, event) {
+        this.type = type;
+        this.event = event;
+        this.signatured = signature;
+    }
+    get signature() { return this.signatured; }
     handler(event) {
-        if (this.is_type(event) && this.is_query(event)) {
-            this.event(new Dispatcher(event, this.type, this.target(event)));
+        if (this.isType(event)) {
+            this.signatured.handler(event, this.type, this.event);
         }
     }
-    is_type(event) {
+    isType(event) {
         switch (this.type) {
             case Type$1.ACTION:
                 return event.type === 'click';
@@ -67,66 +212,77 @@ let Listener$1 = class Listener {
                 return false;
         }
     }
-    is_query(event) {
-        if (event.target && event.target instanceof HTMLElement && event.target.ownerDocument) {
-            for (let query of this.queryes) {
-                if (typeof query === 'string') {
-                    if (event.target.closest(query)) {
-                        return true;
-                    }
-                }
-                else if (query.ownerDocument && query.ownerDocument === event.target.ownerDocument) {
-                    if (query === event.target || query.contains(event.target)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-    target(event) {
-        if (event.target && event.target instanceof HTMLElement && event.target.ownerDocument) {
-            for (let query of this.queryes) {
-                if (typeof query === 'string') {
-                    let target = event.target.closest(query);
-                    if (target) {
-                        return target;
-                    }
-                }
-                else if (query.ownerDocument && query.ownerDocument === event.target.ownerDocument) {
-                    if (query === event.target || query.contains(event.target)) {
-                        return query;
-                    }
-                }
-            }
-        }
-        return event.target;
-    }
-};
+}
 
-class Listener {
-    query;
-    static listen(query) {
-        return new Listener(query);
-    }
-    constructor(query) {
-        this.query = query;
-    }
+class Signature {
+    targetable;
+    constructor(target) { this.targetable = target; }
+    get target() { return this.targetable; }
     onAction(event) {
-        return new Listener$1(Type$1.ACTION, this.query, event);
+        const listener = new Listener(this, Type$1.ACTION, event);
+        Listener.push(this.targetable.view, listener);
+        return listener;
+    }
+    handler(event, type, dispatcher) {
+        this.targetable.handler(event, type, dispatcher);
     }
 }
 
-let View$1 = class View {
-    node;
-    constructor(view) {
-        this.node = view;
+let View$1 = class View extends Widget {
+    constructor() {
+        super(true);
+        this.listen('widget-button').onAction(event => {
+            const action = event.target.getAttribute('action');
+            if (action) {
+                const method = event.target.getAttribute('method') || 'GET';
+                const target = event.target.getAttribute('target') || 'self';
+                switch (method) {
+                    case 'GET':
+                        switch (target) {
+                            case 'top':
+                                window.open(action, '_top');
+                                break;
+                            case 'self':
+                                if (Route.checkPath(action)) {
+                                    Route.go(action);
+                                }
+                                else {
+                                    window.open(action, '_self');
+                                }
+                                break;
+                            case 'blank':
+                                window.open(action, '_blank');
+                                break;
+                            case 'parent':
+                                window.open(action, '_parent');
+                                break;
+                            case 'popup':
+                                const width = event.target.getAttribute('width') || '600';
+                                const height = event.target.getAttribute('height') || '400';
+                                window.open(action, '_blank', `
+                                    status=no,
+                                    toolbar=no,
+                                    menubar=no,
+                                    location=no,
+                                    resizable=yes,
+                                    scrollbars=yes,
+                                    left=100,top=100,
+                                    width=${width},height=${height}
+                                `);
+                                break;
+                        }
+                        break;
+                }
+            }
+        });
     }
-    get element() {
-        return this.node;
+    connectedCallback() {
+        this.handler();
     }
-    listen(selector) {
-        return Listener.listen(selector);
+    listen(query) {
+        const target = new Target(this);
+        target.onQuery(query);
+        return new Signature(target);
     }
 };
 
@@ -142,62 +298,25 @@ class Theread {
 
 class Main extends View$1 {
     loop;
-    constructor(view) {
-        super(view);
-        this.loop = null;
-    }
-    handler() {
-        const top = this.element.querySelector('widget-top');
-        if (top) {
-            this.loop = Theread.loop(60000, () => {
-                const date = new Date();
-                top.innerHTML = `
-                    ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}
-                    <br>
-                    ${date.toLocaleDateString()}
-                `;
-            });
-        }
-        const theme = this.element.querySelector('widget-button.theme');
-        if (theme) {
-            this.listen('widget-button.theme').onAction(() => {
-                switch (window.localStorage.getItem('theme') ?? 'dark') {
-                    case 'light':
-                        theme.innerHTML = '<icon-high-contrast />';
-                        window.localStorage.setItem('theme', 'high_contrast');
-                        this.element.ownerDocument.body.setAttribute('theme', 'high_contrast');
-                        break;
-                    case 'high_contrast':
-                        theme.innerHTML = '<icon-dark />';
-                        window.localStorage.setItem('theme', 'dark');
-                        this.element.ownerDocument.body.setAttribute('theme', 'dark');
-                        break;
-                    default:
-                        theme.innerHTML = '<icon-light />';
-                        window.localStorage.setItem('theme', 'light');
-                        this.element.ownerDocument.body.setAttribute('theme', 'light');
-                        break;
-                }
-            });
-        }
-    }
-    render() {
+    constructor() {
+        super();
         let icon = '';
+        this.loop = null;
         switch (window.localStorage.getItem('theme') ?? 'dark') {
             case 'light':
                 icon = '<icon-light></icon-light>';
-                this.element.ownerDocument.body.setAttribute('theme', 'light');
+                this.ownerDocument.body.setAttribute('theme', 'light');
                 break;
             case 'high_contrast':
                 icon = '<icon-high-contrast></icon-high-contrast>';
-                this.element.ownerDocument.body.setAttribute('theme', 'high_contrast');
+                this.ownerDocument.body.setAttribute('theme', 'high_contrast');
                 break;
             default:
                 icon = '<icon-dark></icon-dark>';
-                this.element.ownerDocument.body.setAttribute('theme', 'dark');
+                this.ownerDocument.body.setAttribute('theme', 'dark');
                 break;
         }
-        return `
+        this.shadow.innerHTML = `
             <widget-top></widget-top>
             <widget-bar>
                 <widget-button class="theme">
@@ -209,7 +328,42 @@ class Main extends View$1 {
             </widget-bar>
         `;
     }
-    destroy() {
+    handler() {
+        const top = this.shadow.querySelector('widget-top');
+        if (top) {
+            this.loop = Theread.loop(60000, () => {
+                const date = new Date();
+                top.innerHTML = `
+                    ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}
+                    <br>
+                    ${date.toLocaleDateString()}
+                `;
+            });
+        }
+        const theme = this.shadow.querySelector('widget-button.theme');
+        if (theme) {
+            this.listen('widget-button.theme').onAction(() => {
+                switch (window.localStorage.getItem('theme') ?? 'dark') {
+                    case 'light':
+                        theme.innerHTML = '<icon-high-contrast />';
+                        window.localStorage.setItem('theme', 'high_contrast');
+                        this.ownerDocument.body.setAttribute('theme', 'high_contrast');
+                        break;
+                    case 'high_contrast':
+                        theme.innerHTML = '<icon-dark />';
+                        window.localStorage.setItem('theme', 'dark');
+                        this.ownerDocument.body.setAttribute('theme', 'dark');
+                        break;
+                    default:
+                        theme.innerHTML = '<icon-light />';
+                        window.localStorage.setItem('theme', 'light');
+                        this.ownerDocument.body.setAttribute('theme', 'light');
+                        break;
+                }
+            });
+        }
+    }
+    disconnectedCallback() {
         if (this.loop) {
             Theread.stop(this.loop);
             this.loop = null;
@@ -217,68 +371,39 @@ class Main extends View$1 {
     }
 }
 
-let Route$1 = class Route {
-    builder;
-    compatible;
-    constructor(view, paths) {
-        if (view === View$1 || Object.getPrototypeOf(view) !== View$1) {
-            throw new Error('Invalid view class');
+let Calendar$1 = class Calendar extends View$1 {
+    constructor() {
+        super();
+        let icon = '';
+        switch (window.localStorage.getItem('theme') ?? 'dark') {
+            case 'light':
+                icon = '<icon-light></icon-light>';
+                this.ownerDocument.body.setAttribute('theme', 'light');
+                break;
+            case 'high_contrast':
+                icon = '<icon-high-contrast></icon-high-contrast>';
+                this.ownerDocument.body.setAttribute('theme', 'high_contrast');
+                break;
+            default:
+                icon = '<icon-dark></icon-dark>';
+                this.ownerDocument.body.setAttribute('theme', 'dark');
+                break;
         }
-        else {
-            this.builder = view;
-            this.compatible = paths;
-        }
+        this.shadow.innerHTML = `
+            <widget-bar>
+                <widget-button class="theme">
+                    ${icon}
+                </widget-button>
+                <widget-button class="calendar" type="link" action="/calendar">
+                    <icon-calendar>
+                </widget-button>
+            </widget-bar>
+        `;
     }
-    get view() {
-        return this.builder;
-    }
-    get paths() {
-        return this.compatible;
-    }
-    build() {
-        const view = this.builder;
-        window.document.querySelectorAll('widget-view').forEach(element => element.remove());
-        const element = window.document.createElement('widget-view');
-        window.document.body.appendChild(element);
-        const instance = new view(element);
-        element.innerHTML = instance.render();
-        instance.handler();
-        return instance;
+    handler() {
+        this.className = 'window';
     }
 };
-
-class Route {
-    static routes = [];
-    static displaying = null;
-    static push(path, view) {
-        for (const route of Route.routes) {
-            if (view === route.view) {
-                if (!route.paths.includes(path)) {
-                    route.paths.push(path);
-                    Route.check();
-                    return;
-                }
-            }
-        }
-        Route.routes.push(new Route$1(view, [path]));
-        Route.check();
-    }
-    static check() {
-        const path = window.location.pathname;
-        for (let route of Route.routes) {
-            if (route.paths.find(p => p === path)) {
-                if (Route.displaying) {
-                    Route.displaying.destroy();
-                }
-                Route.displaying = route.build();
-                // window.document.body.insertAdjacentHTML(
-                //     'beforeend',
-                //     '<script type="module" src="dist/application.mjs" async></script>'
-                // )
-            }
-        }
-    }
-}
 
 class Bar extends HTMLElement {
     constructor() {
@@ -288,7 +413,7 @@ class Bar extends HTMLElement {
         });
         shadow.innerHTML = `
             <slot></slot>
-            <link rel="stylesheet" href="stylesheet/widgets/bar.css">
+            <link rel="stylesheet" href="assets/stylesheet/widgets/bar.css">
             <div class="bacground">
                 <div class="customization"></dv>
             </div>
@@ -325,12 +450,64 @@ class Top extends HTMLElement {
                     clip-path: polygon(${path.join(', ')});
                 }
             </style>
-            <link rel="stylesheet" href="stylesheet/widgets/top.css">
+            <link rel="stylesheet" href="assets/stylesheet/widgets/top.css">
             <div class="content">
                 <slot></slot>
             </div>
             <div class="bacground"></div>
         `;
+    }
+}
+
+class View extends HTMLElement {
+    element;
+    constructor() {
+        super();
+        this.element = this.attachShadow({
+            mode: 'closed',
+        });
+    }
+    get className() {
+        return this.getAttribute('class') ?? '';
+    }
+    set className(value) {
+        this.setAttribute('class', value);
+        this.render(value);
+    }
+    connectedCallback() {
+        this.render(this.className);
+    }
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            switch (name) {
+                case 'class':
+                    return this.render(newValue);
+            }
+        }
+    }
+    render(classValue) {
+        switch (classValue) {
+            case 'window':
+                this.element.innerHTML = `
+                    <link rel="stylesheet" href="assets/stylesheet/widgets/view.css">
+                    <div class="bacground"></div>
+                    <slot></slot>
+                `;
+                break;
+            default:
+                this.element.innerHTML = '<slot></slot>';
+                break;
+        }
+    }
+}
+
+class Button extends HTMLElement {
+    constructor() {
+        super();
+        const shadow = this.attachShadow({
+            mode: 'closed',
+        });
+        shadow.innerHTML = '<style>:host(:hover) { cursor: pointer; }</style><slot></slot>';
     }
 }
 
@@ -353,16 +530,6 @@ class Dark extends HTMLElement {
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
         `;
-    }
-}
-
-class View extends HTMLElement {
-    constructor() {
-        super();
-        const shadow = this.attachShadow({
-            mode: 'closed',
-        });
-        shadow.innerHTML = '<slot></slot>';
     }
 }
 
@@ -392,58 +559,6 @@ class Light extends HTMLElement {
                 <circle cx="12" cy="12" r="3"/>
             </svg>
         `;
-    }
-}
-
-class Button extends HTMLElement {
-    static listener = null;
-    constructor() {
-        super();
-        const shadow = this.attachShadow({
-            mode: 'closed',
-        });
-        shadow.innerHTML = '<style>:host(:hover) { cursor: pointer; }</style><slot></slot>';
-        if (Button.listener === null) {
-            Button.listener = new Listener$1(Type$1.ACTION, 'widget-button[type=link]', event => {
-                const action = event.target.getAttribute('action');
-                if (action) {
-                    const method = event.target.getAttribute('method') || 'GET';
-                    const target = event.target.getAttribute('target') || 'self';
-                    switch (method) {
-                        case 'GET':
-                            switch (target) {
-                                case 'self':
-                                    window.open(action, '_self');
-                                    break;
-                                case 'blank':
-                                    window.open(action, '_blank');
-                                    break;
-                                case 'parent':
-                                    window.open(action, '_parent');
-                                    break;
-                                case 'top':
-                                    window.open(action, '_top');
-                                    break;
-                                case 'popup':
-                                    const width = event.target.getAttribute('width') || '600';
-                                    const height = event.target.getAttribute('height') || '400';
-                                    window.open(action, '_blank', `
-                                        status=no,
-                                        toolbar=no,
-                                        menubar=no,
-                                        location=no,
-                                        resizable=yes,
-                                        scrollbars=yes,
-                                        left=100,top=100,
-                                        width=${width},height=${height}
-                                    `);
-                                    break;
-                            }
-                            break;
-                    }
-                }
-            });
-        }
     }
 }
 
@@ -524,5 +639,14 @@ window.customElements.define('icon-dark', Dark);
 window.customElements.define('icon-light', Light);
 window.customElements.define('icon-calendar', Calendar);
 window.customElements.define('icon-high-contrast', HighContrast);
-Route.push('/', Main);
-Route.push('/index.html', Main);
+window.customElements.define('view-main', Main);
+window.customElements.define('view-calendar', Calendar$1);
+Route.push('/', document => {
+    return document.createElement('view-main');
+});
+Route.push('/index.html', document => {
+    return document.createElement('view-main');
+});
+Route.push('/calendar', document => {
+    return document.createElement('view-calendar');
+});

@@ -1,34 +1,17 @@
-import View from './view'
-
 export default class Route {
-    private builder: typeof View
-    private compatible: string[]
+    private paths: string[]
+    private render: (documento: Document) => HTMLElement
 
-    public constructor(view: typeof View, paths: string[]) {
-        if (view === View || Object.getPrototypeOf(view) !== View) {
-            throw new Error('Invalid view class')
-        } else {
-            this.builder = view
-            this.compatible = paths
-        }
+    public constructor(paths: string[], render: (documento: Document) => HTMLElement) {
+        this.paths = paths
+        this.render = render
     }
 
-    public get view(): typeof View {
-        return this.builder
+    public checkPath(path: string): boolean {
+        return this.paths.includes(path)
     }
 
-    public get paths(): string[] {
-        return this.compatible
-    }
-
-    public build(): View {
-        const view = this.builder as any
-        window.document.querySelectorAll('widget-view').forEach(element => element.remove())
-        const element = window.document.createElement('widget-view')
-        window.document.body.appendChild(element)
-        const instance = new view(element)
-        element.innerHTML = instance.render()
-        instance.handler()
-        return instance
+    public build(document: Document): HTMLElement {
+        return this.render(document)
     }
 }

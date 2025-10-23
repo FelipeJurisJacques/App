@@ -27,7 +27,7 @@ export default class Top extends HTMLElement {
                     clip-path: polygon(${path.join(', ')});
                 }
             </style>
-            <link rel="stylesheet" href="stylesheet/widgets/top.css">
+            <link rel="stylesheet" href="assets/stylesheet/widgets/top.css">
             <div class="content">
                 <slot></slot>
             </div>

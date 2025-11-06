@@ -1,9 +1,0 @@
-export default class Text extends HTMLElement {
-    public constructor() {
-        super()
-        const shadow = this.attachShadow({
-            mode: 'closed',
-        })
-        shadow.innerHTML = '<style>:host(:hover) { cursor: pointer; }</style><slot></slot>'
-    }
-}

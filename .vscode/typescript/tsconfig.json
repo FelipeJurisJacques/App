@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "ESNext",
+            "dom"
+        ], // Bibliotecas padrão
+        "strict": true,
+        "module": "ESNext", // Usa módulos ES
+        "target": "ESNext", // Usa a versão mais recente do ECMAScript
+        "outDir": "./dist",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "strictNullChecks": true,
+        "moduleResolution": "node",
+        "rootDir": "./source/application",
+        "forceConsistentCasingInFileNames": true
+    }
+}

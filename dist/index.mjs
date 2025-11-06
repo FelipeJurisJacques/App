@@ -64,18 +64,33 @@ class Route {
         // )
     }
 }
+window.addEventListener('popstate', event => {
+    if (event.target instanceof Window) {
+        Route.go(event.target.location.pathname);
+    }
+});
 
 class Widget extends HTMLElement {
     shadow;
-    constructor(opened) {
+    constructor(opened = false) {
         super();
         this.shadow = this.attachShadow({
             mode: opened ? 'open' : 'closed',
         });
     }
+    handler() { }
+    destroy() { }
     adoptedCallback() { }
-    connectedCallback() { }
-    disconnectedCallback() { }
+    connectedCallback() {
+        this.build().then(content => {
+            this.shadow.innerHTML = content;
+            this.handler();
+        });
+    }
+    disconnectedCallback() {
+        this.shadow.innerHTML = '';
+        this.destroy();
+    }
     connectedMoveCallback() { }
     attributeChangedCallback(name, old, value) { }
 }
@@ -276,9 +291,7 @@ let View$1 = class View extends Widget {
             }
         });
     }
-    connectedCallback() {
-        this.handler();
-    }
+    get width() { return this.offsetWidth; }
     listen(query) {
         const target = new Target(this);
         target.onQuery(query);
@@ -300,8 +313,10 @@ class Main extends View$1 {
     loop;
     constructor() {
         super();
-        let icon = '';
         this.loop = null;
+    }
+    async build() {
+        let icon = '';
         switch (window.localStorage.getItem('theme') ?? 'dark') {
             case 'light':
                 icon = '<icon-light></icon-light>';
@@ -316,7 +331,7 @@ class Main extends View$1 {
                 this.ownerDocument.body.setAttribute('theme', 'dark');
                 break;
         }
-        this.shadow.innerHTML = `
+        return `
             <widget-top></widget-top>
             <widget-bar>
                 <widget-button class="theme">
@@ -363,7 +378,7 @@ class Main extends View$1 {
             });
         }
     }
-    disconnectedCallback() {
+    destroy() {
         if (this.loop) {
             Theread.stop(this.loop);
             this.loop = null;
@@ -371,9 +386,78 @@ class Main extends View$1 {
     }
 }
 
+class Template {
+    static async content(asset) {
+        const response = await fetch(asset);
+        return await response.text();
+    }
+    static async stylesheet(asset) {
+        return `<style>${await Template.content(asset)}</style>`;
+    }
+}
+
+class Locale {
+    static getLocale() { return 'pt-BR'; }
+}
+
+class Weeks {
+    date;
+    constructor(date) {
+        this.date = date;
+    }
+    getName(locale = null) {
+        return this.date.toLocaleDateString(locale ? locale : Locale.getLocale(), {
+            weekday: 'long',
+        });
+    }
+    getShortName(locale = null) {
+        return this.date.toLocaleDateString(locale ? locale : Locale.getLocale(), {
+            weekday: 'short',
+        });
+    }
+    getNarrowName(locale = null) {
+        return this.date.toLocaleDateString(locale ? locale : Locale.getLocale(), {
+            weekday: 'narrow',
+        });
+    }
+    toString() { return this.getName(); }
+}
+
+class Week extends Weeks {
+    getDay() { return 1 + this.date.getDay(); }
+}
+
+class DateTime {
+    date;
+    static now() { return new DateTime(new Date()); }
+    static getWeeks() {
+        const result = [];
+        for (let i = 0; i < 16; i++) {
+            let date = new Date();
+            date.setDate(i);
+            if (result.length === 7) {
+                break;
+            }
+            else if (result.length === date.getDay()) {
+                result.push(new Weeks(date));
+            }
+        }
+        return result;
+    }
+    constructor(date) { this.date = date; }
+    getWeek() { return new Week(this.date); }
+}
+
+const Stylesheet = {
+    WIDGET_TOP: new URL('/assets/stylesheets/widgets/top.css', window.location.origin),
+    WIDGET_BAR: new URL('/assets/stylesheets/widgets/bar.css', window.location.origin),
+    VIEW_CALENDAR: new URL('/assets/stylesheets/views/calendar.css', window.location.origin),
+    WIDGET_BUTTON: new URL('/assets/stylesheets/widgets/button.css', window.location.origin),
+};
+
 let Calendar$1 = class Calendar extends View$1 {
-    constructor() {
-        super();
+    async build() {
+        this.className = 'window';
         let icon = '';
         switch (window.localStorage.getItem('theme') ?? 'dark') {
             case 'light':
@@ -389,7 +473,25 @@ let Calendar$1 = class Calendar extends View$1 {
                 this.ownerDocument.body.setAttribute('theme', 'dark');
                 break;
         }
-        this.shadow.innerHTML = `
+        console.log(DateTime.getWeeks());
+        const day = new Date();
+        new Date(day.getFullYear(), day.getMonth(), 1);
+        new Date(day.getFullYear(), day.getMonth() + 1, 0);
+        return `
+            ${await Template.stylesheet(Stylesheet.VIEW_CALENDAR)}
+            <table>
+                <thead>
+                    <th>Domingo</th>
+                    <th>Segunda-feira</th>
+                    <th>Terça-feira</th>
+                    <th>Quarta-feira</th>
+                    <th>Quinta-feira</th>
+                    <th>Sexta-feira</th>
+                    <th>Sábado</th>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
             <widget-bar>
                 <widget-button class="theme">
                     ${icon}
@@ -397,36 +499,28 @@ let Calendar$1 = class Calendar extends View$1 {
                 <widget-button class="calendar" type="link" action="/calendar">
                     <icon-calendar>
                 </widget-button>
+                <widget-button class="home" type="link" action="/">
+                    <icon-calendar>
+                </widget-button>
             </widget-bar>
         `;
     }
-    handler() {
-        this.className = 'window';
-    }
 };
 
-class Bar extends HTMLElement {
-    constructor() {
-        super();
-        const shadow = this.attachShadow({
-            mode: 'closed',
-        });
-        shadow.innerHTML = `
+class Bar extends Widget {
+    async build() {
+        return `
+            ${await Template.stylesheet(Stylesheet.WIDGET_BAR)}
             <slot></slot>
-            <link rel="stylesheet" href="assets/stylesheet/widgets/bar.css">
             <div class="bacground">
-                <div class="customization"></dv>
+                <div class="customization"></div>
             </div>
         `;
     }
 }
 
-class Top extends HTMLElement {
-    constructor() {
-        super();
-        const shadow = this.attachShadow({
-            mode: 'closed',
-        });
+class Top extends Widget {
+    async build() {
         const path = [];
         const positions = [
             '50% -',
@@ -444,13 +538,13 @@ class Top extends HTMLElement {
             }
         }
         path.push(`0px 0px`);
-        shadow.innerHTML = `
+        return `
             <style>
+                ${await Template.content(Stylesheet.WIDGET_TOP)}
                 div.bacground {
                     clip-path: polygon(${path.join(', ')});
                 }
             </style>
-            <link rel="stylesheet" href="assets/stylesheet/widgets/top.css">
             <div class="content">
                 <slot></slot>
             </div>
@@ -489,7 +583,7 @@ class View extends HTMLElement {
         switch (classValue) {
             case 'window':
                 this.element.innerHTML = `
-                    <link rel="stylesheet" href="assets/stylesheet/widgets/view.css">
+                    <link rel="stylesheet" href="assets/stylesheets/widgets/view.css">
                     <div class="bacground"></div>
                     <slot></slot>
                 `;
@@ -501,13 +595,9 @@ class View extends HTMLElement {
     }
 }
 
-class Button extends HTMLElement {
-    constructor() {
-        super();
-        const shadow = this.attachShadow({
-            mode: 'closed',
-        });
-        shadow.innerHTML = '<style>:host(:hover) { cursor: pointer; }</style><slot></slot>';
+class Button extends Widget {
+    async build() {
+        return `${await Template.stylesheet(Stylesheet.WIDGET_BUTTON)}<slot></slot>`;
     }
 }
 

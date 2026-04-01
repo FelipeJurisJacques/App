@@ -1,0 +1,24 @@
+services:
+  application_nginx:
+    ports:
+      - 80:80
+    image: nginx:alpine
+    restart: unless-stopped
+    container_name: application_nginx_container
+    volumes:
+      - ../public/:/usr/share/nginx/html/
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+  application_node:
+    tty: true
+    ports:
+      - 9005:9005
+    build: ./typescript/
+    working_dir: /workspace/
+    container_name: application_node_container
+    volumes:
+      - ../data/:/root/.npm/_logs/
+      - ../source/:/workspace/source/
+      - ../public/:/workspace/public/
+      - ../data/node_modules/:/workspace/node_modules/
+      - ../source/application/package.json:/workspace/package.json
+      - ../source/application/tsconfig.json:/workspace/tsconfig.json

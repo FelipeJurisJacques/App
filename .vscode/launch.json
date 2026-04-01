@@ -2,28 +2,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run",
+            "name": "EXECUTAR",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker compose -f .vscode/docker-compose.yaml up"
+            "command": "docker compose -f ./docker/docker-compose.yaml up"
         },
         {
-            "name": "Install",
+            "name": "TERMINAL",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec application_typescript_container npm install"
+            "command": "docker exec -it application_node_container bash"
         },
         {
-            "name": "Treminal",
+            "name": "COMPILAR",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_typescript_container sh"
-        },
-        {
-            "request": "launch",
-            "type": "node-terminal",
-            "name": "Compile Type Script",
-            "command": "docker exec application_typescript_container npm run build"
+            "command": "docker exec -it application_node_container tsx source/application/src/build.ts"
         }
     ]
 }

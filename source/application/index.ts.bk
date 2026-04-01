@@ -1,7 +1,7 @@
 // @ts-ignore
 import * as THREE from './libs/three/three.module.js'
 import Vector2 from './utils/Vector2.js'
-import { Agent } from './helpers/Agent.js'
+import { Agent } from './helpers/agent.js'
 import Div from './helpers/elements/Div.js'
 import Body from './helpers/elements/Body.js'
 import Canvas from './helpers/elements/Canvas.js'

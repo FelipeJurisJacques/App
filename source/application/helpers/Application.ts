@@ -1,4 +1,4 @@
-import Document from "./elements/Document"
+import Document from './elements/Document'
 
 export default class Application {
     private window: Window

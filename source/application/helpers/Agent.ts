@@ -1,7 +1,7 @@
 // @ts-ignore
 import * as THREE from "../libs/three/three.module.js"
 
-export class Agent {
+export default class Agent {
     private n: number
     private l1: number
     private l2: number
@@ -16,7 +16,7 @@ export class Agent {
     private points_length: number
     private points_geometry: THREE.BufferGeometry
     private ring_transforms: THREE.RingGeometry[]
-    
+
     public constructor() {
         this.ray = 0.5
         const length = Math.round(512 * this.ray)
@@ -100,8 +100,7 @@ export class Agent {
         )
     }
 
-    private speaking(message: string, index: number, rate:number)
-    {
+    private speaking(message: string, index: number, rate: number) {
         let time = rate
         const char = message.at(index)
         if (char === ' ') {

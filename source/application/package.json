@@ -7,12 +7,13 @@
     "watch": "rollup -c -w"
   },
   "devDependencies": {
-    "rollup": "^4.0.0",
-    "typescript": "^5.0.0",
-    "tslib": "^2.6.0",
-    "@rollup/plugin-typescript": "^11.1.0",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-inject": "^5.0.5",
     "@rollup/plugin-node-resolve": "^15.2.0",
-    "@rollup/plugin-commonjs": "^25.0.0"
+    "@rollup/plugin-typescript": "^11.1.0",
+    "rollup": "^4.0.0",
+    "tslib": "^2.6.0",
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "three": "^0.160.0"

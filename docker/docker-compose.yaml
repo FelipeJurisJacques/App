@@ -22,3 +22,4 @@ services:
       - ../data/node_modules/:/workspace/node_modules/
       - ../source/application/package.json:/workspace/package.json
       - ../source/application/tsconfig.json:/workspace/tsconfig.json
+      - ../source/application/rollup.config.js:/workspace/rollup.config.js

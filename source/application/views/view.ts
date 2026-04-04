@@ -22,5 +22,7 @@ export default abstract class View extends HTMLElement {
 
     public connectedMoveCallback(): void { }
 
-    public attributeChangedCallback(name: string, old: string, value: string): void { }
+    public attributeChangedCallback(name: string, old: string, value: string): void {
+        window.console.log(name, old, value)
+    }
 }

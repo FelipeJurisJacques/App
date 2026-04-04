@@ -1,19 +1,39 @@
 import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import inject from '@rollup/plugin-inject';
 
-export default {
-  input: 'index.ts',
-  output: {
-    file: '../../public/assets/application/application.mjs',
-    format: 'esm',
-    sourcemap: true
+const commonPlugins = [
+  resolve(),
+  commonjs(),
+  inject({
+    'HyperTextMarkupLanguage': ['/workspace/source/application/dls/HyperTextMarkupLanguage', 'HyperTextMarkupLanguage']
+  }),
+  typescript({
+    tsconfig: './tsconfig.json'
+  })
+];
+
+export default [
+  // 1. Application Bundle
+  {
+    input: 'source/application/index.ts',
+    output: {
+      file: 'public/assets/application/application.mjs',
+      format: 'esm',
+      sourcemap: true
+    },
+    plugins: commonPlugins
   },
-  plugins: [
-    resolve(),
-    commonjs(),
-    typescript({
-      tsconfig: './tsconfig.json'
-    })
-  ]
-};
+
+  // 2. Service Worker Bundle
+  {
+    input: 'source/application/service-worker.ts',
+    output: {
+      file: 'public/assets/application/service-worker.js',
+      format: 'esm',
+      sourcemap: true
+    },
+    plugins: commonPlugins
+  }
+];

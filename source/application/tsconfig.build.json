@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "/workspace/source/application/index.ts",
+    "/workspace/source/application/service-worker.ts",
+    "/workspace/source/application/dls/HyperTextMarkupLanguage.ts"
+  ]
+}

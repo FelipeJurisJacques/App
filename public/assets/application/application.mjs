@@ -15,7 +15,6 @@ const HyperTextMarkupLanguage = {
                     element.insertAdjacentText('beforeend', child);
                 }
                 else {
-                    console.log(child);
                     element.appendChild(child);
                 }
             }

@@ -57,30 +57,32 @@ this-pwa-project/
 │   ├── index.html
 │   ├── manifest.json
 │   └── service-worker.js
-└── source/
-    └── application/
-        ├── package.json
-        ├── tsconfig.json
-        ├── rollup.config.js
-        ├── node_modules/
-        ├── views/
-        │   └── (view).tsx
-        ├── utils/
-        │   └── (util).ts
-        ├── routes/
-        │   └── (route).ts
-        ├── helpers/
-        │   └── (helper).ts
-        ├── entities/
-        │   └── (entity).ts
-        ├── controllers/
-        │   └── (controller).ts
-        ├── components/
-        │   └── (component).tsx
-        ├── interfaces/
-        │   └── (interface).ts
-        └── enumerators/
-            └── (enumerator).ts
+└── resources/
+    ├── application/
+    │   ├── views/
+    │   │   └── (view).tsx
+    │   ├── utils/
+    │   │   └── (util).ts
+    │   ├── routes/
+    │   │   └── (route).ts
+    │   ├── helpers/
+    │   │   └── (helper).ts
+    │   ├── entities/
+    │   │   └── (entity).ts
+    │   ├── controllers/
+    │   │   └── (controller).ts
+    │   ├── components/
+    │   │   └── (component).tsx
+    │   ├── interfaces/
+    │   │   └── (interface).ts
+    │   └── enumerators/
+    │       └── (enumerator).ts
+    ├── build.ts
+    ├── package.json
+    ├── tsconfig.json
+    ├── node_modules/
+    ├── rollup.config.js
+    └── tsconfig.build.json
 
 ## Output Format
 

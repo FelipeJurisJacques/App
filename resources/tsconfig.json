@@ -41,10 +41,6 @@
     "jsxFactory": "HyperTextMarkupLanguage.create",
     "jsxFragmentFactory": "HyperTextMarkupLanguage.Fragment"
   },
-  // "include": [
-  //   "**/*.ts",
-  //   "**/*.tsx"
-  // ],
   "include": [
     "**/*.ts",
     "**/*.tsx"

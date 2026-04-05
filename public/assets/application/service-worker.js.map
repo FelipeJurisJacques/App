@@ -1,1 +1,1 @@
-{"version":3,"file":"service-worker.js","sources":["../../../source/application/service-worker.ts"],"sourcesContent":[null],"names":[],"mappings":"AAAA,OAAO,CAAC,GAAG,CAAC,uBAAuB,CAAC"}
+{"version":3,"file":"service-worker.js","sources":["../../../application/service-worker.ts"],"sourcesContent":[null],"names":[],"mappings":"AAAA,OAAO,CAAC,GAAG,CAAC,uBAAuB,CAAC"}

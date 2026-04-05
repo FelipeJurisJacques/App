@@ -1,7 +1,7 @@
 export default abstract class View extends HTMLElement {
     protected readonly shadow: ShadowRoot
 
-    public abstract render(): Element
+    public abstract render(): Element[]
 
     public constructor(opened: boolean = false) {
         super()
@@ -13,7 +13,7 @@ export default abstract class View extends HTMLElement {
     public adoptedCallback(): void { }
 
     public connectedCallback(): void {
-        this.shadow.append(this.render())
+        this.shadow.append(...this.render())
     }
 
     public disconnectedCallback(): void {

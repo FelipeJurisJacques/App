@@ -16,11 +16,6 @@ services:
     working_dir: /workspace/
     container_name: application_node_container
     volumes:
+      - ../resources/:/workspace/
       - ../data/:/root/.npm/_logs/
-      - ../source/:/workspace/source/
       - ../public/:/workspace/public/
-      - ../data/node_modules/:/workspace/node_modules/
-      - ../source/application/package.json:/workspace/package.json
-      - ../source/application/tsconfig.json:/workspace/tsconfig.json
-      - ../source/application/rollup.config.js:/workspace/rollup.config.js
-      - ../source/application/tsconfig.build.json:/workspace/tsconfig.build.json

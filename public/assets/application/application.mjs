@@ -33,7 +33,7 @@ class View extends HTMLElement {
     }
     adoptedCallback() { }
     connectedCallback() {
-        this.shadow.append(this.render());
+        this.shadow.append(...this.render());
     }
     disconnectedCallback() {
         this.shadow.innerHTML = '';
@@ -44,10 +44,20 @@ class View extends HTMLElement {
     }
 }
 
+var Stylesheet = "div.content {\r\n    left: 50%;\r\n    top: 15px;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n* {\r\n    z-index: 0;\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n}\r\n\r\ndiv.bacground {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 50px;\r\n    position: fixed;\r\n    overflow: hidden;\r\n    background-color: #071F1F;\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground {\r\n    background-color: #071F1F;\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground::before {\r\n    inset: 0;\r\n    content: '';\r\n    position: absolute;\r\n    pointer-events: none;\r\n    background:\r\n        repeating-linear-gradient(0deg,\r\n            #062627 0px,\r\n            #062627 1px,\r\n            transparent 1px,\r\n            transparent 3px);\r\n}";
+
 class Main extends View {
     render() {
-        return (HyperTextMarkupLanguage.create("div", null,
-            HyperTextMarkupLanguage.create("h1", null, "Main")));
+        const sheet = new CSSStyleSheet();
+        sheet.replace(Stylesheet);
+        this.shadow.adoptedStyleSheets = [
+            sheet,
+        ];
+        return [
+            HyperTextMarkupLanguage.create("div", { class: "content" },
+                HyperTextMarkupLanguage.create("slot", null)),
+            HyperTextMarkupLanguage.create("div", { class: "bacground" })
+        ];
     }
 }
 

@@ -29,5 +29,10 @@ declare global {
         }
         interface Element extends globalThis.Element { }
     }
-    const HyperTextMarkupLanguage: any;
+    const HyperTextMarkupLanguage: any
+}
+
+declare module '*.css' {
+    const content: string
+    export default content
 }

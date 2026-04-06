@@ -17,7 +17,7 @@
             "name": "COMPILAR",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_node_container npx rollup -c"
+            "command": "docker exec -it application_node_container cd resources && npx rollup -c"
         }
     ]
 }

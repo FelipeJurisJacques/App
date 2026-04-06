@@ -20,7 +20,7 @@ const commonPlugins = [
   resolve(),
   commonjs(),
   inject({
-    'HyperTextMarkupLanguage': ['/workspace/application/dls/HyperTextMarkupLanguage', 'HyperTextMarkupLanguage']
+    'HyperTextMarkupLanguage': ['/workspace/resources/application/dls/HyperTextMarkupLanguage', 'HyperTextMarkupLanguage']
   }),
   typescript({
     tsconfig: './tsconfig.build.json'
@@ -32,7 +32,7 @@ export default [
   {
     input: 'application/index.ts',
     output: {
-      file: 'public/assets/application/application.mjs',
+      file: '/workspace/public/assets/application/application.mjs',
       format: 'esm',
       sourcemap: true
     },
@@ -43,7 +43,7 @@ export default [
   {
     input: 'application/service-worker.ts',
     output: {
-      file: 'public/assets/application/service-worker.js',
+      file: '/workspace/public/assets/application/service-worker.js',
       format: 'esm',
       sourcemap: true
     },

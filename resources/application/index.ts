@@ -1,6 +1,4 @@
-import Main from './views/main'
-
-window.customElements.define('view-main', Main)
+import * from './views/main'
 
 window.document.body.insertAdjacentHTML(
     'beforeend',

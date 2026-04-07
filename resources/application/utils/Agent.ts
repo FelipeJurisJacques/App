@@ -1,5 +1,4 @@
-// @ts-ignore
-import * as THREE from "../libs/three/three.module.js"
+import * as THREE from 'three'
 
 export default class Agent {
     private n: number
@@ -82,12 +81,12 @@ export default class Agent {
         return this.scene
     }
 
-    public animate() {
+    public animate(): void {
         this.animateWave()
         this.delta += (this.intensity - this.delta) * 0.2
     }
 
-    public speak(message: string) {
+    public speak(message: string): void {
         const speak = new SpeechSynthesisUtterance(message)
         speak.rate = 2
         speak.pitch = 1
@@ -100,7 +99,7 @@ export default class Agent {
         )
     }
 
-    private speaking(message: string, index: number, rate: number) {
+    private speaking(message: string, index: number, rate: number): void {
         let time = rate
         const char = message.at(index)
         if (char === ' ') {
@@ -135,7 +134,7 @@ export default class Agent {
         }
     }
 
-    private vertical(position: any, indexes: number[], angle: number) {
+    private vertical(position: any, indexes: number[], angle: number): void {
         const vertex = new THREE.Vector3()
         let i = 0
         for (let index of indexes) {
@@ -150,7 +149,7 @@ export default class Agent {
         }
     }
 
-    private animateWave() {
+    private animateWave(): void {
         if (this.delta > 0.1) {
             this.left -= this.delta * 2.0
             this.right -= this.delta * 0.4
@@ -177,7 +176,7 @@ export default class Agent {
         position.needsUpdate = true
     }
 
-    private wave(y: number) {
+    private wave(y: number): number {
         const angle = Math.PI / 2
         const external = this.fourierSeries(this.left, this.l1)
         const internal = this.fourierSeries(this.right, this.l2)
@@ -189,7 +188,7 @@ export default class Agent {
         return value
     }
 
-    private fourierSeries(x: number, l: number) {
+    private fourierSeries(x: number, l: number): number {
         const amp = 0.1 + this.delta * 0.1
         if (x % this.l1 === 0) {
             this.n = Math.floor(Math.random() * 3) + 1

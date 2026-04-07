@@ -1,4 +1,6 @@
 import View from './view'
+import * as THREE from 'three'
+import Agent from '../utils/Agent'
 import Stylesheet from '../../stylesheets/main.css'
 import CustomShape from '../components/CustomShape'
 
@@ -10,6 +12,7 @@ export default class Main extends View {
             sheet,
         ]
         return [
+            <canvas id="agent-canvas"></canvas>,
             <custom-shape>
                 <p class="top">
                     00:00:00
@@ -19,6 +22,40 @@ export default class Main extends View {
     }
 
     public handler(): void {
+        const canvas = this.shadow.querySelector('#agent-canvas') as HTMLCanvasElement
+        if (canvas) {
+            const renderer = new THREE.WebGLRenderer({
+                canvas,
+                alpha: true,
+                antialias: true
+            })
+            renderer.setSize(window.innerWidth, window.innerHeight)
+            renderer.setPixelRatio(window.devicePixelRatio)
+
+            const camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            )
+            camera.position.z = 2
+
+            const agent = new Agent()
+
+            const animate = () => {
+                requestAnimationFrame(animate)
+                agent.animate()
+                renderer.render(agent.Scene, camera)
+            }
+            animate()
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight
+                camera.updateProjectionMatrix()
+                renderer.setSize(window.innerWidth, window.innerHeight)
+            })
+        }
+
         const shape = this.shadow.querySelector('custom-shape') as CustomShape
         if (shape) {
 

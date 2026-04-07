@@ -1,4 +1,4 @@
-import Agent from '../helpers/agent'
+import Agent from '../utils/Agent'
 import Theread from '../helpers/theread'
 import View from '../../../engine/utils/view'
 // @ts-ignore

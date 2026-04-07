@@ -1,4 +1,5 @@
-import * from './views/main'
+import './views/main'
+import './components/CustomShape'
 
 window.document.body.insertAdjacentHTML(
     'beforeend',

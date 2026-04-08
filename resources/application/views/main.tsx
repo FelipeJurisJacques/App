@@ -38,7 +38,7 @@ export default class Main extends View {
                 0.1,
                 1000
             )
-            camera.position.z = 2
+            camera.position.z = 1
 
             const agent = new Agent()
 
@@ -48,6 +48,8 @@ export default class Main extends View {
                 renderer.render(agent.Scene, camera)
             }
             animate()
+
+            agent.speak('Olá, como posso ajudar você hoje?')
 
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight

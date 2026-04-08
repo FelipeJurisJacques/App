@@ -14,7 +14,7 @@ export default class Agent {
     private points_depth: number
     private points_length: number
     private points_geometry: THREE.BufferGeometry
-    private ring_transforms: THREE.RingGeometry[]
+    private ring_transforms: THREE.Points[]
 
     public constructor() {
         this.ray = 0.5
@@ -33,6 +33,7 @@ export default class Agent {
         this.ring_transforms = []
 
         const gridHelper = new THREE.GridHelper(10, 10)
+        gridHelper.rotation.x = Math.PI / 2
         this.scene.add(gridHelper)
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 5)
@@ -63,16 +64,17 @@ export default class Agent {
         const ring_geometry = new THREE.RingGeometry(
             0.3,
             0.4,
-            32,
-            1,
+            64,
+            10,
             Math.PI / 2,
-            Math.PI
+            Math.PI * 2
         )
-        const ring_material = new THREE.MeshBasicMaterial({
+        const ring_material = new THREE.PointsMaterial({
             color: 0x00ff00,
-            side: THREE.DoubleSide
+            size: 0.005,
+            sizeAttenuation: true
         })
-        const ring = new THREE.Mesh(ring_geometry, ring_material)
+        const ring = new THREE.Points(ring_geometry, ring_material)
         this.ring_transforms.push(ring)
         this.scene.add(ring)
     }
@@ -82,7 +84,21 @@ export default class Agent {
     }
 
     public animate(): void {
+        const startLeft = this.left
+        const startRight = this.right
+
         this.animateWave()
+
+        const endLeft = this.left
+        const endRight = this.right
+
+        this.left = startLeft
+        this.right = startRight
+        this.animateRing()
+
+        this.left = endLeft
+        this.right = endRight
+
         this.delta += (this.intensity - this.delta) * 0.2
     }
 
@@ -134,16 +150,55 @@ export default class Agent {
         }
     }
 
+    private animateRing(): void {
+        const ring = this.ring_transforms[0]
+        if (!ring) return
+
+        const position = ring.geometry.attributes.position
+        const segments = 64
+        const layers = 11 // phiSegments + 1
+        
+        const startLeft = this.left
+        const startRight = this.right
+        const columns = this.points_length / this.points_depth
+
+        for (let j = 0; j <= segments; j++) {
+            const angle = Math.PI / 2 + (j / segments) * Math.PI * 2
+            const colOffset = (j / segments) * columns
+            const curLeft = startLeft - colOffset
+            const curRight = startRight + colOffset
+            
+            for (let l = 0; l < layers; l++) {
+                const index = l * (segments + 1) + j
+                const radius = 0.3 + (l / (layers - 1)) * 0.1
+                const offset = this.calculateWave(l * (this.points_depth / (layers - 1)), curLeft, curRight)
+                
+                position.setXY(index, Math.cos(angle) * offset * radius, Math.sin(angle) * offset * radius)
+            }
+        }
+        position.needsUpdate = true
+    }
+
+    private calculateWave(y: number, left: number, right: number): number {
+        const angle = Math.PI / 2
+        const external = this.fourierSeries(left, this.l1)
+        const internal = this.fourierSeries(right, this.l2)
+        const balance = y / this.points_depth
+        const sin = Math.sin(balance * angle)
+        const cos = Math.sin((1.0 - balance) * angle)
+        return (external * sin + internal * cos + 1.0)
+    }
+
     private vertical(position: any, indexes: number[], angle: number): void {
         const vertex = new THREE.Vector3()
         let i = 0
         for (let index of indexes) {
-            const offset = this.wave(i++)
+            const offset = this.calculateWave(i++, this.left, this.right)
             vertex.fromBufferAttribute(position, index)
             vertex.set(
                 Math.cos(angle) * offset * this.ray,
-                vertex.y,
                 Math.sin(angle) * offset * this.ray,
+                (i / this.points_depth) - 0.5,
             )
             position.setXYZ(index, vertex.x, vertex.y, vertex.z)
         }
@@ -176,17 +231,6 @@ export default class Agent {
         position.needsUpdate = true
     }
 
-    private wave(y: number): number {
-        const angle = Math.PI / 2
-        const external = this.fourierSeries(this.left, this.l1)
-        const internal = this.fourierSeries(this.right, this.l2)
-        let balance = y / this.points_depth
-        let sin = Math.sin(balance * angle)
-        let cos = Math.sin((1.0 - balance) * angle)
-        let value = external * sin + internal * cos
-        value += 1.0
-        return value
-    }
 
     private fourierSeries(x: number, l: number): number {
         const amp = 0.1 + this.delta * 0.1

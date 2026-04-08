@@ -53,6 +53,28 @@ function toCSS(element) {
     return css;
 }
 
+class View extends HTMLElement {
+    shadow;
+    constructor(opened = false) {
+        super();
+        this.shadow = this.attachShadow({
+            mode: opened ? 'open' : 'closed',
+        });
+    }
+    adoptedCallback() { }
+    connectedCallback() {
+        this.shadow.append(...this.render());
+        this.handler();
+    }
+    disconnectedCallback() {
+        this.shadow.innerHTML = '';
+    }
+    connectedMoveCallback() { }
+    attributeChangedCallback(name, old, value) {
+        window.console.log(name, old, value);
+    }
+}
+
 /**
  * @license
  * Copyright 2010-2023 Three.js Authors
@@ -31305,28 +31327,6 @@ if ( typeof window !== 'undefined' ) {
 
 }
 
-class View extends HTMLElement {
-    shadow;
-    constructor(opened = false) {
-        super();
-        this.shadow = this.attachShadow({
-            mode: opened ? 'open' : 'closed',
-        });
-    }
-    adoptedCallback() { }
-    connectedCallback() {
-        this.shadow.append(...this.render());
-        this.handler();
-    }
-    disconnectedCallback() {
-        this.shadow.innerHTML = '';
-    }
-    connectedMoveCallback() { }
-    attributeChangedCallback(name, old, value) {
-        window.console.log(name, old, value);
-    }
-}
-
 class Agent {
     n;
     l1;
@@ -31358,6 +31358,7 @@ class Agent {
         this.points_length = length;
         this.ring_transforms = [];
         const gridHelper = new GridHelper(10, 10);
+        gridHelper.rotation.x = Math.PI / 2;
         this.scene.add(gridHelper);
         const ambientLight = new AmbientLight(0xffffff, 5);
         this.scene.add(ambientLight);
@@ -31381,12 +31382,13 @@ class Agent {
         const points = new Points(geometry, material);
         this.scene.add(points);
         this.points_geometry = geometry;
-        const ring_geometry = new RingGeometry(0.3, 0.4, 32, 1, Math.PI / 2, Math.PI);
-        const ring_material = new MeshBasicMaterial({
+        const ring_geometry = new RingGeometry(0.3, 0.4, 64, 10, Math.PI / 2, Math.PI * 2);
+        const ring_material = new PointsMaterial({
             color: 0x00ff00,
-            side: DoubleSide
+            size: 0.005,
+            sizeAttenuation: true
         });
-        const ring = new Mesh(ring_geometry, ring_material);
+        const ring = new Points(ring_geometry, ring_material);
         this.ring_transforms.push(ring);
         this.scene.add(ring);
     }
@@ -31394,7 +31396,16 @@ class Agent {
         return this.scene;
     }
     animate() {
+        const startLeft = this.left;
+        const startRight = this.right;
         this.animateWave();
+        const endLeft = this.left;
+        const endRight = this.right;
+        this.left = startLeft;
+        this.right = startRight;
+        this.animateRing();
+        this.left = endLeft;
+        this.right = endRight;
         this.delta += (this.intensity - this.delta) * 0.2;
     }
     speak(message) {
@@ -31439,13 +31450,46 @@ class Agent {
             }, time);
         }
     }
+    animateRing() {
+        const ring = this.ring_transforms[0];
+        if (!ring)
+            return;
+        const position = ring.geometry.attributes.position;
+        const segments = 64;
+        const layers = 11; // phiSegments + 1
+        const startLeft = this.left;
+        const startRight = this.right;
+        const columns = this.points_length / this.points_depth;
+        for (let j = 0; j <= segments; j++) {
+            const angle = Math.PI / 2 + (j / segments) * Math.PI * 2;
+            const colOffset = (j / segments) * columns;
+            const curLeft = startLeft - colOffset;
+            const curRight = startRight + colOffset;
+            for (let l = 0; l < layers; l++) {
+                const index = l * (segments + 1) + j;
+                const radius = 0.3 + (l / (layers - 1)) * 0.1;
+                const offset = this.calculateWave(l * (this.points_depth / (layers - 1)), curLeft, curRight);
+                position.setXY(index, Math.cos(angle) * offset * radius, Math.sin(angle) * offset * radius);
+            }
+        }
+        position.needsUpdate = true;
+    }
+    calculateWave(y, left, right) {
+        const angle = Math.PI / 2;
+        const external = this.fourierSeries(left, this.l1);
+        const internal = this.fourierSeries(right, this.l2);
+        const balance = y / this.points_depth;
+        const sin = Math.sin(balance * angle);
+        const cos = Math.sin((1.0 - balance) * angle);
+        return (external * sin + internal * cos + 1.0);
+    }
     vertical(position, indexes, angle) {
         const vertex = new Vector3();
         let i = 0;
         for (let index of indexes) {
-            const offset = this.wave(i++);
+            const offset = this.calculateWave(i++, this.left, this.right);
             vertex.fromBufferAttribute(position, index);
-            vertex.set(Math.cos(angle) * offset * this.ray, vertex.y, Math.sin(angle) * offset * this.ray);
+            vertex.set(Math.cos(angle) * offset * this.ray, Math.sin(angle) * offset * this.ray, (i / this.points_depth) - 0.5);
             position.setXYZ(index, vertex.x, vertex.y, vertex.z);
         }
     }
@@ -31475,17 +31519,6 @@ class Agent {
             indexes.push(i);
         }
         position.needsUpdate = true;
-    }
-    wave(y) {
-        const angle = Math.PI / 2;
-        const external = this.fourierSeries(this.left, this.l1);
-        const internal = this.fourierSeries(this.right, this.l2);
-        let balance = y / this.points_depth;
-        let sin = Math.sin(balance * angle);
-        let cos = Math.sin((1.0 - balance) * angle);
-        let value = external * sin + internal * cos;
-        value += 1.0;
-        return value;
     }
     fourierSeries(x, l) {
         const amp = 0.1 + this.delta * 0.1;
@@ -31526,7 +31559,7 @@ class Main extends View {
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 2;
+            camera.position.z = 1;
             const agent = new Agent();
             const animate = () => {
                 requestAnimationFrame(animate);
@@ -31534,6 +31567,7 @@ class Main extends View {
                 renderer.render(agent.Scene, camera);
             };
             animate();
+            agent.speak('Olá, como posso ajudar você hoje?');
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();

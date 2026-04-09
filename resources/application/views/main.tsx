@@ -24,6 +24,7 @@ export default class Main extends View {
     public handler(): void {
         const canvas = this.shadow.querySelector('#agent-canvas') as HTMLCanvasElement
         if (canvas) {
+            const scene = new THREE.Scene()
             const renderer = new THREE.WebGLRenderer({
                 canvas,
                 alpha: true,
@@ -38,18 +39,18 @@ export default class Main extends View {
                 0.1,
                 1000
             )
-            camera.position.z = 1
+            camera.position.z = 5
 
-            const agent = new Agent()
+            const agent = new Agent(scene)
 
             const animate = () => {
                 requestAnimationFrame(animate)
                 agent.animate()
-                renderer.render(agent.Scene, camera)
+                renderer.render(scene, camera)
             }
             animate()
 
-            agent.speak('Olá, como posso ajudar você hoje?')
+            // agent.speak('Olá, como posso ajudar você hoje?')
 
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight

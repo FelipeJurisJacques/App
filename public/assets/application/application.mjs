@@ -30368,313 +30368,6 @@ class Scene extends Object3D {
 
 }
 
-class LineBasicMaterial extends Material {
-
-	constructor( parameters ) {
-
-		super();
-
-		this.isLineBasicMaterial = true;
-
-		this.type = 'LineBasicMaterial';
-
-		this.color = new Color( 0xffffff );
-
-		this.map = null;
-
-		this.linewidth = 1;
-		this.linecap = 'round';
-		this.linejoin = 'round';
-
-		this.fog = true;
-
-		this.setValues( parameters );
-
-	}
-
-
-	copy( source ) {
-
-		super.copy( source );
-
-		this.color.copy( source.color );
-
-		this.map = source.map;
-
-		this.linewidth = source.linewidth;
-		this.linecap = source.linecap;
-		this.linejoin = source.linejoin;
-
-		this.fog = source.fog;
-
-		return this;
-
-	}
-
-}
-
-const _start$1 = /*@__PURE__*/ new Vector3();
-const _end$1 = /*@__PURE__*/ new Vector3();
-const _inverseMatrix$1 = /*@__PURE__*/ new Matrix4();
-const _ray$1 = /*@__PURE__*/ new Ray();
-const _sphere$1 = /*@__PURE__*/ new Sphere();
-
-class Line extends Object3D {
-
-	constructor( geometry = new BufferGeometry(), material = new LineBasicMaterial() ) {
-
-		super();
-
-		this.isLine = true;
-
-		this.type = 'Line';
-
-		this.geometry = geometry;
-		this.material = material;
-
-		this.updateMorphTargets();
-
-	}
-
-	copy( source, recursive ) {
-
-		super.copy( source, recursive );
-
-		this.material = Array.isArray( source.material ) ? source.material.slice() : source.material;
-		this.geometry = source.geometry;
-
-		return this;
-
-	}
-
-	computeLineDistances() {
-
-		const geometry = this.geometry;
-
-		// we assume non-indexed geometry
-
-		if ( geometry.index === null ) {
-
-			const positionAttribute = geometry.attributes.position;
-			const lineDistances = [ 0 ];
-
-			for ( let i = 1, l = positionAttribute.count; i < l; i ++ ) {
-
-				_start$1.fromBufferAttribute( positionAttribute, i - 1 );
-				_end$1.fromBufferAttribute( positionAttribute, i );
-
-				lineDistances[ i ] = lineDistances[ i - 1 ];
-				lineDistances[ i ] += _start$1.distanceTo( _end$1 );
-
-			}
-
-			geometry.setAttribute( 'lineDistance', new Float32BufferAttribute( lineDistances, 1 ) );
-
-		} else {
-
-			console.warn( 'THREE.Line.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.' );
-
-		}
-
-		return this;
-
-	}
-
-	raycast( raycaster, intersects ) {
-
-		const geometry = this.geometry;
-		const matrixWorld = this.matrixWorld;
-		const threshold = raycaster.params.Line.threshold;
-		const drawRange = geometry.drawRange;
-
-		// Checking boundingSphere distance to ray
-
-		if ( geometry.boundingSphere === null ) geometry.computeBoundingSphere();
-
-		_sphere$1.copy( geometry.boundingSphere );
-		_sphere$1.applyMatrix4( matrixWorld );
-		_sphere$1.radius += threshold;
-
-		if ( raycaster.ray.intersectsSphere( _sphere$1 ) === false ) return;
-
-		//
-
-		_inverseMatrix$1.copy( matrixWorld ).invert();
-		_ray$1.copy( raycaster.ray ).applyMatrix4( _inverseMatrix$1 );
-
-		const localThreshold = threshold / ( ( this.scale.x + this.scale.y + this.scale.z ) / 3 );
-		const localThresholdSq = localThreshold * localThreshold;
-
-		const vStart = new Vector3();
-		const vEnd = new Vector3();
-		const interSegment = new Vector3();
-		const interRay = new Vector3();
-		const step = this.isLineSegments ? 2 : 1;
-
-		const index = geometry.index;
-		const attributes = geometry.attributes;
-		const positionAttribute = attributes.position;
-
-		if ( index !== null ) {
-
-			const start = Math.max( 0, drawRange.start );
-			const end = Math.min( index.count, ( drawRange.start + drawRange.count ) );
-
-			for ( let i = start, l = end - 1; i < l; i += step ) {
-
-				const a = index.getX( i );
-				const b = index.getX( i + 1 );
-
-				vStart.fromBufferAttribute( positionAttribute, a );
-				vEnd.fromBufferAttribute( positionAttribute, b );
-
-				const distSq = _ray$1.distanceSqToSegment( vStart, vEnd, interRay, interSegment );
-
-				if ( distSq > localThresholdSq ) continue;
-
-				interRay.applyMatrix4( this.matrixWorld ); //Move back to world space for distance calculation
-
-				const distance = raycaster.ray.origin.distanceTo( interRay );
-
-				if ( distance < raycaster.near || distance > raycaster.far ) continue;
-
-				intersects.push( {
-
-					distance: distance,
-					// What do we want? intersection point on the ray or on the segment??
-					// point: raycaster.ray.at( distance ),
-					point: interSegment.clone().applyMatrix4( this.matrixWorld ),
-					index: i,
-					face: null,
-					faceIndex: null,
-					object: this
-
-				} );
-
-			}
-
-		} else {
-
-			const start = Math.max( 0, drawRange.start );
-			const end = Math.min( positionAttribute.count, ( drawRange.start + drawRange.count ) );
-
-			for ( let i = start, l = end - 1; i < l; i += step ) {
-
-				vStart.fromBufferAttribute( positionAttribute, i );
-				vEnd.fromBufferAttribute( positionAttribute, i + 1 );
-
-				const distSq = _ray$1.distanceSqToSegment( vStart, vEnd, interRay, interSegment );
-
-				if ( distSq > localThresholdSq ) continue;
-
-				interRay.applyMatrix4( this.matrixWorld ); //Move back to world space for distance calculation
-
-				const distance = raycaster.ray.origin.distanceTo( interRay );
-
-				if ( distance < raycaster.near || distance > raycaster.far ) continue;
-
-				intersects.push( {
-
-					distance: distance,
-					// What do we want? intersection point on the ray or on the segment??
-					// point: raycaster.ray.at( distance ),
-					point: interSegment.clone().applyMatrix4( this.matrixWorld ),
-					index: i,
-					face: null,
-					faceIndex: null,
-					object: this
-
-				} );
-
-			}
-
-		}
-
-	}
-
-	updateMorphTargets() {
-
-		const geometry = this.geometry;
-
-		const morphAttributes = geometry.morphAttributes;
-		const keys = Object.keys( morphAttributes );
-
-		if ( keys.length > 0 ) {
-
-			const morphAttribute = morphAttributes[ keys[ 0 ] ];
-
-			if ( morphAttribute !== undefined ) {
-
-				this.morphTargetInfluences = [];
-				this.morphTargetDictionary = {};
-
-				for ( let m = 0, ml = morphAttribute.length; m < ml; m ++ ) {
-
-					const name = morphAttribute[ m ].name || String( m );
-
-					this.morphTargetInfluences.push( 0 );
-					this.morphTargetDictionary[ name ] = m;
-
-				}
-
-			}
-
-		}
-
-	}
-
-}
-
-const _start = /*@__PURE__*/ new Vector3();
-const _end = /*@__PURE__*/ new Vector3();
-
-class LineSegments extends Line {
-
-	constructor( geometry, material ) {
-
-		super( geometry, material );
-
-		this.isLineSegments = true;
-
-		this.type = 'LineSegments';
-
-	}
-
-	computeLineDistances() {
-
-		const geometry = this.geometry;
-
-		// we assume non-indexed geometry
-
-		if ( geometry.index === null ) {
-
-			const positionAttribute = geometry.attributes.position;
-			const lineDistances = [];
-
-			for ( let i = 0, l = positionAttribute.count; i < l; i += 2 ) {
-
-				_start.fromBufferAttribute( positionAttribute, i );
-				_end.fromBufferAttribute( positionAttribute, i + 1 );
-
-				lineDistances[ i ] = ( i === 0 ) ? 0 : lineDistances[ i - 1 ];
-				lineDistances[ i + 1 ] = lineDistances[ i ] + _start.distanceTo( _end );
-
-			}
-
-			geometry.setAttribute( 'lineDistance', new Float32BufferAttribute( lineDistances, 1 ) );
-
-		} else {
-
-			console.warn( 'THREE.LineSegments.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.' );
-
-		}
-
-		return this;
-
-	}
-
-}
-
 class PointsMaterial extends Material {
 
 	constructor( parameters ) {
@@ -30878,433 +30571,6 @@ function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, inte
 
 }
 
-class RingGeometry extends BufferGeometry {
-
-	constructor( innerRadius = 0.5, outerRadius = 1, thetaSegments = 32, phiSegments = 1, thetaStart = 0, thetaLength = Math.PI * 2 ) {
-
-		super();
-
-		this.type = 'RingGeometry';
-
-		this.parameters = {
-			innerRadius: innerRadius,
-			outerRadius: outerRadius,
-			thetaSegments: thetaSegments,
-			phiSegments: phiSegments,
-			thetaStart: thetaStart,
-			thetaLength: thetaLength
-		};
-
-		thetaSegments = Math.max( 3, thetaSegments );
-		phiSegments = Math.max( 1, phiSegments );
-
-		// buffers
-
-		const indices = [];
-		const vertices = [];
-		const normals = [];
-		const uvs = [];
-
-		// some helper variables
-
-		let radius = innerRadius;
-		const radiusStep = ( ( outerRadius - innerRadius ) / phiSegments );
-		const vertex = new Vector3();
-		const uv = new Vector2();
-
-		// generate vertices, normals and uvs
-
-		for ( let j = 0; j <= phiSegments; j ++ ) {
-
-			for ( let i = 0; i <= thetaSegments; i ++ ) {
-
-				// values are generate from the inside of the ring to the outside
-
-				const segment = thetaStart + i / thetaSegments * thetaLength;
-
-				// vertex
-
-				vertex.x = radius * Math.cos( segment );
-				vertex.y = radius * Math.sin( segment );
-
-				vertices.push( vertex.x, vertex.y, vertex.z );
-
-				// normal
-
-				normals.push( 0, 0, 1 );
-
-				// uv
-
-				uv.x = ( vertex.x / outerRadius + 1 ) / 2;
-				uv.y = ( vertex.y / outerRadius + 1 ) / 2;
-
-				uvs.push( uv.x, uv.y );
-
-			}
-
-			// increase the radius for next row of vertices
-
-			radius += radiusStep;
-
-		}
-
-		// indices
-
-		for ( let j = 0; j < phiSegments; j ++ ) {
-
-			const thetaSegmentLevel = j * ( thetaSegments + 1 );
-
-			for ( let i = 0; i < thetaSegments; i ++ ) {
-
-				const segment = i + thetaSegmentLevel;
-
-				const a = segment;
-				const b = segment + thetaSegments + 1;
-				const c = segment + thetaSegments + 2;
-				const d = segment + 1;
-
-				// faces
-
-				indices.push( a, b, d );
-				indices.push( b, c, d );
-
-			}
-
-		}
-
-		// build geometry
-
-		this.setIndex( indices );
-		this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
-		this.setAttribute( 'normal', new Float32BufferAttribute( normals, 3 ) );
-		this.setAttribute( 'uv', new Float32BufferAttribute( uvs, 2 ) );
-
-	}
-
-	copy( source ) {
-
-		super.copy( source );
-
-		this.parameters = Object.assign( {}, source.parameters );
-
-		return this;
-
-	}
-
-	static fromJSON( data ) {
-
-		return new RingGeometry( data.innerRadius, data.outerRadius, data.thetaSegments, data.phiSegments, data.thetaStart, data.thetaLength );
-
-	}
-
-}
-
-class Light extends Object3D {
-
-	constructor( color, intensity = 1 ) {
-
-		super();
-
-		this.isLight = true;
-
-		this.type = 'Light';
-
-		this.color = new Color( color );
-		this.intensity = intensity;
-
-	}
-
-	dispose() {
-
-		// Empty here in base class; some subclasses override.
-
-	}
-
-	copy( source, recursive ) {
-
-		super.copy( source, recursive );
-
-		this.color.copy( source.color );
-		this.intensity = source.intensity;
-
-		return this;
-
-	}
-
-	toJSON( meta ) {
-
-		const data = super.toJSON( meta );
-
-		data.object.color = this.color.getHex();
-		data.object.intensity = this.intensity;
-
-		if ( this.groundColor !== undefined ) data.object.groundColor = this.groundColor.getHex();
-
-		if ( this.distance !== undefined ) data.object.distance = this.distance;
-		if ( this.angle !== undefined ) data.object.angle = this.angle;
-		if ( this.decay !== undefined ) data.object.decay = this.decay;
-		if ( this.penumbra !== undefined ) data.object.penumbra = this.penumbra;
-
-		if ( this.shadow !== undefined ) data.object.shadow = this.shadow.toJSON();
-
-		return data;
-
-	}
-
-}
-
-const _projScreenMatrix$1 = /*@__PURE__*/ new Matrix4();
-const _lightPositionWorld$1 = /*@__PURE__*/ new Vector3();
-const _lookTarget$1 = /*@__PURE__*/ new Vector3();
-
-class LightShadow {
-
-	constructor( camera ) {
-
-		this.camera = camera;
-
-		this.bias = 0;
-		this.normalBias = 0;
-		this.radius = 1;
-		this.blurSamples = 8;
-
-		this.mapSize = new Vector2( 512, 512 );
-
-		this.map = null;
-		this.mapPass = null;
-		this.matrix = new Matrix4();
-
-		this.autoUpdate = true;
-		this.needsUpdate = false;
-
-		this._frustum = new Frustum();
-		this._frameExtents = new Vector2( 1, 1 );
-
-		this._viewportCount = 1;
-
-		this._viewports = [
-
-			new Vector4( 0, 0, 1, 1 )
-
-		];
-
-	}
-
-	getViewportCount() {
-
-		return this._viewportCount;
-
-	}
-
-	getFrustum() {
-
-		return this._frustum;
-
-	}
-
-	updateMatrices( light ) {
-
-		const shadowCamera = this.camera;
-		const shadowMatrix = this.matrix;
-
-		_lightPositionWorld$1.setFromMatrixPosition( light.matrixWorld );
-		shadowCamera.position.copy( _lightPositionWorld$1 );
-
-		_lookTarget$1.setFromMatrixPosition( light.target.matrixWorld );
-		shadowCamera.lookAt( _lookTarget$1 );
-		shadowCamera.updateMatrixWorld();
-
-		_projScreenMatrix$1.multiplyMatrices( shadowCamera.projectionMatrix, shadowCamera.matrixWorldInverse );
-		this._frustum.setFromProjectionMatrix( _projScreenMatrix$1 );
-
-		shadowMatrix.set(
-			0.5, 0.0, 0.0, 0.5,
-			0.0, 0.5, 0.0, 0.5,
-			0.0, 0.0, 0.5, 0.5,
-			0.0, 0.0, 0.0, 1.0
-		);
-
-		shadowMatrix.multiply( _projScreenMatrix$1 );
-
-	}
-
-	getViewport( viewportIndex ) {
-
-		return this._viewports[ viewportIndex ];
-
-	}
-
-	getFrameExtents() {
-
-		return this._frameExtents;
-
-	}
-
-	dispose() {
-
-		if ( this.map ) {
-
-			this.map.dispose();
-
-		}
-
-		if ( this.mapPass ) {
-
-			this.mapPass.dispose();
-
-		}
-
-	}
-
-	copy( source ) {
-
-		this.camera = source.camera.clone();
-
-		this.bias = source.bias;
-		this.radius = source.radius;
-
-		this.mapSize.copy( source.mapSize );
-
-		return this;
-
-	}
-
-	clone() {
-
-		return new this.constructor().copy( this );
-
-	}
-
-	toJSON() {
-
-		const object = {};
-
-		if ( this.bias !== 0 ) object.bias = this.bias;
-		if ( this.normalBias !== 0 ) object.normalBias = this.normalBias;
-		if ( this.radius !== 1 ) object.radius = this.radius;
-		if ( this.mapSize.x !== 512 || this.mapSize.y !== 512 ) object.mapSize = this.mapSize.toArray();
-
-		object.camera = this.camera.toJSON( false ).object;
-		delete object.camera.matrix;
-
-		return object;
-
-	}
-
-}
-
-class DirectionalLightShadow extends LightShadow {
-
-	constructor() {
-
-		super( new OrthographicCamera( -5, 5, 5, -5, 0.5, 500 ) );
-
-		this.isDirectionalLightShadow = true;
-
-	}
-
-}
-
-class DirectionalLight extends Light {
-
-	constructor( color, intensity ) {
-
-		super( color, intensity );
-
-		this.isDirectionalLight = true;
-
-		this.type = 'DirectionalLight';
-
-		this.position.copy( Object3D.DEFAULT_UP );
-		this.updateMatrix();
-
-		this.target = new Object3D();
-
-		this.shadow = new DirectionalLightShadow();
-
-	}
-
-	dispose() {
-
-		this.shadow.dispose();
-
-	}
-
-	copy( source ) {
-
-		super.copy( source );
-
-		this.target = source.target.clone();
-		this.shadow = source.shadow.clone();
-
-		return this;
-
-	}
-
-}
-
-class AmbientLight extends Light {
-
-	constructor( color, intensity ) {
-
-		super( color, intensity );
-
-		this.isAmbientLight = true;
-
-		this.type = 'AmbientLight';
-
-	}
-
-}
-
-class GridHelper extends LineSegments {
-
-	constructor( size = 10, divisions = 10, color1 = 0x444444, color2 = 0x888888 ) {
-
-		color1 = new Color( color1 );
-		color2 = new Color( color2 );
-
-		const center = divisions / 2;
-		const step = size / divisions;
-		const halfSize = size / 2;
-
-		const vertices = [], colors = [];
-
-		for ( let i = 0, j = 0, k = - halfSize; i <= divisions; i ++, k += step ) {
-
-			vertices.push( - halfSize, 0, k, halfSize, 0, k );
-			vertices.push( k, 0, - halfSize, k, 0, halfSize );
-
-			const color = i === center ? color1 : color2;
-
-			color.toArray( colors, j ); j += 3;
-			color.toArray( colors, j ); j += 3;
-			color.toArray( colors, j ); j += 3;
-			color.toArray( colors, j ); j += 3;
-
-		}
-
-		const geometry = new BufferGeometry();
-		geometry.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
-		geometry.setAttribute( 'color', new Float32BufferAttribute( colors, 3 ) );
-
-		const material = new LineBasicMaterial( { vertexColors: true, toneMapped: false } );
-
-		super( geometry, material );
-
-		this.type = 'GridHelper';
-
-	}
-
-	dispose() {
-
-		this.geometry.dispose();
-		this.material.dispose();
-
-	}
-
-}
-
 if ( typeof __THREE_DEVTOOLS__ !== 'undefined' ) {
 
 	__THREE_DEVTOOLS__.dispatchEvent( new CustomEvent( 'register', { detail: {
@@ -31327,86 +30593,519 @@ if ( typeof window !== 'undefined' ) {
 
 }
 
+// Ported from Stefan Gustavson's java implementation
+// http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
+// Read Stefan's excellent paper for details on how this code works.
+//
+// Sean McCullough banksean@gmail.com
+//
+// Added 4D noise
+
+/**
+ * You can pass in a random number generator object if you like.
+ * It is assumed to have a random() method.
+ */
+class SimplexNoise {
+
+	constructor( r = Math ) {
+
+		this.grad3 = [[ 1, 1, 0 ], [ -1, 1, 0 ], [ 1, -1, 0 ], [ -1, -1, 0 ],
+			[ 1, 0, 1 ], [ -1, 0, 1 ], [ 1, 0, -1 ], [ -1, 0, -1 ],
+			[ 0, 1, 1 ], [ 0, -1, 1 ], [ 0, 1, -1 ], [ 0, -1, -1 ]];
+
+		this.grad4 = [[ 0, 1, 1, 1 ], [ 0, 1, 1, -1 ], [ 0, 1, -1, 1 ], [ 0, 1, -1, -1 ],
+			[ 0, -1, 1, 1 ], [ 0, -1, 1, -1 ], [ 0, -1, -1, 1 ], [ 0, -1, -1, -1 ],
+			[ 1, 0, 1, 1 ], [ 1, 0, 1, -1 ], [ 1, 0, -1, 1 ], [ 1, 0, -1, -1 ],
+			[ -1, 0, 1, 1 ], [ -1, 0, 1, -1 ], [ -1, 0, -1, 1 ], [ -1, 0, -1, -1 ],
+			[ 1, 1, 0, 1 ], [ 1, 1, 0, -1 ], [ 1, -1, 0, 1 ], [ 1, -1, 0, -1 ],
+			[ -1, 1, 0, 1 ], [ -1, 1, 0, -1 ], [ -1, -1, 0, 1 ], [ -1, -1, 0, -1 ],
+			[ 1, 1, 1, 0 ], [ 1, 1, -1, 0 ], [ 1, -1, 1, 0 ], [ 1, -1, -1, 0 ],
+			[ -1, 1, 1, 0 ], [ -1, 1, -1, 0 ], [ -1, -1, 1, 0 ], [ -1, -1, -1, 0 ]];
+
+		this.p = [];
+
+		for ( let i = 0; i < 256; i ++ ) {
+
+			this.p[ i ] = Math.floor( r.random() * 256 );
+
+		}
+
+		// To remove the need for index wrapping, double the permutation table length
+		this.perm = [];
+
+		for ( let i = 0; i < 512; i ++ ) {
+
+			this.perm[ i ] = this.p[ i & 255 ];
+
+		}
+
+		// A lookup table to traverse the simplex around a given point in 4D.
+		// Details can be found where this table is used, in the 4D noise method.
+		this.simplex = [
+			[ 0, 1, 2, 3 ], [ 0, 1, 3, 2 ], [ 0, 0, 0, 0 ], [ 0, 2, 3, 1 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 1, 2, 3, 0 ],
+			[ 0, 2, 1, 3 ], [ 0, 0, 0, 0 ], [ 0, 3, 1, 2 ], [ 0, 3, 2, 1 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 1, 3, 2, 0 ],
+			[ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ],
+			[ 1, 2, 0, 3 ], [ 0, 0, 0, 0 ], [ 1, 3, 0, 2 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 2, 3, 0, 1 ], [ 2, 3, 1, 0 ],
+			[ 1, 0, 2, 3 ], [ 1, 0, 3, 2 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 2, 0, 3, 1 ], [ 0, 0, 0, 0 ], [ 2, 1, 3, 0 ],
+			[ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ],
+			[ 2, 0, 1, 3 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 3, 0, 1, 2 ], [ 3, 0, 2, 1 ], [ 0, 0, 0, 0 ], [ 3, 1, 2, 0 ],
+			[ 2, 1, 0, 3 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 3, 1, 0, 2 ], [ 0, 0, 0, 0 ], [ 3, 2, 0, 1 ], [ 3, 2, 1, 0 ]];
+
+	}
+
+	dot( g, x, y ) {
+
+		return g[ 0 ] * x + g[ 1 ] * y;
+
+	}
+
+	dot3( g, x, y, z ) {
+
+		return g[ 0 ] * x + g[ 1 ] * y + g[ 2 ] * z;
+
+	}
+
+	dot4( g, x, y, z, w ) {
+
+		return g[ 0 ] * x + g[ 1 ] * y + g[ 2 ] * z + g[ 3 ] * w;
+
+	}
+
+	noise( xin, yin ) {
+
+		let n0; // Noise contributions from the three corners
+		let n1;
+		let n2;
+		// Skew the input space to determine which simplex cell we're in
+		const F2 = 0.5 * ( Math.sqrt( 3.0 ) - 1.0 );
+		const s = ( xin + yin ) * F2; // Hairy factor for 2D
+		const i = Math.floor( xin + s );
+		const j = Math.floor( yin + s );
+		const G2 = ( 3.0 - Math.sqrt( 3.0 ) ) / 6.0;
+		const t = ( i + j ) * G2;
+		const X0 = i - t; // Unskew the cell origin back to (x,y) space
+		const Y0 = j - t;
+		const x0 = xin - X0; // The x,y distances from the cell origin
+		const y0 = yin - Y0;
+
+		// For the 2D case, the simplex shape is an equilateral triangle.
+		// Determine which simplex we are in.
+		let i1; // Offsets for second (middle) corner of simplex in (i,j) coords
+
+		let j1;
+		if ( x0 > y0 ) {
+
+			i1 = 1; j1 = 0;
+
+			// lower triangle, XY order: (0,0)->(1,0)->(1,1)
+
+		}	else {
+
+			i1 = 0; j1 = 1;
+
+		} // upper triangle, YX order: (0,0)->(0,1)->(1,1)
+
+		// A step of (1,0) in (i,j) means a step of (1-c,-c) in (x,y), and
+		// a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
+		// c = (3-sqrt(3))/6
+		const x1 = x0 - i1 + G2; // Offsets for middle corner in (x,y) unskewed coords
+		const y1 = y0 - j1 + G2;
+		const x2 = x0 - 1.0 + 2.0 * G2; // Offsets for last corner in (x,y) unskewed coords
+		const y2 = y0 - 1.0 + 2.0 * G2;
+		// Work out the hashed gradient indices of the three simplex corners
+		const ii = i & 255;
+		const jj = j & 255;
+		const gi0 = this.perm[ ii + this.perm[ jj ] ] % 12;
+		const gi1 = this.perm[ ii + i1 + this.perm[ jj + j1 ] ] % 12;
+		const gi2 = this.perm[ ii + 1 + this.perm[ jj + 1 ] ] % 12;
+		// Calculate the contribution from the three corners
+		let t0 = 0.5 - x0 * x0 - y0 * y0;
+		if ( t0 < 0 ) n0 = 0.0;
+		else {
+
+			t0 *= t0;
+			n0 = t0 * t0 * this.dot( this.grad3[ gi0 ], x0, y0 ); // (x,y) of grad3 used for 2D gradient
+
+		}
+
+		let t1 = 0.5 - x1 * x1 - y1 * y1;
+		if ( t1 < 0 ) n1 = 0.0;
+		else {
+
+			t1 *= t1;
+			n1 = t1 * t1 * this.dot( this.grad3[ gi1 ], x1, y1 );
+
+		}
+
+		let t2 = 0.5 - x2 * x2 - y2 * y2;
+		if ( t2 < 0 ) n2 = 0.0;
+		else {
+
+			t2 *= t2;
+			n2 = t2 * t2 * this.dot( this.grad3[ gi2 ], x2, y2 );
+
+		}
+
+		// Add contributions from each corner to get the final noise value.
+		// The result is scaled to return values in the interval [-1,1].
+		return 70.0 * ( n0 + n1 + n2 );
+
+	}
+
+	// 3D simplex noise
+	noise3d( xin, yin, zin ) {
+
+		let n0; // Noise contributions from the four corners
+		let n1;
+		let n2;
+		let n3;
+		// Skew the input space to determine which simplex cell we're in
+		const F3 = 1.0 / 3.0;
+		const s = ( xin + yin + zin ) * F3; // Very nice and simple skew factor for 3D
+		const i = Math.floor( xin + s );
+		const j = Math.floor( yin + s );
+		const k = Math.floor( zin + s );
+		const G3 = 1.0 / 6.0; // Very nice and simple unskew factor, too
+		const t = ( i + j + k ) * G3;
+		const X0 = i - t; // Unskew the cell origin back to (x,y,z) space
+		const Y0 = j - t;
+		const Z0 = k - t;
+		const x0 = xin - X0; // The x,y,z distances from the cell origin
+		const y0 = yin - Y0;
+		const z0 = zin - Z0;
+
+		// For the 3D case, the simplex shape is a slightly irregular tetrahedron.
+		// Determine which simplex we are in.
+		let i1; // Offsets for second corner of simplex in (i,j,k) coords
+
+		let j1;
+		let k1;
+		let i2; // Offsets for third corner of simplex in (i,j,k) coords
+		let j2;
+		let k2;
+		if ( x0 >= y0 ) {
+
+			if ( y0 >= z0 ) {
+
+				i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0;
+
+				// X Y Z order
+
+			} else if ( x0 >= z0 ) {
+
+				i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 0; k2 = 1;
+
+				// X Z Y order
+
+			} else {
+
+				i1 = 0; j1 = 0; k1 = 1; i2 = 1; j2 = 0; k2 = 1;
+
+			} // Z X Y order
+
+		} else { // x0<y0
+
+			if ( y0 < z0 ) {
+
+				i1 = 0; j1 = 0; k1 = 1; i2 = 0; j2 = 1; k2 = 1;
+
+				// Z Y X order
+
+			} else if ( x0 < z0 ) {
+
+				i1 = 0; j1 = 1; k1 = 0; i2 = 0; j2 = 1; k2 = 1;
+
+				// Y Z X order
+
+			} else {
+
+				i1 = 0; j1 = 1; k1 = 0; i2 = 1; j2 = 1; k2 = 0;
+
+			} // Y X Z order
+
+		}
+
+		// A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z),
+		// a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and
+		// a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where
+		// c = 1/6.
+		const x1 = x0 - i1 + G3; // Offsets for second corner in (x,y,z) coords
+		const y1 = y0 - j1 + G3;
+		const z1 = z0 - k1 + G3;
+		const x2 = x0 - i2 + 2.0 * G3; // Offsets for third corner in (x,y,z) coords
+		const y2 = y0 - j2 + 2.0 * G3;
+		const z2 = z0 - k2 + 2.0 * G3;
+		const x3 = x0 - 1.0 + 3.0 * G3; // Offsets for last corner in (x,y,z) coords
+		const y3 = y0 - 1.0 + 3.0 * G3;
+		const z3 = z0 - 1.0 + 3.0 * G3;
+		// Work out the hashed gradient indices of the four simplex corners
+		const ii = i & 255;
+		const jj = j & 255;
+		const kk = k & 255;
+		const gi0 = this.perm[ ii + this.perm[ jj + this.perm[ kk ] ] ] % 12;
+		const gi1 = this.perm[ ii + i1 + this.perm[ jj + j1 + this.perm[ kk + k1 ] ] ] % 12;
+		const gi2 = this.perm[ ii + i2 + this.perm[ jj + j2 + this.perm[ kk + k2 ] ] ] % 12;
+		const gi3 = this.perm[ ii + 1 + this.perm[ jj + 1 + this.perm[ kk + 1 ] ] ] % 12;
+		// Calculate the contribution from the four corners
+		let t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
+		if ( t0 < 0 ) n0 = 0.0;
+		else {
+
+			t0 *= t0;
+			n0 = t0 * t0 * this.dot3( this.grad3[ gi0 ], x0, y0, z0 );
+
+		}
+
+		let t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
+		if ( t1 < 0 ) n1 = 0.0;
+		else {
+
+			t1 *= t1;
+			n1 = t1 * t1 * this.dot3( this.grad3[ gi1 ], x1, y1, z1 );
+
+		}
+
+		let t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
+		if ( t2 < 0 ) n2 = 0.0;
+		else {
+
+			t2 *= t2;
+			n2 = t2 * t2 * this.dot3( this.grad3[ gi2 ], x2, y2, z2 );
+
+		}
+
+		let t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
+		if ( t3 < 0 ) n3 = 0.0;
+		else {
+
+			t3 *= t3;
+			n3 = t3 * t3 * this.dot3( this.grad3[ gi3 ], x3, y3, z3 );
+
+		}
+
+		// Add contributions from each corner to get the final noise value.
+		// The result is scaled to stay just inside [-1,1]
+		return 32.0 * ( n0 + n1 + n2 + n3 );
+
+	}
+
+	// 4D simplex noise
+	noise4d( x, y, z, w ) {
+
+		// For faster and easier lookups
+		const grad4 = this.grad4;
+		const simplex = this.simplex;
+		const perm = this.perm;
+
+		// The skewing and unskewing factors are hairy again for the 4D case
+		const F4 = ( Math.sqrt( 5.0 ) - 1.0 ) / 4.0;
+		const G4 = ( 5.0 - Math.sqrt( 5.0 ) ) / 20.0;
+		let n0; // Noise contributions from the five corners
+		let n1;
+		let n2;
+		let n3;
+		let n4;
+		// Skew the (x,y,z,w) space to determine which cell of 24 simplices we're in
+		const s = ( x + y + z + w ) * F4; // Factor for 4D skewing
+		const i = Math.floor( x + s );
+		const j = Math.floor( y + s );
+		const k = Math.floor( z + s );
+		const l = Math.floor( w + s );
+		const t = ( i + j + k + l ) * G4; // Factor for 4D unskewing
+		const X0 = i - t; // Unskew the cell origin back to (x,y,z,w) space
+		const Y0 = j - t;
+		const Z0 = k - t;
+		const W0 = l - t;
+		const x0 = x - X0; // The x,y,z,w distances from the cell origin
+		const y0 = y - Y0;
+		const z0 = z - Z0;
+		const w0 = w - W0;
+
+		// For the 4D case, the simplex is a 4D shape I won't even try to describe.
+		// To find out which of the 24 possible simplices we're in, we need to
+		// determine the magnitude ordering of x0, y0, z0 and w0.
+		// The method below is a good way of finding the ordering of x,y,z,w and
+		// then find the correct traversal order for the simplex we’re in.
+		// First, six pair-wise comparisons are performed between each possible pair
+		// of the four coordinates, and the results are used to add up binary bits
+		// for an integer index.
+		const c1 = ( x0 > y0 ) ? 32 : 0;
+		const c2 = ( x0 > z0 ) ? 16 : 0;
+		const c3 = ( y0 > z0 ) ? 8 : 0;
+		const c4 = ( x0 > w0 ) ? 4 : 0;
+		const c5 = ( y0 > w0 ) ? 2 : 0;
+		const c6 = ( z0 > w0 ) ? 1 : 0;
+		const c = c1 + c2 + c3 + c4 + c5 + c6;
+
+		// simplex[c] is a 4-vector with the numbers 0, 1, 2 and 3 in some order.
+		// Many values of c will never occur, since e.g. x>y>z>w makes x<z, y<w and x<w
+		// impossible. Only the 24 indices which have non-zero entries make any sense.
+		// We use a thresholding to set the coordinates in turn from the largest magnitude.
+		// The number 3 in the "simplex" array is at the position of the largest coordinate.
+		const i1 = simplex[ c ][ 0 ] >= 3 ? 1 : 0;
+		const j1 = simplex[ c ][ 1 ] >= 3 ? 1 : 0;
+		const k1 = simplex[ c ][ 2 ] >= 3 ? 1 : 0;
+		const l1 = simplex[ c ][ 3 ] >= 3 ? 1 : 0;
+		// The number 2 in the "simplex" array is at the second largest coordinate.
+		const i2 = simplex[ c ][ 0 ] >= 2 ? 1 : 0;
+		const j2 = simplex[ c ][ 1 ] >= 2 ? 1 : 0;
+		const k2 = simplex[ c ][ 2 ] >= 2 ? 1 : 0;
+		const l2 = simplex[ c ][ 3 ] >= 2 ? 1 : 0;
+		// The number 1 in the "simplex" array is at the second smallest coordinate.
+		const i3 = simplex[ c ][ 0 ] >= 1 ? 1 : 0;
+		const j3 = simplex[ c ][ 1 ] >= 1 ? 1 : 0;
+		const k3 = simplex[ c ][ 2 ] >= 1 ? 1 : 0;
+		const l3 = simplex[ c ][ 3 ] >= 1 ? 1 : 0;
+		// The fifth corner has all coordinate offsets = 1, so no need to look that up.
+		const x1 = x0 - i1 + G4; // Offsets for second corner in (x,y,z,w) coords
+		const y1 = y0 - j1 + G4;
+		const z1 = z0 - k1 + G4;
+		const w1 = w0 - l1 + G4;
+		const x2 = x0 - i2 + 2.0 * G4; // Offsets for third corner in (x,y,z,w) coords
+		const y2 = y0 - j2 + 2.0 * G4;
+		const z2 = z0 - k2 + 2.0 * G4;
+		const w2 = w0 - l2 + 2.0 * G4;
+		const x3 = x0 - i3 + 3.0 * G4; // Offsets for fourth corner in (x,y,z,w) coords
+		const y3 = y0 - j3 + 3.0 * G4;
+		const z3 = z0 - k3 + 3.0 * G4;
+		const w3 = w0 - l3 + 3.0 * G4;
+		const x4 = x0 - 1.0 + 4.0 * G4; // Offsets for last corner in (x,y,z,w) coords
+		const y4 = y0 - 1.0 + 4.0 * G4;
+		const z4 = z0 - 1.0 + 4.0 * G4;
+		const w4 = w0 - 1.0 + 4.0 * G4;
+		// Work out the hashed gradient indices of the five simplex corners
+		const ii = i & 255;
+		const jj = j & 255;
+		const kk = k & 255;
+		const ll = l & 255;
+		const gi0 = perm[ ii + perm[ jj + perm[ kk + perm[ ll ] ] ] ] % 32;
+		const gi1 = perm[ ii + i1 + perm[ jj + j1 + perm[ kk + k1 + perm[ ll + l1 ] ] ] ] % 32;
+		const gi2 = perm[ ii + i2 + perm[ jj + j2 + perm[ kk + k2 + perm[ ll + l2 ] ] ] ] % 32;
+		const gi3 = perm[ ii + i3 + perm[ jj + j3 + perm[ kk + k3 + perm[ ll + l3 ] ] ] ] % 32;
+		const gi4 = perm[ ii + 1 + perm[ jj + 1 + perm[ kk + 1 + perm[ ll + 1 ] ] ] ] % 32;
+		// Calculate the contribution from the five corners
+		let t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0 - w0 * w0;
+		if ( t0 < 0 ) n0 = 0.0;
+		else {
+
+			t0 *= t0;
+			n0 = t0 * t0 * this.dot4( grad4[ gi0 ], x0, y0, z0, w0 );
+
+		}
+
+		let t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1 - w1 * w1;
+		if ( t1 < 0 ) n1 = 0.0;
+		else {
+
+			t1 *= t1;
+			n1 = t1 * t1 * this.dot4( grad4[ gi1 ], x1, y1, z1, w1 );
+
+		}
+
+		let t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2 - w2 * w2;
+		if ( t2 < 0 ) n2 = 0.0;
+		else {
+
+			t2 *= t2;
+			n2 = t2 * t2 * this.dot4( grad4[ gi2 ], x2, y2, z2, w2 );
+
+		}
+
+		let t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3 - w3 * w3;
+		if ( t3 < 0 ) n3 = 0.0;
+		else {
+
+			t3 *= t3;
+			n3 = t3 * t3 * this.dot4( grad4[ gi3 ], x3, y3, z3, w3 );
+
+		}
+
+		let t4 = 0.6 - x4 * x4 - y4 * y4 - z4 * z4 - w4 * w4;
+		if ( t4 < 0 ) n4 = 0.0;
+		else {
+
+			t4 *= t4;
+			n4 = t4 * t4 * this.dot4( grad4[ gi4 ], x4, y4, z4, w4 );
+
+		}
+
+		// Sum up and scale the result to cover the range [-1,1]
+		return 27.0 * ( n0 + n1 + n2 + n3 + n4 );
+
+	}
+
+}
+
 class Agent {
-    n;
-    l1;
-    l2;
-    ray;
-    left;
-    right;
-    delta;
-    scene;
-    offset;
-    intensity;
-    points_depth;
-    points_length;
-    points_geometry;
-    ring_transforms;
-    constructor() {
-        this.ray = 0.5;
-        const length = Math.round(512 * this.ray);
-        this.n = 1;
-        this.l1 = length / 5;
-        this.l2 = length / 7;
-        this.left = 0;
-        this.right = 0;
-        this.delta = 0.0;
-        this.scene = new Scene();
-        this.offset = 0.0;
-        this.intensity = 0.0;
-        this.points_depth = Math.round(16 * this.ray);
-        this.points_length = length;
-        this.ring_transforms = [];
-        const gridHelper = new GridHelper(10, 10);
-        gridHelper.rotation.x = Math.PI / 2;
-        this.scene.add(gridHelper);
-        const ambientLight = new AmbientLight(0xffffff, 5);
-        this.scene.add(ambientLight);
-        const directionalLight1 = new DirectionalLight(0xffffff, 5);
-        directionalLight1.position.set(1, 0, 1);
-        this.scene.add(directionalLight1);
-        const directionalLight2 = new DirectionalLight(0xffffff, 5);
-        directionalLight2.position.set(-1, 0, -1);
-        this.scene.add(directionalLight2);
-        const geometry = new BufferGeometry();
-        const material = new PointsMaterial({
-            color: 0xffffff,
-            size: 0.001 + Math.random() * 0.003,
-            sizeAttenuation: true
-        });
-        const vertices = [];
-        for (let i = 0; i < this.points_length * this.points_depth; i++) {
-            vertices.push(0.0, 0.0, 0.0);
+    numParticles;
+    particleSphere;
+    simplex;
+    radius;
+    basePositions;
+    constructor(scene) {
+        this.numParticles = 8000; // Milhares de partículas
+        this.simplex = new SimplexNoise();
+        this.radius = 2.0;
+        const sphereGeometry = new BufferGeometry();
+        const radius = this.radius;
+        const positions = new Float32Array(this.numParticles * 3);
+        this.basePositions = new Float32Array(this.numParticles * 3);
+        for (let i = 0; i < this.numParticles; i++) {
+            const i3 = i * 3;
+            // Geração de pontos aleatórios no volume da esfera (nuvem) em vez da casca com padrão
+            const r = radius * Math.cbrt(Math.random());
+            const theta = Math.random() * 2 * Math.PI;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const px = r * Math.sin(phi) * Math.cos(theta);
+            const py = r * Math.sin(phi) * Math.sin(theta);
+            const pz = r * Math.cos(phi);
+            // Guardamos a posição base para referenciar na animação
+            this.basePositions[i3 + 0] = px;
+            this.basePositions[i3 + 1] = py;
+            this.basePositions[i3 + 2] = pz;
+            positions[i3 + 0] = px;
+            positions[i3 + 1] = py;
+            positions[i3 + 2] = pz;
         }
-        geometry.setAttribute('position', new Float32BufferAttribute(vertices, 3));
-        const points = new Points(geometry, material);
-        this.scene.add(points);
-        this.points_geometry = geometry;
-        const ring_geometry = new RingGeometry(0.3, 0.4, 64, 10, Math.PI / 2, Math.PI * 2);
-        const ring_material = new PointsMaterial({
-            color: 0x00ff00,
-            size: 0.005,
-            sizeAttenuation: true
+        sphereGeometry.setAttribute('position', new BufferAttribute(positions, 3));
+        // Material Ciano Jarvis com transparência e brilho
+        const jarvisMaterial = new PointsMaterial({
+            color: 0x00ffff,
+            size: 0.03, // Aumentado para garantir visibilidade com a câmera mais distante
+            sizeAttenuation: true,
+            transparent: true, // Importante para o efeito de rastro
+            opacity: 0.6, // Mais translúcido devido à maior quantidade de partículas
+            blending: AdditiveBlending, // Ajuda os pontos que se sobrepõem a brilharem
         });
-        const ring = new Points(ring_geometry, ring_material);
-        this.ring_transforms.push(ring);
-        this.scene.add(ring);
-    }
-    get Scene() {
-        return this.scene;
+        this.particleSphere = new Points(sphereGeometry, jarvisMaterial);
+        this.particleSphere.position.set(0, 0, 0); // No centro para a câmera em Z = 5 capturar bem
+        scene.add(this.particleSphere);
     }
     animate() {
-        const startLeft = this.left;
-        const startRight = this.right;
-        this.animateWave();
-        const endLeft = this.left;
-        const endRight = this.right;
-        this.left = startLeft;
-        this.right = startRight;
-        this.animateRing();
-        this.left = endLeft;
-        this.right = endRight;
-        this.delta += (this.intensity - this.delta) * 0.2;
+        const time = Date.now() * 0.001;
+        const positionAttribute = this.particleSphere.geometry.getAttribute('position');
+        for (let i = 0; i < this.numParticles; i++) {
+            const i3 = i * 3;
+            // Lemos a coordenada base que foi gerada aleatoriamente
+            const bx = this.basePositions[i3 + 0];
+            const by = this.basePositions[i3 + 1];
+            const bz = this.basePositions[i3 + 2];
+            // Usando ruído 4D (espaço 3D + tempo) para movimento fluido da névoa
+            const noiseScale = 0.8;
+            const noiseFactor = 0.5;
+            // O deslocamento é aplicado baseado na própria posição no espaço
+            const offset = this.simplex.noise4d(bx * noiseScale, by * noiseScale, bz * noiseScale, time * 0.3) * noiseFactor;
+            // Queremos que a partícula transite de forma natural, espalhando-se a partir do centro
+            const length = Math.sqrt(bx * bx + by * by + bz * bz) || 1;
+            const nx = bx / length;
+            const ny = by / length;
+            const nz = bz / length;
+            const finalX = bx + nx * offset;
+            const finalY = by + ny * offset;
+            const finalZ = bz + nz * offset;
+            positionAttribute.setXYZ(i, finalX, finalY, finalZ);
+        }
+        positionAttribute.needsUpdate = true;
     }
     speak(message) {
         const speak = new SpeechSynthesisUtterance(message);
@@ -31414,122 +31113,6 @@ class Agent {
         speak.pitch = 1;
         speak.volume = 1;
         window.speechSynthesis.speak(speak);
-        this.speaking(message.toLocaleLowerCase(), 0, 100 / speak.rate);
-    }
-    speaking(message, index, rate) {
-        let time = rate;
-        const char = message.at(index);
-        if (char === ' ') {
-            this.intensity = 0.0;
-        }
-        else if (char === '.'
-            || char === '?'
-            || char === '!'
-            || char === ','
-            || char === ';'
-            || char === ':') {
-            time *= 2;
-            this.intensity = 0.0;
-        }
-        else if (char === 'a'
-            || char === 'e'
-            || char === 'i'
-            || char === 'o'
-            || char === 'u') {
-            this.intensity = 1.0;
-        }
-        else {
-            this.intensity = 0.5;
-        }
-        if (index > message.length) {
-            this.intensity = 0.0;
-        }
-        else {
-            setTimeout(() => {
-                this.speaking(message, index + 1, rate);
-            }, time);
-        }
-    }
-    animateRing() {
-        const ring = this.ring_transforms[0];
-        if (!ring)
-            return;
-        const position = ring.geometry.attributes.position;
-        const segments = 64;
-        const layers = 11; // phiSegments + 1
-        const startLeft = this.left;
-        const startRight = this.right;
-        const columns = this.points_length / this.points_depth;
-        for (let j = 0; j <= segments; j++) {
-            const angle = Math.PI / 2 + (j / segments) * Math.PI * 2;
-            const colOffset = (j / segments) * columns;
-            const curLeft = startLeft - colOffset;
-            const curRight = startRight + colOffset;
-            for (let l = 0; l < layers; l++) {
-                const index = l * (segments + 1) + j;
-                const radius = 0.3 + (l / (layers - 1)) * 0.1;
-                const offset = this.calculateWave(l * (this.points_depth / (layers - 1)), curLeft, curRight);
-                position.setXY(index, Math.cos(angle) * offset * radius, Math.sin(angle) * offset * radius);
-            }
-        }
-        position.needsUpdate = true;
-    }
-    calculateWave(y, left, right) {
-        const angle = Math.PI / 2;
-        const external = this.fourierSeries(left, this.l1);
-        const internal = this.fourierSeries(right, this.l2);
-        const balance = y / this.points_depth;
-        const sin = Math.sin(balance * angle);
-        const cos = Math.sin((1.0 - balance) * angle);
-        return (external * sin + internal * cos + 1.0);
-    }
-    vertical(position, indexes, angle) {
-        const vertex = new Vector3();
-        let i = 0;
-        for (let index of indexes) {
-            const offset = this.calculateWave(i++, this.left, this.right);
-            vertex.fromBufferAttribute(position, index);
-            vertex.set(Math.cos(angle) * offset * this.ray, Math.sin(angle) * offset * this.ray, (i / this.points_depth) - 0.5);
-            position.setXYZ(index, vertex.x, vertex.y, vertex.z);
-        }
-    }
-    animateWave() {
-        if (this.delta > 0.1) {
-            this.left -= this.delta * 2.0;
-            this.right -= this.delta * 0.4;
-        }
-        else {
-            this.left -= 0.1;
-            this.right -= 0.002;
-        }
-        let angle = 0.0;
-        let indexes = [];
-        this.offset += 0.05;
-        const delta = Math.PI * 2.0 / this.points_length;
-        const position = this.points_geometry.attributes.position;
-        const length = position.count;
-        for (let i = 0; i < length; i++) {
-            if (i % this.points_depth === 0) {
-                this.vertical(position, indexes, angle);
-                angle += delta;
-                indexes = [];
-                this.left -= 1.0;
-                this.right += 1.0;
-            }
-            indexes.push(i);
-        }
-        position.needsUpdate = true;
-    }
-    fourierSeries(x, l) {
-        const amp = 0.1 + this.delta * 0.1;
-        if (x % this.l1 === 0) {
-            this.n = Math.floor(Math.random() * 3) + 1;
-        }
-        let sum = 0;
-        for (let n = 1; n <= this.n; n++) {
-            sum += Math.sin(2 * Math.PI * n * x / l) / n;
-        }
-        return sum * amp + amp * this.n;
     }
 }
 
@@ -31551,6 +31134,7 @@ class Main extends View {
     handler() {
         const canvas = this.shadow.querySelector('#agent-canvas');
         if (canvas) {
+            const scene = new Scene();
             const renderer = new WebGLRenderer({
                 canvas,
                 alpha: true,
@@ -31559,15 +31143,15 @@ class Main extends View {
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 1;
-            const agent = new Agent();
+            camera.position.z = 5;
+            const agent = new Agent(scene);
             const animate = () => {
                 requestAnimationFrame(animate);
                 agent.animate();
-                renderer.render(agent.Scene, camera);
+                renderer.render(scene, camera);
             };
             animate();
-            agent.speak('Olá, como posso ajudar você hoje?');
+            // agent.speak('Olá, como posso ajudar você hoje?')
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();

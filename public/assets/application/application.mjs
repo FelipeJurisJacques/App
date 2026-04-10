@@ -30571,6 +30571,425 @@ function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, inte
 
 }
 
+class PolyhedronGeometry extends BufferGeometry {
+
+	constructor( vertices = [], indices = [], radius = 1, detail = 0 ) {
+
+		super();
+
+		this.type = 'PolyhedronGeometry';
+
+		this.parameters = {
+			vertices: vertices,
+			indices: indices,
+			radius: radius,
+			detail: detail
+		};
+
+		// default buffer data
+
+		const vertexBuffer = [];
+		const uvBuffer = [];
+
+		// the subdivision creates the vertex buffer data
+
+		subdivide( detail );
+
+		// all vertices should lie on a conceptual sphere with a given radius
+
+		applyRadius( radius );
+
+		// finally, create the uv data
+
+		generateUVs();
+
+		// build non-indexed geometry
+
+		this.setAttribute( 'position', new Float32BufferAttribute( vertexBuffer, 3 ) );
+		this.setAttribute( 'normal', new Float32BufferAttribute( vertexBuffer.slice(), 3 ) );
+		this.setAttribute( 'uv', new Float32BufferAttribute( uvBuffer, 2 ) );
+
+		if ( detail === 0 ) {
+
+			this.computeVertexNormals(); // flat normals
+
+		} else {
+
+			this.normalizeNormals(); // smooth normals
+
+		}
+
+		// helper functions
+
+		function subdivide( detail ) {
+
+			const a = new Vector3();
+			const b = new Vector3();
+			const c = new Vector3();
+
+			// iterate over all faces and apply a subdivision with the given detail value
+
+			for ( let i = 0; i < indices.length; i += 3 ) {
+
+				// get the vertices of the face
+
+				getVertexByIndex( indices[ i + 0 ], a );
+				getVertexByIndex( indices[ i + 1 ], b );
+				getVertexByIndex( indices[ i + 2 ], c );
+
+				// perform subdivision
+
+				subdivideFace( a, b, c, detail );
+
+			}
+
+		}
+
+		function subdivideFace( a, b, c, detail ) {
+
+			const cols = detail + 1;
+
+			// we use this multidimensional array as a data structure for creating the subdivision
+
+			const v = [];
+
+			// construct all of the vertices for this subdivision
+
+			for ( let i = 0; i <= cols; i ++ ) {
+
+				v[ i ] = [];
+
+				const aj = a.clone().lerp( c, i / cols );
+				const bj = b.clone().lerp( c, i / cols );
+
+				const rows = cols - i;
+
+				for ( let j = 0; j <= rows; j ++ ) {
+
+					if ( j === 0 && i === cols ) {
+
+						v[ i ][ j ] = aj;
+
+					} else {
+
+						v[ i ][ j ] = aj.clone().lerp( bj, j / rows );
+
+					}
+
+				}
+
+			}
+
+			// construct all of the faces
+
+			for ( let i = 0; i < cols; i ++ ) {
+
+				for ( let j = 0; j < 2 * ( cols - i ) - 1; j ++ ) {
+
+					const k = Math.floor( j / 2 );
+
+					if ( j % 2 === 0 ) {
+
+						pushVertex( v[ i ][ k + 1 ] );
+						pushVertex( v[ i + 1 ][ k ] );
+						pushVertex( v[ i ][ k ] );
+
+					} else {
+
+						pushVertex( v[ i ][ k + 1 ] );
+						pushVertex( v[ i + 1 ][ k + 1 ] );
+						pushVertex( v[ i + 1 ][ k ] );
+
+					}
+
+				}
+
+			}
+
+		}
+
+		function applyRadius( radius ) {
+
+			const vertex = new Vector3();
+
+			// iterate over the entire buffer and apply the radius to each vertex
+
+			for ( let i = 0; i < vertexBuffer.length; i += 3 ) {
+
+				vertex.x = vertexBuffer[ i + 0 ];
+				vertex.y = vertexBuffer[ i + 1 ];
+				vertex.z = vertexBuffer[ i + 2 ];
+
+				vertex.normalize().multiplyScalar( radius );
+
+				vertexBuffer[ i + 0 ] = vertex.x;
+				vertexBuffer[ i + 1 ] = vertex.y;
+				vertexBuffer[ i + 2 ] = vertex.z;
+
+			}
+
+		}
+
+		function generateUVs() {
+
+			const vertex = new Vector3();
+
+			for ( let i = 0; i < vertexBuffer.length; i += 3 ) {
+
+				vertex.x = vertexBuffer[ i + 0 ];
+				vertex.y = vertexBuffer[ i + 1 ];
+				vertex.z = vertexBuffer[ i + 2 ];
+
+				const u = azimuth( vertex ) / 2 / Math.PI + 0.5;
+				const v = inclination( vertex ) / Math.PI + 0.5;
+				uvBuffer.push( u, 1 - v );
+
+			}
+
+			correctUVs();
+
+			correctSeam();
+
+		}
+
+		function correctSeam() {
+
+			// handle case when face straddles the seam, see #3269
+
+			for ( let i = 0; i < uvBuffer.length; i += 6 ) {
+
+				// uv data of a single face
+
+				const x0 = uvBuffer[ i + 0 ];
+				const x1 = uvBuffer[ i + 2 ];
+				const x2 = uvBuffer[ i + 4 ];
+
+				const max = Math.max( x0, x1, x2 );
+				const min = Math.min( x0, x1, x2 );
+
+				// 0.9 is somewhat arbitrary
+
+				if ( max > 0.9 && min < 0.1 ) {
+
+					if ( x0 < 0.2 ) uvBuffer[ i + 0 ] += 1;
+					if ( x1 < 0.2 ) uvBuffer[ i + 2 ] += 1;
+					if ( x2 < 0.2 ) uvBuffer[ i + 4 ] += 1;
+
+				}
+
+			}
+
+		}
+
+		function pushVertex( vertex ) {
+
+			vertexBuffer.push( vertex.x, vertex.y, vertex.z );
+
+		}
+
+		function getVertexByIndex( index, vertex ) {
+
+			const stride = index * 3;
+
+			vertex.x = vertices[ stride + 0 ];
+			vertex.y = vertices[ stride + 1 ];
+			vertex.z = vertices[ stride + 2 ];
+
+		}
+
+		function correctUVs() {
+
+			const a = new Vector3();
+			const b = new Vector3();
+			const c = new Vector3();
+
+			const centroid = new Vector3();
+
+			const uvA = new Vector2();
+			const uvB = new Vector2();
+			const uvC = new Vector2();
+
+			for ( let i = 0, j = 0; i < vertexBuffer.length; i += 9, j += 6 ) {
+
+				a.set( vertexBuffer[ i + 0 ], vertexBuffer[ i + 1 ], vertexBuffer[ i + 2 ] );
+				b.set( vertexBuffer[ i + 3 ], vertexBuffer[ i + 4 ], vertexBuffer[ i + 5 ] );
+				c.set( vertexBuffer[ i + 6 ], vertexBuffer[ i + 7 ], vertexBuffer[ i + 8 ] );
+
+				uvA.set( uvBuffer[ j + 0 ], uvBuffer[ j + 1 ] );
+				uvB.set( uvBuffer[ j + 2 ], uvBuffer[ j + 3 ] );
+				uvC.set( uvBuffer[ j + 4 ], uvBuffer[ j + 5 ] );
+
+				centroid.copy( a ).add( b ).add( c ).divideScalar( 3 );
+
+				const azi = azimuth( centroid );
+
+				correctUV( uvA, j + 0, a, azi );
+				correctUV( uvB, j + 2, b, azi );
+				correctUV( uvC, j + 4, c, azi );
+
+			}
+
+		}
+
+		function correctUV( uv, stride, vector, azimuth ) {
+
+			if ( ( azimuth < 0 ) && ( uv.x === 1 ) ) {
+
+				uvBuffer[ stride ] = uv.x - 1;
+
+			}
+
+			if ( ( vector.x === 0 ) && ( vector.z === 0 ) ) {
+
+				uvBuffer[ stride ] = azimuth / 2 / Math.PI + 0.5;
+
+			}
+
+		}
+
+		// Angle around the Y axis, counter-clockwise when looking from above.
+
+		function azimuth( vector ) {
+
+			return Math.atan2( vector.z, - vector.x );
+
+		}
+
+
+		// Angle above the XZ plane.
+
+		function inclination( vector ) {
+
+			return Math.atan2( - vector.y, Math.sqrt( ( vector.x * vector.x ) + ( vector.z * vector.z ) ) );
+
+		}
+
+	}
+
+	copy( source ) {
+
+		super.copy( source );
+
+		this.parameters = Object.assign( {}, source.parameters );
+
+		return this;
+
+	}
+
+	static fromJSON( data ) {
+
+		return new PolyhedronGeometry( data.vertices, data.indices, data.radius, data.details );
+
+	}
+
+}
+
+class IcosahedronGeometry extends PolyhedronGeometry {
+
+	constructor( radius = 1, detail = 0 ) {
+
+		const t = ( 1 + Math.sqrt( 5 ) ) / 2;
+
+		const vertices = [
+			-1, t, 0, 	1, t, 0, 	-1, - t, 0, 	1, - t, 0,
+			0, -1, t, 	0, 1, t,	0, -1, - t, 	0, 1, - t,
+			t, 0, -1, 	t, 0, 1, 	- t, 0, -1, 	- t, 0, 1
+		];
+
+		const indices = [
+			0, 11, 5, 	0, 5, 1, 	0, 1, 7, 	0, 7, 10, 	0, 10, 11,
+			1, 5, 9, 	5, 11, 4,	11, 10, 2,	10, 7, 6,	7, 1, 8,
+			3, 9, 4, 	3, 4, 2,	3, 2, 6,	3, 6, 8,	3, 8, 9,
+			4, 9, 5, 	2, 4, 11,	6, 2, 10,	8, 6, 7,	9, 8, 1
+		];
+
+		super( vertices, indices, radius, detail );
+
+		this.type = 'IcosahedronGeometry';
+
+		this.parameters = {
+			radius: radius,
+			detail: detail
+		};
+
+	}
+
+	static fromJSON( data ) {
+
+		return new IcosahedronGeometry( data.radius, data.detail );
+
+	}
+
+}
+
+class Light extends Object3D {
+
+	constructor( color, intensity = 1 ) {
+
+		super();
+
+		this.isLight = true;
+
+		this.type = 'Light';
+
+		this.color = new Color( color );
+		this.intensity = intensity;
+
+	}
+
+	dispose() {
+
+		// Empty here in base class; some subclasses override.
+
+	}
+
+	copy( source, recursive ) {
+
+		super.copy( source, recursive );
+
+		this.color.copy( source.color );
+		this.intensity = source.intensity;
+
+		return this;
+
+	}
+
+	toJSON( meta ) {
+
+		const data = super.toJSON( meta );
+
+		data.object.color = this.color.getHex();
+		data.object.intensity = this.intensity;
+
+		if ( this.groundColor !== undefined ) data.object.groundColor = this.groundColor.getHex();
+
+		if ( this.distance !== undefined ) data.object.distance = this.distance;
+		if ( this.angle !== undefined ) data.object.angle = this.angle;
+		if ( this.decay !== undefined ) data.object.decay = this.decay;
+		if ( this.penumbra !== undefined ) data.object.penumbra = this.penumbra;
+
+		if ( this.shadow !== undefined ) data.object.shadow = this.shadow.toJSON();
+
+		return data;
+
+	}
+
+}
+
+class AmbientLight extends Light {
+
+	constructor( color, intensity ) {
+
+		super( color, intensity );
+
+		this.isAmbientLight = true;
+
+		this.type = 'AmbientLight';
+
+	}
+
+}
+
 if ( typeof __THREE_DEVTOOLS__ !== 'undefined' ) {
 
 	__THREE_DEVTOOLS__.dispatchEvent( new CustomEvent( 'register', { detail: {
@@ -31038,74 +31457,99 @@ class SimplexNoise {
 
 class Agent {
     numParticles;
-    particleSphere;
     simplex;
-    radius;
-    basePositions;
-    constructor(scene) {
-        this.numParticles = 8000; // Milhares de partículas
+    scenes;
+    coreGroup;
+    particleNoisePoints1;
+    particleNoisePoints2;
+    particleNoisePositions1;
+    particleNoisePositions2;
+    constructor() {
+        this.scenes = [];
+        // nevoa fluida
+        let scene = new Scene();
+        this.scenes.push(scene);
+        this.numParticles = 4096;
         this.simplex = new SimplexNoise();
-        this.radius = 2.0;
-        const sphereGeometry = new BufferGeometry();
-        const radius = this.radius;
-        const positions = new Float32Array(this.numParticles * 3);
-        this.basePositions = new Float32Array(this.numParticles * 3);
-        for (let i = 0; i < this.numParticles; i++) {
-            const i3 = i * 3;
-            // Geração de pontos aleatórios no volume da esfera (nuvem) em vez da casca com padrão
-            const r = radius * Math.cbrt(Math.random());
-            const theta = Math.random() * 2 * Math.PI;
-            const phi = Math.acos(2 * Math.random() - 1);
-            const px = r * Math.sin(phi) * Math.cos(theta);
-            const py = r * Math.sin(phi) * Math.sin(theta);
-            const pz = r * Math.cos(phi);
-            // Guardamos a posição base para referenciar na animação
-            this.basePositions[i3 + 0] = px;
-            this.basePositions[i3 + 1] = py;
-            this.basePositions[i3 + 2] = pz;
-            positions[i3 + 0] = px;
-            positions[i3 + 1] = py;
-            positions[i3 + 2] = pz;
-        }
-        sphereGeometry.setAttribute('position', new BufferAttribute(positions, 3));
-        // Material Ciano Jarvis com transparência e brilho
-        const jarvisMaterial = new PointsMaterial({
+        const material = new PointsMaterial({
+            size: 0.02,
+            opacity: 0.6,
             color: 0x00ffff,
-            size: 0.03, // Aumentado para garantir visibilidade com a câmera mais distante
+            transparent: true,
             sizeAttenuation: true,
-            transparent: true, // Importante para o efeito de rastro
-            opacity: 0.6, // Mais translúcido devido à maior quantidade de partículas
-            blending: AdditiveBlending, // Ajuda os pontos que se sobrepõem a brilharem
+            blending: AdditiveBlending,
         });
-        this.particleSphere = new Points(sphereGeometry, jarvisMaterial);
-        this.particleSphere.position.set(0, 0, 0); // No centro para a câmera em Z = 5 capturar bem
-        scene.add(this.particleSphere);
-    }
-    animate() {
-        const time = Date.now() * 0.001;
-        const positionAttribute = this.particleSphere.geometry.getAttribute('position');
+        const sphereGeometry1 = new BufferGeometry();
+        const sphereGeometry2 = new BufferGeometry();
+        const positions1 = new Float32Array(this.numParticles * 3);
+        const positions2 = new Float32Array(this.numParticles * 3);
+        this.particleNoisePositions1 = new Float32Array(this.numParticles * 3);
+        this.particleNoisePositions2 = new Float32Array(this.numParticles * 3);
         for (let i = 0; i < this.numParticles; i++) {
             const i3 = i * 3;
-            // Lemos a coordenada base que foi gerada aleatoriamente
-            const bx = this.basePositions[i3 + 0];
-            const by = this.basePositions[i3 + 1];
-            const bz = this.basePositions[i3 + 2];
-            // Usando ruído 4D (espaço 3D + tempo) para movimento fluido da névoa
-            const noiseScale = 0.8;
-            const noiseFactor = 0.5;
-            // O deslocamento é aplicado baseado na própria posição no espaço
-            const offset = this.simplex.noise4d(bx * noiseScale, by * noiseScale, bz * noiseScale, time * 0.3) * noiseFactor;
-            // Queremos que a partícula transite de forma natural, espalhando-se a partir do centro
-            const length = Math.sqrt(bx * bx + by * by + bz * bz) || 1;
-            const nx = bx / length;
-            const ny = by / length;
-            const nz = bz / length;
-            const finalX = bx + nx * offset;
-            const finalY = by + ny * offset;
-            const finalZ = bz + nz * offset;
-            positionAttribute.setXYZ(i, finalX, finalY, finalZ);
+            const [px, py, pz] = this.cloud(2.0, 1.9);
+            positions1[i3 + 0] = px;
+            positions1[i3 + 1] = py;
+            positions1[i3 + 2] = pz;
+            this.particleNoisePositions1[i3 + 0] = px;
+            this.particleNoisePositions1[i3 + 1] = py;
+            this.particleNoisePositions1[i3 + 2] = pz;
         }
-        positionAttribute.needsUpdate = true;
+        for (let i = 0; i < this.numParticles; i++) {
+            const i3 = i * 3;
+            const [px, py, pz] = this.cloud(1.6, 1.5);
+            positions2[i3 + 0] = px;
+            positions2[i3 + 1] = py;
+            positions2[i3 + 2] = pz;
+            this.particleNoisePositions2[i3 + 0] = px;
+            this.particleNoisePositions2[i3 + 1] = py;
+            this.particleNoisePositions2[i3 + 2] = pz;
+        }
+        sphereGeometry1.setAttribute('position', new BufferAttribute(positions1, 3));
+        sphereGeometry2.setAttribute('position', new BufferAttribute(positions2, 3));
+        this.particleNoisePoints1 = new Points(sphereGeometry1, material);
+        this.particleNoisePoints2 = new Points(sphereGeometry2, material);
+        this.particleNoisePoints1.position.set(0, 0, 0);
+        this.particleNoisePoints2.position.set(0, 0, 0);
+        scene.add(this.particleNoisePoints1);
+        scene.add(this.particleNoisePoints2);
+        // nucleo
+        scene = new Scene();
+        this.scenes.push(scene);
+        const coreGeometry = new IcosahedronGeometry(0.7, 4);
+        const clippingPlane = new Plane(new Vector3(0, 0, 1), 0);
+        const wireframeMaterial = new MeshBasicMaterial({
+            opacity: 0.3,
+            color: 0x00ffff,
+            wireframe: true,
+            depthWrite: false,
+            transparent: true,
+            clipIntersection: false,
+            clippingPlanes: [clippingPlane],
+            blending: AdditiveBlending,
+        });
+        const coreWireframe = new Mesh(coreGeometry, wireframeMaterial);
+        const pointsMaterial = new PointsMaterial({
+            size: 0.02,
+            opacity: 0.9,
+            color: 0x00ffff,
+            depthWrite: false,
+            transparent: true,
+            sizeAttenuation: true,
+            clipIntersection: false,
+            clippingPlanes: [clippingPlane],
+            blending: AdditiveBlending,
+        });
+        const corePoints = new Points(coreGeometry, pointsMaterial);
+        this.coreGroup = new Group();
+        this.coreGroup.add(coreWireframe);
+        this.coreGroup.add(corePoints);
+        scene.add(this.coreGroup);
+        const ambientLight = new AmbientLight(0x021111, 0.5);
+        scene.add(ambientLight);
+    }
+    getScenes() {
+        return this.scenes;
     }
     speak(message) {
         const speak = new SpeechSynthesisUtterance(message);
@@ -31113,6 +31557,60 @@ class Agent {
         speak.pitch = 1;
         speak.volume = 1;
         window.speechSynthesis.speak(speak);
+    }
+    animate() {
+        const time = Date.now() * 0.001;
+        const buffer = this.particleNoisePoints1.geometry.getAttribute('position');
+        for (let i = 0; i < this.numParticles; i++) {
+            this.noise(buffer, this.particleNoisePositions1, 0.1, 1.0, time, i);
+        }
+        buffer.needsUpdate = true;
+        const buffer2 = this.particleNoisePoints2.geometry.getAttribute('position');
+        for (let i = 0; i < this.numParticles; i++) {
+            this.noise(buffer2, this.particleNoisePositions2, 0.05, 2.0, time, i);
+        }
+        buffer2.needsUpdate = true;
+        // Rotação suave para mostrar a complexidade 3D
+        this.coreGroup.rotation.y += 0.002;
+        this.coreGroup.rotation.x += 0.001;
+        // // OPCIONAL: Adicionar uma pulsação sutil na opacidade para simular o "pensamento"
+        // this.coreGroup.material.opacity = 0.7 + Math.sin(time * 2) * 0.2
+    }
+    noise(buffer, positions, noiseFactor, noiseScale, time, index) {
+        const i3 = index * 3;
+        // posicao do efeito
+        const bx = positions[i3 + 0];
+        const by = positions[i3 + 1];
+        const bz = positions[i3 + 2];
+        // deslocamento aplicado em relacao a base
+        const offset = this.simplex.noise4d(bx * noiseScale, by * noiseScale, bz * noiseScale, time * 0.3) * noiseFactor;
+        // efeito de transicao natural
+        const length = Math.sqrt(bx * bx + by * by + bz * bz) || 1;
+        const nx = bx / length;
+        const ny = by / length;
+        const nz = bz / length;
+        // escrita do deslocamento
+        const finalX = bx + nx * offset;
+        const finalY = by + ny * offset;
+        const finalZ = bz + nz * offset;
+        buffer.setXYZ(index, finalX, finalY, finalZ);
+    }
+    cloud(externalRadius, internalRadius) {
+        let isValid = false;
+        let px = 0, py = 0, pz = 0;
+        while (!isValid) {
+            const r = externalRadius * Math.cbrt(Math.random());
+            const theta = Math.random() * 2 * Math.PI;
+            const phi = Math.acos(2 * Math.random() - 1);
+            px = r * Math.sin(phi) * Math.cos(theta);
+            py = r * Math.sin(phi) * Math.sin(theta);
+            pz = r * Math.cos(phi);
+            const distXY = Math.sqrt(px * px + py * py);
+            if (distXY >= internalRadius) {
+                isValid = true;
+            }
+        }
+        return [px, py, pz];
     }
 }
 
@@ -31134,21 +31632,25 @@ class Main extends View {
     handler() {
         const canvas = this.shadow.querySelector('#agent-canvas');
         if (canvas) {
-            const scene = new Scene();
             const renderer = new WebGLRenderer({
                 canvas,
                 alpha: true,
                 antialias: true
             });
+            renderer.localClippingEnabled = true;
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 5;
-            const agent = new Agent(scene);
+            const agent = new Agent();
+            renderer.autoClear = false;
             const animate = () => {
                 requestAnimationFrame(animate);
                 agent.animate();
-                renderer.render(scene, camera);
+                renderer.clear();
+                for (let scene of agent.getScenes()) {
+                    renderer.render(scene, camera);
+                }
             };
             animate();
             // agent.speak('Olá, como posso ajudar você hoje?')
@@ -31162,28 +31664,31 @@ class Main extends View {
         if (shape) {
             // top
             shape.polygon(() => {
+                const step = 20.0;
+                const start = 100.0;
+                const height = 100.0;
                 const path = [];
                 path.push([0, 0]);
                 for (let i = 0; i < 20; i++) {
-                    let size = Math.round(1 * (i * 0.3 + 1));
+                    let size = Math.round(2.0 * (i * 0.3 + 1.0));
                     let center = shape.width / 2;
-                    path.push([50 + center + (i * 10 + size + 70), 0]);
-                    path.push([50 + center + (i * 10 + size + 70 + size), 0]);
-                    path.push([50 + center + (i * 10 + size + 60 + size), 30]);
-                    path.push([50 + center + (i * 10 + size + 60), 30]);
-                    path.push([50 + center + (i * 10 + size + 70), 0]);
-                    path.push([center - 50 - (i * 10 + size + 70), 0]);
-                    path.push([center - 50 - (i * 10 + size + 70 + size), 0]);
-                    path.push([center - 50 - (i * 10 + size + 60 + size), 30]);
-                    path.push([center - 50 - (i * 10 + size + 60), 30]);
-                    path.push([center - 50 - (i * 10 + size + 70), 0]);
-                    path.push([50 + center + (i * 10 + size + 70), 0]);
-                    path.push([center - 50 - (i * 10 + size + 70), 0]);
-                    path.push([center - 50 - (i * 10 + size + 70 + size), 0]);
-                    path.push([center - 50 - (i * 10 + size + 60 + size), 30]);
-                    path.push([center - 50 - (i * 10 + size + 60), 30]);
-                    path.push([center - 50 - (i * 10 + size + 70), 0]);
-                    path.push([center - 50 - (i * 10 + size + 70), 0]);
+                    path.push([start + center + (i * step + size + 70), 0]);
+                    path.push([start + center + (i * step + size + 70 + size), 0]);
+                    path.push([start + center + (i * step + size + 60 + size), height]);
+                    path.push([start + center + (i * step + size + 60), height]);
+                    path.push([start + center + (i * step + size + 70), 0]);
+                    path.push([center - start - (i * step + size + 70), 0]);
+                    path.push([center - start - (i * step + size + 70 + size), 0]);
+                    path.push([center - start - (i * step + size + 60 + size), height]);
+                    path.push([center - start - (i * step + size + 60), height]);
+                    path.push([center - start - (i * step + size + 70), 0]);
+                    path.push([start + center + (i * step + size + 70), 0]);
+                    path.push([center - start - (i * step + size + 70), 0]);
+                    path.push([center - start - (i * step + size + 70 + size), 0]);
+                    path.push([center - start - (i * step + size + 60 + size), height]);
+                    path.push([center - start - (i * step + size + 60), height]);
+                    path.push([center - start - (i * step + size + 70), 0]);
+                    path.push([center - start - (i * step + size + 70), 0]);
                 }
                 path.push([0, 0]);
                 return {

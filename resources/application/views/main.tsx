@@ -24,12 +24,12 @@ export default class Main extends View {
     public handler(): void {
         const canvas = this.shadow.querySelector('#agent-canvas') as HTMLCanvasElement
         if (canvas) {
-            const scene = new THREE.Scene()
             const renderer = new THREE.WebGLRenderer({
                 canvas,
                 alpha: true,
                 antialias: true
             })
+            renderer.localClippingEnabled = true
             renderer.setSize(window.innerWidth, window.innerHeight)
             renderer.setPixelRatio(window.devicePixelRatio)
 
@@ -41,12 +41,16 @@ export default class Main extends View {
             )
             camera.position.z = 5
 
-            const agent = new Agent(scene)
+            const agent = new Agent()
 
+            renderer.autoClear = false
             const animate = () => {
                 requestAnimationFrame(animate)
                 agent.animate()
-                renderer.render(scene, camera)
+                renderer.clear()
+                for (let scene of agent.getScenes()) {
+                    renderer.render(scene, camera)
+                }
             }
             animate()
 
@@ -64,28 +68,31 @@ export default class Main extends View {
 
             // top
             shape.polygon(() => {
+                const step = 20.0
+                const start = 100.0
+                const height = 100.0
                 const path: Array<[number, number]> = []
                 path.push([0, 0])
                 for (let i = 0; i < 20; i++) {
-                    let size = Math.round(1 * (i * 0.3 + 1))
+                    let size = Math.round(2.0 * (i * 0.3 + 1.0))
                     let center = shape.width / 2
-                    path.push([50 + center + (i * 10 + size + 70), 0])
-                    path.push([50 + center + (i * 10 + size + 70 + size), 0])
-                    path.push([50 + center + (i * 10 + size + 60 + size), 30])
-                    path.push([50 + center + (i * 10 + size + 60), 30])
-                    path.push([50 + center + (i * 10 + size + 70), 0])
-                    path.push([center - 50 - (i * 10 + size + 70), 0])
-                    path.push([center - 50 - (i * 10 + size + 70 + size), 0])
-                    path.push([center - 50 - (i * 10 + size + 60 + size), 30])
-                    path.push([center - 50 - (i * 10 + size + 60), 30])
-                    path.push([center - 50 - (i * 10 + size + 70), 0])
-                    path.push([50 + center + (i * 10 + size + 70), 0])
-                    path.push([center - 50 - (i * 10 + size + 70), 0])
-                    path.push([center - 50 - (i * 10 + size + 70 + size), 0])
-                    path.push([center - 50 - (i * 10 + size + 60 + size), 30])
-                    path.push([center - 50 - (i * 10 + size + 60), 30])
-                    path.push([center - 50 - (i * 10 + size + 70), 0])
-                    path.push([center - 50 - (i * 10 + size + 70), 0])
+                    path.push([start + center + (i * step + size + 70), 0])
+                    path.push([start + center + (i * step + size + 70 + size), 0])
+                    path.push([start + center + (i * step + size + 60 + size), height])
+                    path.push([start + center + (i * step + size + 60), height])
+                    path.push([start + center + (i * step + size + 70), 0])
+                    path.push([center - start - (i * step + size + 70), 0])
+                    path.push([center - start - (i * step + size + 70 + size), 0])
+                    path.push([center - start - (i * step + size + 60 + size), height])
+                    path.push([center - start - (i * step + size + 60), height])
+                    path.push([center - start - (i * step + size + 70), 0])
+                    path.push([start + center + (i * step + size + 70), 0])
+                    path.push([center - start - (i * step + size + 70), 0])
+                    path.push([center - start - (i * step + size + 70 + size), 0])
+                    path.push([center - start - (i * step + size + 60 + size), height])
+                    path.push([center - start - (i * step + size + 60), height])
+                    path.push([center - start - (i * step + size + 70), 0])
+                    path.push([center - start - (i * step + size + 70), 0])
                 }
                 path.push([0, 0])
                 return {

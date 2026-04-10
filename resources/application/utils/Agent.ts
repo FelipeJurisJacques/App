@@ -3,94 +3,109 @@ import { SimplexNoise } from 'three/examples/jsm/math/SimplexNoise.js'
 
 export default class Agent {
     private readonly numParticles: number
-    private readonly particleSphere: THREE.Points
     private readonly simplex: SimplexNoise
-    private readonly radius: number
-    private readonly basePositions: Float32Array
+    private readonly scenes: THREE.Scene[]
+    private readonly coreGroup: THREE.Group
+    private readonly particleNoisePoints1: THREE.Points
+    private readonly particleNoisePoints2: THREE.Points
+    private readonly particleNoisePositions1: Float32Array
+    private readonly particleNoisePositions2: Float32Array
 
-    public constructor(scene: THREE.Scene) {
-        this.numParticles = 8000 // Milhares de partículas
+    public constructor() {
+        this.scenes = []
+        // nevoa fluida
+
+        let scene = new THREE.Scene()
+        this.scenes.push(scene)
+        this.numParticles = 4096
         this.simplex = new SimplexNoise()
-        this.radius = 2.0
-
-        const sphereGeometry = new THREE.BufferGeometry()
-
-        const radius = this.radius
-        const positions = new Float32Array(this.numParticles * 3)
-        this.basePositions = new Float32Array(this.numParticles * 3)
-
-        for (let i = 0; i < this.numParticles; i++) {
-            const i3 = i * 3
-
-            // Geração de pontos aleatórios no volume da esfera (nuvem) em vez da casca com padrão
-            const r = radius * Math.cbrt(Math.random())
-            const theta = Math.random() * 2 * Math.PI
-            const phi = Math.acos(2 * Math.random() - 1)
-
-            const px = r * Math.sin(phi) * Math.cos(theta)
-            const py = r * Math.sin(phi) * Math.sin(theta)
-            const pz = r * Math.cos(phi)
-
-            // Guardamos a posição base para referenciar na animação
-            this.basePositions[i3 + 0] = px
-            this.basePositions[i3 + 1] = py
-            this.basePositions[i3 + 2] = pz
-
-            positions[i3 + 0] = px
-            positions[i3 + 1] = py
-            positions[i3 + 2] = pz
-        }
-
-        sphereGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-
-        // Material Ciano Jarvis com transparência e brilho
-        const jarvisMaterial = new THREE.PointsMaterial({
+        const material = new THREE.PointsMaterial({
+            size: 0.02,
+            opacity: 0.6,
             color: 0x00ffff,
-            size: 0.03, // Aumentado para garantir visibilidade com a câmera mais distante
+            transparent: true,
             sizeAttenuation: true,
-            transparent: true, // Importante para o efeito de rastro
-            opacity: 0.6,      // Mais translúcido devido à maior quantidade de partículas
-            blending: THREE.AdditiveBlending, // Ajuda os pontos que se sobrepõem a brilharem
+            blending: THREE.AdditiveBlending,
         })
 
-        this.particleSphere = new THREE.Points(sphereGeometry, jarvisMaterial)
-        this.particleSphere.position.set(0, 0, 0) // No centro para a câmera em Z = 5 capturar bem
-        scene.add(this.particleSphere)
-    }
-
-    public animate(): void {
-        const time = Date.now() * 0.001
-        const positionAttribute = this.particleSphere.geometry.getAttribute('position') as THREE.BufferAttribute
+        const sphereGeometry1 = new THREE.BufferGeometry()
+        const sphereGeometry2 = new THREE.BufferGeometry()
+        const positions1 = new Float32Array(this.numParticles * 3)
+        const positions2 = new Float32Array(this.numParticles * 3)
+        this.particleNoisePositions1 = new Float32Array(this.numParticles * 3)
+        this.particleNoisePositions2 = new Float32Array(this.numParticles * 3)
 
         for (let i = 0; i < this.numParticles; i++) {
             const i3 = i * 3
-
-            // Lemos a coordenada base que foi gerada aleatoriamente
-            const bx = this.basePositions[i3 + 0]!
-            const by = this.basePositions[i3 + 1]!
-            const bz = this.basePositions[i3 + 2]!
-
-            // Usando ruído 4D (espaço 3D + tempo) para movimento fluido da névoa
-            const noiseScale = 0.8
-            const noiseFactor = 0.5
-
-            // O deslocamento é aplicado baseado na própria posição no espaço
-            const offset = this.simplex.noise4d(bx * noiseScale, by * noiseScale, bz * noiseScale, time * 0.3) * noiseFactor
-
-            // Queremos que a partícula transite de forma natural, espalhando-se a partir do centro
-            const length = Math.sqrt(bx * bx + by * by + bz * bz) || 1
-            const nx = bx / length
-            const ny = by / length
-            const nz = bz / length
-
-            const finalX = bx + nx * offset
-            const finalY = by + ny * offset
-            const finalZ = bz + nz * offset
-
-            positionAttribute.setXYZ(i, finalX, finalY, finalZ)
+            const [px, py, pz] = this.cloud(2.0, 1.9)
+            positions1[i3 + 0] = px!
+            positions1[i3 + 1] = py!
+            positions1[i3 + 2] = pz!
+            this.particleNoisePositions1[i3 + 0] = px!
+            this.particleNoisePositions1[i3 + 1] = py!
+            this.particleNoisePositions1[i3 + 2] = pz!
         }
 
-        positionAttribute.needsUpdate = true
+        for (let i = 0; i < this.numParticles; i++) {
+            const i3 = i * 3
+            const [px, py, pz] = this.cloud(1.6, 1.5)
+            positions2[i3 + 0] = px!
+            positions2[i3 + 1] = py!
+            positions2[i3 + 2] = pz!
+            this.particleNoisePositions2[i3 + 0] = px!
+            this.particleNoisePositions2[i3 + 1] = py!
+            this.particleNoisePositions2[i3 + 2] = pz!
+        }
+
+        sphereGeometry1.setAttribute('position', new THREE.BufferAttribute(positions1, 3))
+        sphereGeometry2.setAttribute('position', new THREE.BufferAttribute(positions2, 3))
+        this.particleNoisePoints1 = new THREE.Points(sphereGeometry1, material)
+        this.particleNoisePoints2 = new THREE.Points(sphereGeometry2, material)
+        this.particleNoisePoints1.position.set(0, 0, 0)
+        this.particleNoisePoints2.position.set(0, 0, 0)
+        scene.add(this.particleNoisePoints1)
+        scene.add(this.particleNoisePoints2)
+
+        // nucleo
+        scene = new THREE.Scene()
+        this.scenes.push(scene)
+
+        const coreGeometry = new THREE.IcosahedronGeometry(0.7, 4)
+        const clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
+        const wireframeMaterial = new THREE.MeshBasicMaterial({
+            opacity: 0.3,
+            color: 0x00ffff,
+            wireframe: true,
+            depthWrite: false,
+            transparent: true,
+            clipIntersection: false,
+            clippingPlanes: [clippingPlane],
+            blending: THREE.AdditiveBlending,
+        })
+        const coreWireframe = new THREE.Mesh(coreGeometry, wireframeMaterial)
+        const pointsMaterial = new THREE.PointsMaterial({
+            size: 0.02,
+            opacity: 0.9,
+            color: 0x00ffff,
+            depthWrite: false,
+            transparent: true,
+            sizeAttenuation: true,
+            clipIntersection: false,
+            clippingPlanes: [clippingPlane],
+            blending: THREE.AdditiveBlending,
+        })
+        const corePoints = new THREE.Points(coreGeometry, pointsMaterial)
+        this.coreGroup = new THREE.Group()
+        this.coreGroup.add(coreWireframe)
+        this.coreGroup.add(corePoints)
+        scene.add(this.coreGroup)
+
+        const ambientLight = new THREE.AmbientLight(0x021111, 0.5)
+        scene.add(ambientLight)
+    }
+
+    public getScenes(): THREE.Scene[] {
+        return this.scenes
     }
 
     public speak(message: string): void {
@@ -99,5 +114,83 @@ export default class Agent {
         speak.pitch = 1
         speak.volume = 1
         window.speechSynthesis.speak(speak)
+    }
+
+    public animate(): void {
+        const time = Date.now() * 0.001
+        const buffer = this.particleNoisePoints1.geometry.getAttribute('position') as THREE.BufferAttribute
+        for (let i = 0; i < this.numParticles; i++) {
+            this.noise(buffer, this.particleNoisePositions1, 0.1, 1.0, time, i)
+        }
+        buffer.needsUpdate = true
+
+        const buffer2 = this.particleNoisePoints2.geometry.getAttribute('position') as THREE.BufferAttribute
+        for (let i = 0; i < this.numParticles; i++) {
+            this.noise(buffer2, this.particleNoisePositions2, 0.05, 2.0, time, i)
+        }
+        buffer2.needsUpdate = true
+
+        // Rotação suave para mostrar a complexidade 3D
+        this.coreGroup.rotation.y += 0.002
+        this.coreGroup.rotation.x += 0.001
+
+        // // OPCIONAL: Adicionar uma pulsação sutil na opacidade para simular o "pensamento"
+        // this.coreGroup.material.opacity = 0.7 + Math.sin(time * 2) * 0.2
+    }
+
+    private noise(
+        buffer: THREE.BufferAttribute,
+        positions: Float32Array,
+        noiseFactor: number,
+        noiseScale: number,
+        time: number,
+        index: number
+    ): void {
+        const i3 = index * 3
+
+        // posicao do efeito
+        const bx = positions[i3 + 0]!
+        const by = positions[i3 + 1]!
+        const bz = positions[i3 + 2]!
+
+        // deslocamento aplicado em relacao a base
+        const offset = this.simplex.noise4d(
+            bx * noiseScale,
+            by * noiseScale,
+            bz * noiseScale,
+            time * 0.3
+        ) * noiseFactor
+
+        // efeito de transicao natural
+        const length = Math.sqrt(bx * bx + by * by + bz * bz) || 1
+        const nx = bx / length
+        const ny = by / length
+        const nz = bz / length
+
+        // escrita do deslocamento
+        const finalX = bx + nx * offset
+        const finalY = by + ny * offset
+        const finalZ = bz + nz * offset
+        buffer.setXYZ(index, finalX, finalY, finalZ)
+    }
+
+    private cloud(externalRadius: number, internalRadius: number): Array<number> {
+        let isValid = false
+        let px = 0, py = 0, pz = 0
+        while (!isValid) {
+            const r = externalRadius * Math.cbrt(Math.random())
+            const theta = Math.random() * 2 * Math.PI
+            const phi = Math.acos(2 * Math.random() - 1)
+
+            px = r * Math.sin(phi) * Math.cos(theta)
+            py = r * Math.sin(phi) * Math.sin(theta)
+            pz = r * Math.cos(phi)
+
+            const distXY = Math.sqrt(px * px + py * py)
+            if (distXY >= internalRadius) {
+                isValid = true
+            }
+        }
+        return [px, py, pz]
     }
 }

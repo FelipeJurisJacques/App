@@ -16,6 +16,7 @@ export default class CustomShape extends View {
     private observer: ResizeObserver | null = null
     private canvas: HTMLCanvasElement | null = null
     private tasks: Array<() => void> = []
+    private static dpr: number = window.devicePixelRatio || 1
 
     public constructor() {
         super(true)
@@ -30,24 +31,27 @@ export default class CustomShape extends View {
     }
 
     public get width(): number {
-        return this.canvas?.width || 0
+        const dpr = CustomShape.dpr
+        return this.canvas ? this.canvas.width / dpr : 0
     }
 
     public get height(): number {
-        return this.canvas?.height || 0
+        const dpr = CustomShape.dpr
+        return this.canvas ? this.canvas.height / dpr : 0
     }
 
     public polygon(task: () => Polygon): void {
         this.tasks.push(() => {
+            const dpr = CustomShape.dpr
             const { color, points } = task()
             if (!this.canvas) return
             const ctx = this.canvas.getContext('2d')
             if (!ctx) return
             ctx.fillStyle = color
             ctx.beginPath()
-            ctx.moveTo(points[0][0], points[0][1])
+            ctx.moveTo(points[0]![0] * dpr, points[0]![1] * dpr)
             for (let i = 1; i < points.length; i++) {
-                ctx.lineTo(points[i][0], points[i][1])
+                ctx.lineTo(points[i]![0] * dpr, points[i]![1] * dpr)
             }
             ctx.closePath()
             ctx.fill()
@@ -57,18 +61,19 @@ export default class CustomShape extends View {
 
     public handler(): void {
         if (!this.canvas) return
+        const dpr = CustomShape.dpr
         const rect = this.getBoundingClientRect()
-        const dpr = window.devicePixelRatio || 1
 
         // Ajusta a resolução interna do canvas para evitar borrões
-        this.canvas.width = rect.width * dpr
-        this.canvas.height = rect.height * dpr
+        const width = rect.width * dpr
+        const height = rect.height * dpr
+
+        this.canvas.width = width
+        this.canvas.height = height
 
         const ctx = this.canvas.getContext('2d')
         if (!ctx) return
 
-        const width = this.canvas.width
-        const height = this.canvas.height
 
         // Limpa o canvas
         ctx.clearRect(0, 0, width, height)

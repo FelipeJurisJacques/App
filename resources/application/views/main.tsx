@@ -1,8 +1,8 @@
 import View from './view'
 import * as THREE from 'three'
 import Agent from '../utils/Agent'
-import Stylesheet from '../../stylesheets/main.css'
 import CustomShape from '../components/CustomShape'
+import Stylesheet from '../../stylesheets/views/main.css'
 
 export default class Main extends View {
     public render(): Element[] {
@@ -17,6 +17,9 @@ export default class Main extends View {
                 <p class="top">
                     00:00:00
                 </p>
+                <button type="button">
+                    tema
+                </button>
             </custom-shape>
         ]
     }
@@ -68,13 +71,13 @@ export default class Main extends View {
 
             // top
             shape.polygon(() => {
-                const step = 20.0
-                const start = 100.0
-                const height = 100.0
+                const step = 10.0
+                const start = 25.0
+                const height = 40.0
                 const path: Array<[number, number]> = []
                 path.push([0, 0])
                 for (let i = 0; i < 20; i++) {
-                    let size = Math.round(2.0 * (i * 0.3 + 1.0))
+                    let size = Math.round(1.0 * (i * 0.3 + 1.0))
                     let center = shape.width / 2
                     path.push([start + center + (i * step + size + 70), 0])
                     path.push([start + center + (i * step + size + 70 + size), 0])
@@ -103,33 +106,33 @@ export default class Main extends View {
 
             // bottom
             shape.polygon(() => {
-                const top = shape.height - 100
+                const top = shape.height - 50
                 const center = shape.width / 2.0
                 return {
                     color: '#071F1F',
                     points: [
                         [0, top],
-                        [Math.min(center - 230, 10), top],
-                        [Math.min(center - 220, 20), top - 20],
-                        [center - 50, top - 20],
+                        [Math.min(center - 128, 10), top],
+                        [Math.min(center - 138, 20), top - 10],
+                        [center - 50, top - 10],
                         [center - 40, top],
                         [center + 40, top],
-                        [center + 50, top - 20],
-                        [Math.max(center + 220, shape.width - 20), top - 20],
-                        [Math.max(center + 230, shape.width - 10), top],
+                        [center + 50, top - 10],
+                        [Math.max(center + 138, shape.width - 20), top - 10],
+                        [Math.max(center + 128, shape.width - 10), top],
                         [shape.width, top],
                         // [shape.width, shape.height],
                         // [0, shape.height],
                         // [0, top],
                         [shape.width, top - 2],
-                        [Math.max(center + 230, shape.width - 10), top - 2],
-                        [Math.max(center + 220, shape.width - 20), top - 22],
-                        [center + 50, top - 22],
+                        [Math.max(center + 128, shape.width - 10), top - 2],
+                        [Math.max(center + 138, shape.width - 20), top - 12],
+                        [center + 50, top - 12],
                         [center + 40, top - 2],
                         [center - 40, top - 2],
-                        [center - 50, top - 22],
-                        [Math.min(center - 220, 20), top - 22],
-                        [Math.min(center - 230, 10), top - 2],
+                        [center - 50, top - 12],
+                        [Math.min(center - 138, 20), top - 12],
+                        [Math.min(center - 128, 10), top - 2],
                         [0, top - 2],
                         [0, top],
                     ],

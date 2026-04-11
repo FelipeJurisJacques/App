@@ -31614,7 +31614,7 @@ class Agent {
     }
 }
 
-var Stylesheet$1 = "* {\r\n    z-index: 0;\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n}\r\n\r\np.top {\r\n    top: 15px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\ncustom-shape {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n}\r\n\r\ndiv.bacground {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 50px;\r\n    position: fixed;\r\n    overflow: hidden;\r\n    background-color: #071F1F;\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground {\r\n    background-color: #071F1F;\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground::before {\r\n    inset: 0;\r\n    content: '';\r\n    position: absolute;\r\n    pointer-events: none;\r\n    background:\r\n        repeating-linear-gradient(0deg,\r\n            #062627 0px,\r\n            #062627 1px,\r\n            transparent 1px,\r\n            transparent 3px);\r\n}\r\n\r\n#agent-canvas {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n    z-index: -1;\r\n    pointer-events: none;\r\n}";
+var Stylesheet$1 = "* {\r\n    z-index: 0;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n}\r\n\r\np.top {\r\n    top: 15px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: -1;\r\n    position: fixed;\r\n    pointer-events: none;\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 15px;\r\n    bottom: 15px;\r\n    position: fixed;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n}\r\n\r\ndiv.bacground {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 50px;\r\n    position: fixed;\r\n    overflow: hidden;\r\n    background-color: #071F1F;\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground {\r\n    background-color: #071F1F;\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground::before {\r\n    inset: 0;\r\n    content: '';\r\n    position: absolute;\r\n    pointer-events: none;\r\n    background:\r\n        repeating-linear-gradient(0deg,\r\n            #062627 0px,\r\n            #062627 1px,\r\n            transparent 1px,\r\n            transparent 3px);\r\n}";
 
 class Main extends View {
     render() {
@@ -31626,7 +31626,8 @@ class Main extends View {
         return [
             HyperTextMarkupLanguage.create("canvas", { id: "agent-canvas" }),
             HyperTextMarkupLanguage.create("custom-shape", null,
-                HyperTextMarkupLanguage.create("p", { class: "top" }, "00:00:00"))
+                HyperTextMarkupLanguage.create("p", { class: "top" }, "00:00:00"),
+                HyperTextMarkupLanguage.create("button", { type: "button" }, "tema"))
         ];
     }
     handler() {
@@ -31664,13 +31665,13 @@ class Main extends View {
         if (shape) {
             // top
             shape.polygon(() => {
-                const step = 20.0;
-                const start = 100.0;
-                const height = 100.0;
+                const step = 10.0;
+                const start = 25.0;
+                const height = 40.0;
                 const path = [];
                 path.push([0, 0]);
                 for (let i = 0; i < 20; i++) {
-                    let size = Math.round(2.0 * (i * 0.3 + 1.0));
+                    let size = Math.round(1.0 * (i * 0.3 + 1.0));
                     let center = shape.width / 2;
                     path.push([start + center + (i * step + size + 70), 0]);
                     path.push([start + center + (i * step + size + 70 + size), 0]);
@@ -31698,33 +31699,33 @@ class Main extends View {
             });
             // bottom
             shape.polygon(() => {
-                const top = shape.height - 100;
+                const top = shape.height - 50;
                 const center = shape.width / 2.0;
                 return {
                     color: '#071F1F',
                     points: [
                         [0, top],
-                        [Math.min(center - 230, 10), top],
-                        [Math.min(center - 220, 20), top - 20],
-                        [center - 50, top - 20],
+                        [Math.min(center - 128, 10), top],
+                        [Math.min(center - 138, 20), top - 10],
+                        [center - 50, top - 10],
                         [center - 40, top],
                         [center + 40, top],
-                        [center + 50, top - 20],
-                        [Math.max(center + 220, shape.width - 20), top - 20],
-                        [Math.max(center + 230, shape.width - 10), top],
+                        [center + 50, top - 10],
+                        [Math.max(center + 138, shape.width - 20), top - 10],
+                        [Math.max(center + 128, shape.width - 10), top],
                         [shape.width, top],
                         // [shape.width, shape.height],
                         // [0, shape.height],
                         // [0, top],
                         [shape.width, top - 2],
-                        [Math.max(center + 230, shape.width - 10), top - 2],
-                        [Math.max(center + 220, shape.width - 20), top - 22],
-                        [center + 50, top - 22],
+                        [Math.max(center + 128, shape.width - 10), top - 2],
+                        [Math.max(center + 138, shape.width - 20), top - 12],
+                        [center + 50, top - 12],
                         [center + 40, top - 2],
                         [center - 40, top - 2],
-                        [center - 50, top - 22],
-                        [Math.min(center - 220, 20), top - 22],
-                        [Math.min(center - 230, 10), top - 2],
+                        [center - 50, top - 12],
+                        [Math.min(center - 138, 20), top - 12],
+                        [Math.min(center - 128, 10), top - 2],
                         [0, top - 2],
                         [0, top],
                     ],
@@ -31747,6 +31748,7 @@ class CustomShape extends View {
     observer = null;
     canvas = null;
     tasks = [];
+    static dpr = window.devicePixelRatio || 1;
     constructor() {
         super(true);
         this.tasks = [];
@@ -31759,13 +31761,16 @@ class CustomShape extends View {
         ];
     }
     get width() {
-        return this.canvas?.width || 0;
+        const dpr = CustomShape.dpr;
+        return this.canvas ? this.canvas.width / dpr : 0;
     }
     get height() {
-        return this.canvas?.height || 0;
+        const dpr = CustomShape.dpr;
+        return this.canvas ? this.canvas.height / dpr : 0;
     }
     polygon(task) {
         this.tasks.push(() => {
+            const dpr = CustomShape.dpr;
             const { color, points } = task();
             if (!this.canvas)
                 return;
@@ -31774,9 +31779,9 @@ class CustomShape extends View {
                 return;
             ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.moveTo(points[0][0], points[0][1]);
+            ctx.moveTo(points[0][0] * dpr, points[0][1] * dpr);
             for (let i = 1; i < points.length; i++) {
-                ctx.lineTo(points[i][0], points[i][1]);
+                ctx.lineTo(points[i][0] * dpr, points[i][1] * dpr);
             }
             ctx.closePath();
             ctx.fill();
@@ -31786,16 +31791,16 @@ class CustomShape extends View {
     handler() {
         if (!this.canvas)
             return;
+        const dpr = CustomShape.dpr;
         const rect = this.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
         // Ajusta a resolução interna do canvas para evitar borrões
-        this.canvas.width = rect.width * dpr;
-        this.canvas.height = rect.height * dpr;
+        const width = rect.width * dpr;
+        const height = rect.height * dpr;
+        this.canvas.width = width;
+        this.canvas.height = height;
         const ctx = this.canvas.getContext('2d');
         if (!ctx)
             return;
-        const width = this.canvas.width;
-        const height = this.canvas.height;
         // Limpa o canvas
         ctx.clearRect(0, 0, width, height);
         this.tasks.forEach((draw) => {

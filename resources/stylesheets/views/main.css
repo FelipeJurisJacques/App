@@ -1,5 +1,6 @@
 * {
     z-index: 0;
+    transform: translate(-50%, -50%);
 }
 
 ::slotted(*) {
@@ -7,17 +8,30 @@
 }
 
 p.top {
-    top: 15px;
+    top: 10px;
     left: 50%;
     position: fixed;
     font-size: 10pt;
     text-align: center;
-    transform: translate(-50%, -50%);
+}
+
+#agent-canvas {
+    top: 50%;
+    left: 50%;
+    z-index: -1;
+    position: fixed;
+    pointer-events: none;
+}
+
+button[type="button"] {
+    right: 15px;
+    bottom: 15px;
+    position: fixed;
 }
 
 custom-shape {
-    top: 0px;
-    left: 0px;
+    top: 50%;
+    left: 50%;
     width: 100%;
     height: 100%;
     position: fixed;
@@ -48,14 +62,4 @@ div.bacground {
             #062627 1px,
             transparent 1px,
             transparent 3px);
-}
-
-#agent-canvas {
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    z-index: -1;
-    pointer-events: none;
 }

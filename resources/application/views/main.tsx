@@ -5,6 +5,35 @@ import CustomShape from '../components/CustomShape'
 import Stylesheet from '../../stylesheets/views/main.css'
 
 export default class Main extends View {
+    private themes = ['dark', 'light', 'high-contrast']
+    private themeIndex = 0
+
+    public constructor() {
+        super(true)
+        const savedTheme = window.localStorage.getItem('theme') || 'dark'
+        this.themeIndex = this.themes.indexOf(savedTheme)
+        if (this.themeIndex === -1) this.themeIndex = 0
+        this.applyTheme()
+    }
+
+    private applyTheme(): void {
+        const theme = this.themes[this.themeIndex]!
+        document.body.setAttribute('theme', theme)
+        window.localStorage.setItem('theme', theme)
+    }
+
+    private toggleTheme(): void {
+        this.themeIndex = (this.themeIndex + 1) % this.themes.length
+        this.applyTheme()
+        // Repintar o componente para atualizar as cores do custom-shape
+        this.handler()
+    }
+
+    private getThemeColor(): string {
+        const theme = this.themes[this.themeIndex]
+        if (theme === 'dark') return '#071F1F'
+        return '#E0E0E0' // Light and High-Contrast
+    }
     public render(): Element[] {
         const sheet = new CSSStyleSheet()
         sheet.replace(Stylesheet)
@@ -65,6 +94,10 @@ export default class Main extends View {
                 renderer.setSize(window.innerWidth, window.innerHeight)
             })
         }
+        const themeButton = this.shadow.querySelector('button[type="button"]')
+        if (themeButton) {
+            themeButton.addEventListener('click', () => this.toggleTheme())
+        }
 
         const shape = this.shadow.querySelector('custom-shape') as CustomShape
         if (shape) {
@@ -99,7 +132,7 @@ export default class Main extends View {
                 }
                 path.push([0, 0])
                 return {
-                    color: '#071F1F',
+                    color: this.getThemeColor(),
                     points: path,
                 }
             })
@@ -109,7 +142,7 @@ export default class Main extends View {
                 const top = shape.height - 50
                 const center = shape.width / 2.0
                 return {
-                    color: '#071F1F',
+                    color: this.getThemeColor(),
                     points: [
                         [0, top],
                         [Math.min(center - 128, 10), top],

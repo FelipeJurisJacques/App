@@ -30922,6 +30922,127 @@ class IcosahedronGeometry extends PolyhedronGeometry {
 
 }
 
+class RingGeometry extends BufferGeometry {
+
+	constructor( innerRadius = 0.5, outerRadius = 1, thetaSegments = 32, phiSegments = 1, thetaStart = 0, thetaLength = Math.PI * 2 ) {
+
+		super();
+
+		this.type = 'RingGeometry';
+
+		this.parameters = {
+			innerRadius: innerRadius,
+			outerRadius: outerRadius,
+			thetaSegments: thetaSegments,
+			phiSegments: phiSegments,
+			thetaStart: thetaStart,
+			thetaLength: thetaLength
+		};
+
+		thetaSegments = Math.max( 3, thetaSegments );
+		phiSegments = Math.max( 1, phiSegments );
+
+		// buffers
+
+		const indices = [];
+		const vertices = [];
+		const normals = [];
+		const uvs = [];
+
+		// some helper variables
+
+		let radius = innerRadius;
+		const radiusStep = ( ( outerRadius - innerRadius ) / phiSegments );
+		const vertex = new Vector3();
+		const uv = new Vector2();
+
+		// generate vertices, normals and uvs
+
+		for ( let j = 0; j <= phiSegments; j ++ ) {
+
+			for ( let i = 0; i <= thetaSegments; i ++ ) {
+
+				// values are generate from the inside of the ring to the outside
+
+				const segment = thetaStart + i / thetaSegments * thetaLength;
+
+				// vertex
+
+				vertex.x = radius * Math.cos( segment );
+				vertex.y = radius * Math.sin( segment );
+
+				vertices.push( vertex.x, vertex.y, vertex.z );
+
+				// normal
+
+				normals.push( 0, 0, 1 );
+
+				// uv
+
+				uv.x = ( vertex.x / outerRadius + 1 ) / 2;
+				uv.y = ( vertex.y / outerRadius + 1 ) / 2;
+
+				uvs.push( uv.x, uv.y );
+
+			}
+
+			// increase the radius for next row of vertices
+
+			radius += radiusStep;
+
+		}
+
+		// indices
+
+		for ( let j = 0; j < phiSegments; j ++ ) {
+
+			const thetaSegmentLevel = j * ( thetaSegments + 1 );
+
+			for ( let i = 0; i < thetaSegments; i ++ ) {
+
+				const segment = i + thetaSegmentLevel;
+
+				const a = segment;
+				const b = segment + thetaSegments + 1;
+				const c = segment + thetaSegments + 2;
+				const d = segment + 1;
+
+				// faces
+
+				indices.push( a, b, d );
+				indices.push( b, c, d );
+
+			}
+
+		}
+
+		// build geometry
+
+		this.setIndex( indices );
+		this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+		this.setAttribute( 'normal', new Float32BufferAttribute( normals, 3 ) );
+		this.setAttribute( 'uv', new Float32BufferAttribute( uvs, 2 ) );
+
+	}
+
+	copy( source ) {
+
+		super.copy( source );
+
+		this.parameters = Object.assign( {}, source.parameters );
+
+		return this;
+
+	}
+
+	static fromJSON( data ) {
+
+		return new RingGeometry( data.innerRadius, data.outerRadius, data.thetaSegments, data.phiSegments, data.thetaStart, data.thetaLength );
+
+	}
+
+}
+
 class Light extends Object3D {
 
 	constructor( color, intensity = 1 ) {
@@ -31469,12 +31590,12 @@ class Agent {
         // nevoa fluida
         let scene = new Scene();
         this.scenes.push(scene);
-        this.numParticles = 4096;
+        this.numParticles = 8192;
         this.simplex = new SimplexNoise();
         const material = new PointsMaterial({
-            size: 0.02,
-            opacity: 0.6,
-            color: 0x00ffff,
+            size: 0.01,
+            opacity: 0.5,
+            color: 0xaaffff,
             transparent: true,
             sizeAttenuation: true,
             blending: AdditiveBlending,
@@ -31516,7 +31637,7 @@ class Agent {
         // nucleo
         scene = new Scene();
         this.scenes.push(scene);
-        const coreGeometry = new IcosahedronGeometry(0.7, 4);
+        const coreGeometry = new IcosahedronGeometry(0.7, 5);
         const clippingPlane = new Plane(new Vector3(0, 0, 1), 0);
         const wireframeMaterial = new MeshBasicMaterial({
             opacity: 0.3,
@@ -31547,6 +31668,30 @@ class Agent {
         scene.add(this.coreGroup);
         const ambientLight = new AmbientLight(0x021111, 0.5);
         scene.add(ambientLight);
+        // anel
+        scene = new Scene();
+        const ringGroup = new Group();
+        const ringMat = new MeshBasicMaterial({
+            opacity: 0.4,
+            color: 0x00ffff,
+            wireframe: false,
+            transparent: true,
+            side: DoubleSide,
+            blending: AdditiveBlending,
+        });
+        this.scenes.push(scene);
+        for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 32) {
+            const ringGeo = new RingGeometry(1.2, // innerRadius
+            1.5, // outerRadius
+            1, // thetaSegments
+            1, // phiSegments
+            i, // thetaStart
+            Math.PI / 40 // thetaEnd
+            );
+            const techRing = new Mesh(ringGeo, ringMat);
+            ringGroup.add(techRing);
+        }
+        scene.add(ringGroup);
     }
     getScenes() {
         return this.scenes;
@@ -31595,7 +31740,7 @@ class Agent {
         const finalZ = bz + nz * offset;
         buffer.setXYZ(index, finalX, finalY, finalZ);
     }
-    cloud(externalRadius, internalRadius) {
+    cloud(externalRadius, internalRadius, center = false) {
         let isValid = false;
         let px = 0, py = 0, pz = 0;
         while (!isValid) {
@@ -31614,9 +31759,36 @@ class Agent {
     }
 }
 
-var Stylesheet$1 = "* {\r\n    z-index: 0;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n}\r\n\r\np.top {\r\n    top: 15px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: -1;\r\n    position: fixed;\r\n    pointer-events: none;\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 15px;\r\n    bottom: 15px;\r\n    position: fixed;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n}\r\n\r\ndiv.bacground {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 50px;\r\n    position: fixed;\r\n    overflow: hidden;\r\n    background-color: #071F1F;\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground {\r\n    background-color: #071F1F;\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground::before {\r\n    inset: 0;\r\n    content: '';\r\n    position: absolute;\r\n    pointer-events: none;\r\n    background:\r\n        repeating-linear-gradient(0deg,\r\n            #062627 0px,\r\n            #062627 1px,\r\n            transparent 1px,\r\n            transparent 3px);\r\n}";
+var Stylesheet$1 = "* {\r\n    z-index: 0;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n}\r\n\r\np.top {\r\n    top: 10px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    color: var(--font-color);\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: -1;\r\n    position: fixed;\r\n    pointer-events: none;\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 15px;\r\n    bottom: 15px;\r\n    position: fixed;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n}\r\n\r\ndiv.bacground {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 50px;\r\n    position: fixed;\r\n    overflow: hidden;\r\n    background-color: var(--primary-color);\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground::before {\r\n    inset: 0;\r\n    content: '';\r\n    position: absolute;\r\n    pointer-events: none;\r\n    background:\r\n        repeating-linear-gradient(0deg,\r\n            #062627 0px,\r\n            #062627 1px,\r\n            transparent 1px,\r\n            transparent 3px);\r\n}";
 
 class Main extends View {
+    themes = ['dark', 'light', 'high-contrast'];
+    themeIndex = 0;
+    constructor() {
+        super(true);
+        const savedTheme = window.localStorage.getItem('theme') || 'dark';
+        this.themeIndex = this.themes.indexOf(savedTheme);
+        if (this.themeIndex === -1)
+            this.themeIndex = 0;
+        this.applyTheme();
+    }
+    applyTheme() {
+        const theme = this.themes[this.themeIndex];
+        document.body.setAttribute('theme', theme);
+        window.localStorage.setItem('theme', theme);
+    }
+    toggleTheme() {
+        this.themeIndex = (this.themeIndex + 1) % this.themes.length;
+        this.applyTheme();
+        // Repintar o componente para atualizar as cores do custom-shape
+        this.handler();
+    }
+    getThemeColor() {
+        const theme = this.themes[this.themeIndex];
+        if (theme === 'dark')
+            return '#071F1F';
+        return '#E0E0E0'; // Light and High-Contrast
+    }
     render() {
         const sheet = new CSSStyleSheet();
         sheet.replace(Stylesheet$1);
@@ -31661,6 +31833,10 @@ class Main extends View {
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
         }
+        const themeButton = this.shadow.querySelector('button[type="button"]');
+        if (themeButton) {
+            themeButton.addEventListener('click', () => this.toggleTheme());
+        }
         const shape = this.shadow.querySelector('custom-shape');
         if (shape) {
             // top
@@ -31693,7 +31869,7 @@ class Main extends View {
                 }
                 path.push([0, 0]);
                 return {
-                    color: '#071F1F',
+                    color: this.getThemeColor(),
                     points: path,
                 };
             });
@@ -31702,7 +31878,7 @@ class Main extends View {
                 const top = shape.height - 50;
                 const center = shape.width / 2.0;
                 return {
-                    color: '#071F1F',
+                    color: this.getThemeColor(),
                     points: [
                         [0, top],
                         [Math.min(center - 128, 10), top],

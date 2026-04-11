@@ -5,12 +5,12 @@ body[theme="dark"] {
 }
 
 body[theme="light"] {
-    --font-color: #AAA;
-    --primary-color: #111;
-    --background-color: #222;
+    --font-color: #333;
+    --primary-color: #555;
+    --background-color: #F0F0F0;
 }
 
-body[theme="high_contrast"] {
+body[theme="high-contrast"] {
     --font-color: #000;
     --primary-color: #000;
     --background-color: #FFF;
@@ -27,3 +27,10 @@ body {
     font-family: 'Courier New', monospace;
     text-shadow: 0 0 10px var(--font-color);
 }
+
+body[theme="high-contrast"] * {
+    text-shadow: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+}

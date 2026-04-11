@@ -17,12 +17,12 @@ export default class Agent {
 
         let scene = new THREE.Scene()
         this.scenes.push(scene)
-        this.numParticles = 4096
+        this.numParticles = 8192
         this.simplex = new SimplexNoise()
         const material = new THREE.PointsMaterial({
-            size: 0.02,
-            opacity: 0.6,
-            color: 0x00ffff,
+            size: 0.01,
+            opacity: 0.5,
+            color: 0xaaffff,
             transparent: true,
             sizeAttenuation: true,
             blending: THREE.AdditiveBlending,
@@ -70,7 +70,7 @@ export default class Agent {
         scene = new THREE.Scene()
         this.scenes.push(scene)
 
-        const coreGeometry = new THREE.IcosahedronGeometry(0.7, 4)
+        const coreGeometry = new THREE.IcosahedronGeometry(0.7, 5)
         const clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
         const wireframeMaterial = new THREE.MeshBasicMaterial({
             opacity: 0.3,
@@ -102,6 +102,32 @@ export default class Agent {
 
         const ambientLight = new THREE.AmbientLight(0x021111, 0.5)
         scene.add(ambientLight)
+
+        // anel
+        scene = new THREE.Scene()
+        const ringGroup = new THREE.Group()
+        const ringMat = new THREE.MeshBasicMaterial({
+            opacity: 0.4,
+            color: 0x00ffff,
+            wireframe: false,
+            transparent: true,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+        })
+        this.scenes.push(scene)
+        for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 32) {
+            const ringGeo = new THREE.RingGeometry(
+                1.2, // innerRadius
+                1.5, // outerRadius
+                1, // thetaSegments
+                1, // phiSegments
+                i, // thetaStart
+                Math.PI / 40 // thetaEnd
+            )
+            const techRing = new THREE.Mesh(ringGeo, ringMat)
+            ringGroup.add(techRing)
+        }
+        scene.add(ringGroup)
     }
 
     public getScenes(): THREE.Scene[] {
@@ -174,7 +200,7 @@ export default class Agent {
         buffer.setXYZ(index, finalX, finalY, finalZ)
     }
 
-    private cloud(externalRadius: number, internalRadius: number): Array<number> {
+    private cloud(externalRadius: number, internalRadius: number, center: boolean = false): Array<number> {
         let isValid = false
         let px = 0, py = 0, pz = 0
         while (!isValid) {

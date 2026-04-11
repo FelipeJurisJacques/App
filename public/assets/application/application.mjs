@@ -31698,33 +31698,33 @@ class Main extends View {
             });
             // bottom
             shape.polygon(() => {
-                const top = shape.height - 50;
+                const top = shape.height - 100;
                 const center = shape.width / 2.0;
                 return {
                     color: '#071F1F',
                     points: [
                         [0, top],
-                        [Math.max(center - 230, 10), top],
-                        [Math.max(center - 220, 20), top - 10],
-                        [center - 50, top - 10],
+                        [Math.min(center - 230, 10), top],
+                        [Math.min(center - 220, 20), top - 20],
+                        [center - 50, top - 20],
                         [center - 40, top],
                         [center + 40, top],
-                        [center + 50, top - 10],
-                        [Math.min(center + 220, shape.width - 20), top - 10],
-                        [Math.min(center + 230, shape.width - 10), top],
+                        [center + 50, top - 20],
+                        [Math.max(center + 220, shape.width - 20), top - 20],
+                        [Math.max(center + 230, shape.width - 10), top],
                         [shape.width, top],
                         // [shape.width, shape.height],
                         // [0, shape.height],
                         // [0, top],
                         [shape.width, top - 2],
-                        [Math.min(center + 230, shape.width - 10), top - 2],
-                        [Math.min(center + 220, shape.width - 20), top - 12],
-                        [center + 50, top - 12],
+                        [Math.max(center + 230, shape.width - 10), top - 2],
+                        [Math.max(center + 220, shape.width - 20), top - 22],
+                        [center + 50, top - 22],
                         [center + 40, top - 2],
                         [center - 40, top - 2],
-                        [center - 50, top - 12],
-                        [Math.max(center - 220, 20), top - 12],
-                        [Math.max(center - 230, 10), top - 2],
+                        [center - 50, top - 22],
+                        [Math.min(center - 220, 20), top - 22],
+                        [Math.min(center - 230, 10), top - 2],
                         [0, top - 2],
                         [0, top],
                     ],

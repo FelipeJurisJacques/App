@@ -30571,6 +30571,20 @@ function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, inte
 
 }
 
+class CanvasTexture extends Texture {
+
+	constructor( canvas, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy ) {
+
+		super( canvas, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy );
+
+		this.isCanvasTexture = true;
+
+		this.needsUpdate = true;
+
+	}
+
+}
+
 class PolyhedronGeometry extends BufferGeometry {
 
 	constructor( vertices = [], indices = [], radius = 1, detail = 0 ) {
@@ -31587,15 +31601,18 @@ class Agent {
     particleNoisePositions2;
     constructor() {
         this.scenes = [];
+        this.numParticles = 4096;
+        this.simplex = new SimplexNoise();
+        const glowTexture = this.createGlowTexture();
         // nevoa fluida
         let scene = new Scene();
         this.scenes.push(scene);
-        this.numParticles = 8192;
-        this.simplex = new SimplexNoise();
         const material = new PointsMaterial({
-            size: 0.01,
+            size: 0.05,
             opacity: 0.5,
             color: 0xaaffff,
+            map: glowTexture,
+            depthWrite: false,
             transparent: true,
             sizeAttenuation: true,
             blending: AdditiveBlending,
@@ -31651,8 +31668,8 @@ class Agent {
         });
         const coreWireframe = new Mesh(coreGeometry, wireframeMaterial);
         const pointsMaterial = new PointsMaterial({
-            size: 0.02,
-            opacity: 0.9,
+            size: 0.03,
+            opacity: 0.5,
             color: 0x00ffff,
             depthWrite: false,
             transparent: true,
@@ -31712,12 +31729,12 @@ class Agent {
         buffer.needsUpdate = true;
         const buffer2 = this.particleNoisePoints2.geometry.getAttribute('position');
         for (let i = 0; i < this.numParticles; i++) {
-            this.noise(buffer2, this.particleNoisePositions2, 0.05, 2.0, time, i);
+            this.noise(buffer2, this.particleNoisePositions2, 0.05, 0.7, time, i);
         }
         buffer2.needsUpdate = true;
         // Rotação suave para mostrar a complexidade 3D
-        this.coreGroup.rotation.y += 0.002;
-        this.coreGroup.rotation.x += 0.001;
+        this.coreGroup.rotation.y += 0.001;
+        this.coreGroup.rotation.x += 0.0005;
         // // OPCIONAL: Adicionar uma pulsação sutil na opacidade para simular o "pensamento"
         // this.coreGroup.material.opacity = 0.7 + Math.sin(time * 2) * 0.2
     }
@@ -31756,6 +31773,20 @@ class Agent {
             }
         }
         return [px, py, pz];
+    }
+    createGlowTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 16;
+        canvas.height = 16;
+        const context = canvas.getContext('2d');
+        const gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0.2, 'rgba(0, 255, 255, 0.8)');
+        gradient.addColorStop(0.5, 'rgba(0, 128, 128, 0.3)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        return new CanvasTexture(canvas);
     }
 }
 

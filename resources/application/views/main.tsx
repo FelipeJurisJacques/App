@@ -1,6 +1,6 @@
 import View from './view'
 import * as THREE from 'three'
-import Agent from '../utils/Agent'
+import Agent from '../utils/agent/Agent'
 import CustomShape from '../components/CustomShape'
 import Stylesheet from '../../stylesheets/views/main.css'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'

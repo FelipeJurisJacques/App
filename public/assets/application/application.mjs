@@ -32386,23 +32386,19 @@ class SimplexNoise {
 
 }
 
-class Agent {
+class Particles {
+    scene;
     numParticles;
     simplex;
-    scenes;
-    coreGroup;
     particleNoisePoints1;
     particleNoisePoints2;
     particleNoisePositions1;
     particleNoisePositions2;
     constructor() {
-        this.scenes = [];
         this.numParticles = 1024;
+        this.scene = new Scene();
         this.simplex = new SimplexNoise();
         const glowTexture = this.createGlowTexture();
-        // nevoa fluida
-        let scene = new Scene();
-        this.scenes.push(scene);
         const material = new PointsMaterial({
             size: 0.05,
             opacity: 0.5,
@@ -32445,87 +32441,11 @@ class Agent {
         this.particleNoisePoints2 = new Points(sphereGeometry2, material);
         this.particleNoisePoints1.position.set(0, 0, 0);
         this.particleNoisePoints2.position.set(0, 0, 0);
-        scene.add(this.particleNoisePoints1);
-        scene.add(this.particleNoisePoints2);
-        // nucleo
-        scene = new Scene();
-        this.scenes.push(scene);
-        const coreGeometry = new IcosahedronGeometry(0.7, 5);
-        const clippingPlane = new Plane(new Vector3(0, 0, 1), 0);
-        const wireframeMaterial = new MeshBasicMaterial({
-            opacity: 0.3,
-            color: 0x00ffff,
-            wireframe: true,
-            depthWrite: false,
-            transparent: true,
-            clipIntersection: false,
-            clippingPlanes: [clippingPlane],
-            blending: AdditiveBlending,
-        });
-        const coreWireframe = new Mesh(coreGeometry, wireframeMaterial);
-        const pointsMaterial = new PointsMaterial({
-            size: 0.03,
-            opacity: 0.5,
-            color: 0x00ffff,
-            depthWrite: false,
-            transparent: true,
-            sizeAttenuation: true,
-            clipIntersection: false,
-            clippingPlanes: [clippingPlane],
-            blending: AdditiveBlending,
-        });
-        const corePoints = new Points(coreGeometry, pointsMaterial);
-        this.coreGroup = new Group();
-        this.coreGroup.add(coreWireframe);
-        this.coreGroup.add(corePoints);
-        scene.add(this.coreGroup);
-        // bloom (glow)
-        const centralGlowTexture = this.createCentralGlowTexture();
-        const centralGlowMaterial = new SpriteMaterial({
-            transparent: true,
-            depthWrite: false,
-            map: centralGlowTexture,
-            blending: AdditiveBlending,
-        });
-        const centralGlow = new Sprite(centralGlowMaterial);
-        centralGlow.scale.set(7, 7, 1);
-        scene.add(centralGlow);
-        const ambientLight = new AmbientLight(0x021111, 0.5);
-        scene.add(ambientLight);
-        // anel
-        scene = new Scene();
-        const ringGroup = new Group();
-        const ringMat = new MeshBasicMaterial({
-            // opacity: 0.4,
-            color: 0x00ffff,
-            wireframe: false,
-            transparent: false,
-            side: DoubleSide,
-            blending: AdditiveBlending,
-        });
-        this.scenes.push(scene);
-        for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 32) {
-            const ringGeo = new RingGeometry(1.2, // innerRadius
-            1.5, // outerRadius
-            1, // thetaSegments
-            1, // phiSegments
-            i, // thetaStart
-            Math.PI / 40 // thetaEnd
-            );
-            const techRing = new Mesh(ringGeo, ringMat);
-            ringGroup.add(techRing);
-        }
-        scene.add(ringGroup);
+        this.scene.add(this.particleNoisePoints1);
+        this.scene.add(this.particleNoisePoints2);
     }
-    getScenes() {
-        return this.scenes;
-    }
-    speak(message) {
-        const speak = new SpeechSynthesisUtterance(message);
-        speak.rate = 2;
-        speak.pitch = 1;
-        speak.volume = 1;
-        window.speechSynthesis.speak(speak);
+    getScene() {
+        return this.scene;
     }
     animate() {
         const time = Date.now() * 0.001;
@@ -32539,11 +32459,6 @@ class Agent {
             this.noise(buffer2, this.particleNoisePositions2, 0.1, 0.8, time, i);
         }
         buffer2.needsUpdate = true;
-        // Rotação suave para mostrar a complexidade 3D
-        this.coreGroup.rotation.y += 0.001;
-        this.coreGroup.rotation.x += 0.0005;
-        // // OPCIONAL: Adicionar uma pulsação sutil na opacidade para simular o "pensamento"
-        // this.coreGroup.material.opacity = 0.7 + Math.sin(time * 2) * 0.2
     }
     noise(buffer, positions, noiseFactor, noiseScale, time, index) {
         const i3 = index * 3;
@@ -32594,6 +32509,121 @@ class Agent {
         context.fillStyle = gradient;
         context.fillRect(0, 0, canvas.width, canvas.height);
         return new CanvasTexture(canvas);
+    }
+}
+
+class Agent {
+    particles;
+    scenes;
+    coreGroup;
+    ringSegments = [];
+    constructor() {
+        this.particles = new Particles();
+        this.scenes = [
+            this.particles.getScene()
+        ];
+        // nucleo
+        let scene = new Scene();
+        this.scenes.push(scene);
+        const coreGeometry = new IcosahedronGeometry(0.7, 5);
+        const clippingPlane = new Plane(new Vector3(0, 0, 1), 0);
+        const wireframeMaterial = new MeshBasicMaterial({
+            opacity: 0.3,
+            color: 0x00ffff,
+            wireframe: true,
+            depthWrite: false,
+            transparent: true,
+            clipIntersection: false,
+            clippingPlanes: [clippingPlane],
+            blending: AdditiveBlending,
+        });
+        const coreWireframe = new Mesh(coreGeometry, wireframeMaterial);
+        const pointsMaterial = new PointsMaterial({
+            size: 0.03,
+            opacity: 0.5,
+            color: 0x00ffff,
+            depthWrite: false,
+            transparent: true,
+            sizeAttenuation: true,
+            clipIntersection: false,
+            clippingPlanes: [clippingPlane],
+            blending: AdditiveBlending,
+        });
+        const corePoints = new Points(coreGeometry, pointsMaterial);
+        this.coreGroup = new Group();
+        this.coreGroup.add(coreWireframe);
+        this.coreGroup.add(corePoints);
+        scene.add(this.coreGroup);
+        // bloom (glow)
+        const centralGlowTexture = this.createCentralGlowTexture();
+        const centralGlowMaterial = new SpriteMaterial({
+            transparent: true,
+            depthWrite: false,
+            map: centralGlowTexture,
+            blending: AdditiveBlending,
+        });
+        const centralGlow = new Sprite(centralGlowMaterial);
+        centralGlow.scale.set(7, 7, 1);
+        scene.add(centralGlow);
+        const ambientLight = new AmbientLight(0x021111, 0.5);
+        scene.add(ambientLight);
+        // anel
+        scene = new Scene();
+        const ringGroup = new Group();
+        this.scenes.push(scene);
+        for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 32) {
+            const ringGeo = new RingGeometry(1.2, // innerRadius
+            1.5, // outerRadius
+            1, // thetaSegments
+            1, // phiSegments
+            i, // thetaStart
+            Math.PI / 40 // thetaEnd
+            );
+            const ringMat = new MeshBasicMaterial({
+                color: 0x00ffff,
+                wireframe: false,
+                transparent: true,
+                side: DoubleSide,
+                blending: AdditiveBlending,
+            });
+            const techRing = new Mesh(ringGeo, ringMat);
+            techRing.userData.angle = i;
+            this.ringSegments.push(techRing);
+            ringGroup.add(techRing);
+        }
+        scene.add(ringGroup);
+    }
+    getScenes() {
+        return this.scenes;
+    }
+    speak(message) {
+        const speak = new SpeechSynthesisUtterance(message);
+        speak.rate = 2;
+        speak.pitch = 1;
+        speak.volume = 1;
+        window.speechSynthesis.speak(speak);
+    }
+    animate() {
+        const time = Date.now() * 0.001;
+        this.particles.animate(time);
+        // Rotação suave para mostrar a complexidade 3D
+        this.coreGroup.rotation.y += 0.001;
+        this.coreGroup.rotation.x += 0.0005;
+        // Iluminação orbital do anel
+        // Começa em 45 graus (Math.PI / 4) e se move no tempo
+        const lightPos = (Math.PI / 4) + (time * 0.05);
+        for (const segment of this.ringSegments) {
+            const angle = segment.userData.angle;
+            // Calcula a distância angular curta entre o segmento e o ponto de luz
+            const dist = Math.atan2(Math.sin(angle - lightPos), Math.cos(angle - lightPos));
+            // Intensidade baseada no cosseno da distância (mais próximo = mais iluminado)
+            // Elevamos ao cubo para tornar o feixe mais "fechado" e menos simétrico (degradê rápido)
+            const intensity = Math.pow(Math.max(0, Math.cos(dist)), 3);
+            const mat = segment.material;
+            mat.opacity = 0.1 + intensity * 0.9;
+        }
+        // // OPCIONAL: Adicionar uma pulsação sutil na opacidade para simular o "pensamento"
+        // this.coreGroup.material.opacity = 0.7 + Math.sin(time * 2) * 0.2
     }
     createCentralGlowTexture() {
         const canvas = document.createElement('canvas');

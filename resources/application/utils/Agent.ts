@@ -104,6 +104,18 @@ export default class Agent {
         this.coreGroup.add(corePoints)
         scene.add(this.coreGroup)
 
+        // bloom (glow)
+        const centralGlowTexture = this.createCentralGlowTexture()
+        const centralGlowMaterial = new THREE.SpriteMaterial({
+            transparent: true,
+            depthWrite: false,
+            map: centralGlowTexture,
+            blending: THREE.AdditiveBlending,
+        })
+        const centralGlow = new THREE.Sprite(centralGlowMaterial)
+        centralGlow.scale.set(7, 7, 1)
+        scene.add(centralGlow)
+
         const ambientLight = new THREE.AmbientLight(0x021111, 0.5)
         scene.add(ambientLight)
 
@@ -111,10 +123,10 @@ export default class Agent {
         scene = new THREE.Scene()
         const ringGroup = new THREE.Group()
         const ringMat = new THREE.MeshBasicMaterial({
-            opacity: 0.4,
+            // opacity: 0.4,
             color: 0x00ffff,
             wireframe: false,
-            transparent: true,
+            transparent: false,
             side: THREE.DoubleSide,
             blending: THREE.AdditiveBlending,
         })
@@ -246,6 +258,23 @@ export default class Agent {
 
         context.fillStyle = gradient
         context.fillRect(0, 0, canvas.width, canvas.height)
+
+        return new THREE.CanvasTexture(canvas)
+    }
+
+    private createCentralGlowTexture(): THREE.CanvasTexture {
+        const canvas = document.createElement('canvas')
+        canvas.width = 128
+        canvas.height = 128
+        const context = canvas.getContext('2d')!
+
+        const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64)
+        gradient.addColorStop(0, 'rgba(0, 255, 255, 0.4)')
+        gradient.addColorStop(0.4, 'rgba(0, 150, 150, 0.1)')
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
+
+        context.fillStyle = gradient
+        context.fillRect(0, 0, 128, 128)
 
         return new THREE.CanvasTexture(canvas)
     }

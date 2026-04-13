@@ -3,10 +3,12 @@ import * as THREE from 'three'
 import Agent from '../utils/Agent'
 import CustomShape from '../components/CustomShape'
 import Stylesheet from '../../stylesheets/views/main.css'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 export default class Main extends View {
     private themes = ['dark', 'light', 'high-contrast']
     private themeIndex = 0
+    private allowCameraRotation = true
 
     public constructor() {
         super(true)
@@ -73,12 +75,21 @@ export default class Main extends View {
             )
             camera.position.z = 5
 
+            let controls: OrbitControls | undefined
+            if (this.allowCameraRotation) {
+                controls = new OrbitControls(camera, renderer.domElement)
+                controls.enableDamping = true
+                controls.dampingFactor = 0.05
+                controls.screenSpacePanning = false
+            }
+
             const agent = new Agent()
 
             renderer.autoClear = false
             const animate = () => {
                 requestAnimationFrame(animate)
                 agent.animate()
+                if (controls) controls.update()
                 renderer.clear()
                 for (let scene of agent.getScenes()) {
                     renderer.render(scene, camera)

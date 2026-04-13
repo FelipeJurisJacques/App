@@ -13,7 +13,7 @@ export default class Agent {
 
     public constructor() {
         this.scenes = []
-        this.numParticles = 4096
+        this.numParticles = 1024
         this.simplex = new SimplexNoise()
         const glowTexture = this.createGlowTexture()
 
@@ -41,7 +41,7 @@ export default class Agent {
 
         for (let i = 0; i < this.numParticles; i++) {
             const i3 = i * 3
-            const [px, py, pz] = this.cloud(2.0, 1.9)
+            const [px, py, pz] = this.cloud(2.0, 1.95)
             positions1[i3 + 0] = px!
             positions1[i3 + 1] = py!
             positions1[i3 + 2] = pz!
@@ -52,7 +52,7 @@ export default class Agent {
 
         for (let i = 0; i < this.numParticles; i++) {
             const i3 = i * 3
-            const [px, py, pz] = this.cloud(1.6, 1.5)
+            const [px, py, pz] = this.cloud(1.95, 1.8)
             positions2[i3 + 0] = px!
             positions2[i3 + 1] = py!
             positions2[i3 + 2] = pz!
@@ -162,13 +162,13 @@ export default class Agent {
         const time = Date.now() * 0.001
         const buffer = this.particleNoisePoints1.geometry.getAttribute('position') as THREE.BufferAttribute
         for (let i = 0; i < this.numParticles; i++) {
-            this.noise(buffer, this.particleNoisePositions1, 0.1, 1.0, time, i)
+            this.noise(buffer, this.particleNoisePositions1, 0.3, 0.8, time, i)
         }
         buffer.needsUpdate = true
 
         const buffer2 = this.particleNoisePoints2.geometry.getAttribute('position') as THREE.BufferAttribute
         for (let i = 0; i < this.numParticles; i++) {
-            this.noise(buffer2, this.particleNoisePositions2, 0.05, 0.7, time, i)
+            this.noise(buffer2, this.particleNoisePositions2, 0.1, 0.8, time, i)
         }
         buffer2.needsUpdate = true
 
@@ -216,7 +216,7 @@ export default class Agent {
         buffer.setXYZ(index, finalX, finalY, finalZ)
     }
 
-    private cloud(externalRadius: number, internalRadius: number, center: boolean = false): Array<number> {
+    private cloud(externalRadius: number, internalRadius: number): Array<number> {
         let isValid = false
         let px = 0, py = 0, pz = 0
         while (!isValid) {
@@ -233,7 +233,7 @@ export default class Agent {
                 isValid = true
             }
         }
-        return [px, py, pz]
+        return [px, py, pz / 2.0]
     }
 
     private createGlowTexture(): THREE.CanvasTexture {

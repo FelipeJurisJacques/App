@@ -11,11 +11,10 @@ export default class Particles {
     private readonly particleNoisePositions2: Float32Array
 
     public constructor() {
-        this.numParticles = 4096
+        this.numParticles = 2048
         this.scene = new THREE.Scene()
         this.simplex = new SimplexNoise()
         const glowTexture = this.createGlowTexture()
-
         const material = new THREE.PointsMaterial({
             size: 0.05,
             opacity: 0.5,
@@ -27,13 +26,10 @@ export default class Particles {
             sizeAttenuation: true,
             blending: THREE.AdditiveBlending,
         })
-
         const sphereGeometry1 = new THREE.BufferGeometry()
         const sphereGeometry2 = new THREE.BufferGeometry()
-
-        this.particleNoisePositions1 = this.sphereVertices(2.0, 1.9, this.numParticles)
+        this.particleNoisePositions1 = this.sphereVertices(1.8, 1.7, this.numParticles)
         this.particleNoisePositions2 = this.sphereVertices(1.7, 1.5, this.numParticles)
-
         sphereGeometry1.setAttribute('position', new THREE.BufferAttribute(new Float32Array(this.particleNoisePositions1), 3))
         sphereGeometry2.setAttribute('position', new THREE.BufferAttribute(new Float32Array(this.particleNoisePositions2), 3))
         sphereGeometry1.setAttribute('color', new THREE.BufferAttribute(new Float32Array(this.numParticles * 3), 3))
@@ -129,7 +125,7 @@ export default class Particles {
                 const pz = radius * Math.cos(phi)
 
                 const distXY = Math.sqrt(px * px + py * py)
-                if (distXY >= internalRadius) {
+                if (pz > 0 && distXY >= internalRadius) {
                     allPoints.push([px, py, pz])
                 }
             }

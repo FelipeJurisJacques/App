@@ -31943,6 +31943,213 @@ if ( typeof window !== 'undefined' ) {
 
 }
 
+class Core {
+    scene;
+    coreGroup;
+    constructor() {
+        this.scene = new Scene();
+        const coreGeometry = new IcosahedronGeometry(0.7, 5);
+        const clippingPlane = new Plane(new Vector3(0, 0, 1), 0);
+        const wireframeMaterial = new MeshBasicMaterial({
+            opacity: 0.3,
+            color: 0x00ffff,
+            wireframe: true,
+            depthWrite: false,
+            transparent: true,
+            clipIntersection: false,
+            clippingPlanes: [clippingPlane],
+            blending: AdditiveBlending,
+        });
+        const coreWireframe = new Mesh(coreGeometry, wireframeMaterial);
+        const pointsMaterial = new PointsMaterial({
+            size: 0.03,
+            opacity: 0.5,
+            color: 0x00ffff,
+            depthWrite: false,
+            transparent: true,
+            sizeAttenuation: true,
+            clipIntersection: false,
+            clippingPlanes: [clippingPlane],
+            blending: AdditiveBlending,
+        });
+        const corePoints = new Points(coreGeometry, pointsMaterial);
+        this.coreGroup = new Group();
+        this.coreGroup.add(coreWireframe);
+        this.coreGroup.add(corePoints);
+        this.scene.add(this.coreGroup);
+        const centralGlowTexture = this.createCentralGlowTexture();
+        const centralGlowMaterial = new SpriteMaterial({
+            transparent: true,
+            depthWrite: false,
+            map: centralGlowTexture,
+            blending: AdditiveBlending,
+        });
+        const centralGlow = new Sprite(centralGlowMaterial);
+        centralGlow.scale.set(7, 7, 1);
+        this.scene.add(centralGlow);
+        const ambientLight = new AmbientLight(0x021111, 0.5);
+        this.scene.add(ambientLight);
+    }
+    getScene() {
+        return this.scene;
+    }
+    animate() {
+        this.coreGroup.rotation.y += 0.001;
+        this.coreGroup.rotation.x += 0.0005;
+    }
+    createCentralGlowTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const context = canvas.getContext('2d');
+        const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
+        gradient.addColorStop(0, 'rgba(0, 255, 255, 0.4)');
+        gradient.addColorStop(0.4, 'rgba(0, 150, 150, 0.1)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, 128, 128);
+        return new CanvasTexture(canvas);
+    }
+}
+
+class Rings {
+    ring1;
+    ring2;
+    ring3;
+    ring4;
+    ring5;
+    ring6;
+    ring7;
+    scene;
+    ringSegments = [];
+    constructor() {
+        this.ringSegments = [];
+        this.scene = new Scene();
+        const ringGroup = new Group();
+        for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 32) {
+            const ringGeo = new RingGeometry(1.2, // innerRadius
+            1.5, // outerRadius
+            1, // thetaSegments
+            1, // phiSegments
+            i, // thetaStart
+            Math.PI / 40 // thetaEnd
+            );
+            const ringMat = new MeshBasicMaterial({
+                color: 0x00ffff,
+                wireframe: false,
+                transparent: false,
+                side: DoubleSide,
+                blending: AdditiveBlending,
+            });
+            const techRing = new Mesh(ringGeo, ringMat);
+            techRing.userData.angle = i;
+            this.ringSegments.push(techRing);
+            ringGroup.add(techRing);
+        }
+        this.scene.add(ringGroup);
+        const material = new MeshBasicMaterial({
+            color: 0x00ffff,
+            wireframe: false,
+            transparent: false,
+            side: DoubleSide,
+            blending: AdditiveBlending,
+        });
+        let geometry = new RingGeometry(0.8, // innerRadius
+        0.85, // outerRadius
+        16, // thetaSegments
+        1, // phiSegments
+        0, // thetaStart
+        Math.PI / 2 // thetaEnd
+        );
+        this.ring1 = new Mesh(geometry, material);
+        this.ring1.userData.angle = 0;
+        this.scene.add(this.ring1);
+        geometry = new RingGeometry(0.85, // innerRadius
+        0.9, // outerRadius
+        8, // thetaSegments
+        1, // phiSegments
+        Math.PI / 4, // thetaStart
+        Math.PI / 4 // thetaEnd
+        );
+        this.ring2 = new Mesh(geometry, material);
+        this.ring2.userData.angle = 0;
+        this.scene.add(this.ring2);
+        geometry = new RingGeometry(0.9, // innerRadius
+        0.95, // outerRadius
+        16, // thetaSegments
+        1, // phiSegments
+        Math.PI / 2, // thetaStart
+        Math.PI / 2 // thetaEnd
+        );
+        this.ring3 = new Mesh(geometry, material);
+        this.ring3.userData.angle = 0;
+        this.scene.add(this.ring3);
+        geometry = new RingGeometry(0.95, // innerRadius
+        1.0, // outerRadius
+        8, // thetaSegments
+        1, // phiSegments
+        Math.PI, // thetaStart
+        Math.PI / 4 // thetaEnd
+        );
+        this.ring4 = new Mesh(geometry, material);
+        this.ring4.userData.angle = 0;
+        this.scene.add(this.ring4);
+        geometry = new RingGeometry(1.0, // innerRadius
+        1.05, // outerRadius
+        16, // thetaSegments
+        1, // phiSegments
+        0, // thetaStart
+        Math.PI / 2 // thetaEnd
+        );
+        this.ring5 = new Mesh(geometry, material);
+        this.ring5.userData.angle = 0;
+        this.scene.add(this.ring5);
+        geometry = new RingGeometry(1.05, // innerRadius
+        1.1, // outerRadius
+        16, // thetaSegments
+        1, // phiSegments
+        Math.PI / 2, // thetaStart
+        Math.PI / 2 // thetaEnd
+        );
+        this.ring6 = new Mesh(geometry, material);
+        this.ring6.userData.angle = 0;
+        this.scene.add(this.ring6);
+        geometry = new RingGeometry(1.1, // innerRadius
+        1.15, // outerRadius
+        8, // thetaSegments
+        1, // phiSegments
+        Math.PI, // thetaStart
+        Math.PI / 4 // thetaEnd
+        );
+        this.ring7 = new Mesh(geometry, material);
+        this.ring7.userData.angle = 0;
+        this.scene.add(this.ring7);
+    }
+    getScene() {
+        return this.scene;
+    }
+    animate(time) {
+        this.ring1.rotation.z += 0.002;
+        this.ring2.rotation.z -= 0.002;
+        this.ring3.rotation.z += 0.001;
+        this.ring4.rotation.z -= 0.001;
+        this.ring5.rotation.z -= 0.0025;
+        this.ring6.rotation.z += 0.0025;
+        this.ring7.rotation.z -= 0.0015;
+        const lightPos = (Math.PI / 4) + (time * 0.05);
+        for (const segment of this.ringSegments) {
+            const angle = segment.userData.angle;
+            // Calcula a distância angular curta entre o segmento e o ponto de luz
+            const dist = Math.atan2(Math.sin(angle - lightPos), Math.cos(angle - lightPos));
+            // Intensidade baseada no cosseno da distância (mais próximo = mais iluminado)
+            // Elevamos ao cubo para tornar o feixe mais "fechado" e menos simétrico (degradê rápido)
+            const intensity = Math.pow(Math.max(0, Math.cos(dist)), 3);
+            const mat = segment.material;
+            mat.opacity = 0.1 + intensity * 0.9;
+        }
+    }
+}
+
 // Ported from Stefan Gustavson's java implementation
 // http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
 // Read Stefan's excellent paper for details on how this code works.
@@ -32395,7 +32602,7 @@ class Particles {
     particleNoisePositions1;
     particleNoisePositions2;
     constructor() {
-        this.numParticles = 4096;
+        this.numParticles = 2048;
         this.scene = new Scene();
         this.simplex = new SimplexNoise();
         const glowTexture = this.createGlowTexture();
@@ -32412,7 +32619,7 @@ class Particles {
         });
         const sphereGeometry1 = new BufferGeometry();
         const sphereGeometry2 = new BufferGeometry();
-        this.particleNoisePositions1 = this.sphereVertices(2.0, 1.9, this.numParticles);
+        this.particleNoisePositions1 = this.sphereVertices(1.8, 1.7, this.numParticles);
         this.particleNoisePositions2 = this.sphereVertices(1.7, 1.5, this.numParticles);
         sphereGeometry1.setAttribute('position', new BufferAttribute(new Float32Array(this.particleNoisePositions1), 3));
         sphereGeometry2.setAttribute('position', new BufferAttribute(new Float32Array(this.particleNoisePositions2), 3));
@@ -32483,7 +32690,7 @@ class Particles {
                 const py = radius * Math.sin(phi) * Math.sin(theta);
                 const pz = radius * Math.cos(phi);
                 const distXY = Math.sqrt(px * px + py * py);
-                if (distXY >= internalRadius) {
+                if (pz > 0 && distXY >= internalRadius) {
                     allPoints.push([px, py, pz]);
                 }
             }
@@ -32518,85 +32725,19 @@ class Particles {
 }
 
 class Agent {
+    core;
+    rings;
     particles;
     scenes;
-    coreGroup;
-    ringSegments = [];
     constructor() {
+        this.core = new Core();
         this.particles = new Particles();
+        this.rings = new Rings();
         this.scenes = [
-            this.particles.getScene()
+            this.core.getScene(),
+            this.rings.getScene(),
+            this.particles.getScene(),
         ];
-        // nucleo
-        let scene = new Scene();
-        this.scenes.push(scene);
-        const coreGeometry = new IcosahedronGeometry(0.7, 5);
-        const clippingPlane = new Plane(new Vector3(0, 0, 1), 0);
-        const wireframeMaterial = new MeshBasicMaterial({
-            opacity: 0.3,
-            color: 0x00ffff,
-            wireframe: true,
-            depthWrite: false,
-            transparent: true,
-            clipIntersection: false,
-            clippingPlanes: [clippingPlane],
-            blending: AdditiveBlending,
-        });
-        const coreWireframe = new Mesh(coreGeometry, wireframeMaterial);
-        const pointsMaterial = new PointsMaterial({
-            size: 0.03,
-            opacity: 0.5,
-            color: 0x00ffff,
-            depthWrite: false,
-            transparent: true,
-            sizeAttenuation: true,
-            clipIntersection: false,
-            clippingPlanes: [clippingPlane],
-            blending: AdditiveBlending,
-        });
-        const corePoints = new Points(coreGeometry, pointsMaterial);
-        this.coreGroup = new Group();
-        this.coreGroup.add(coreWireframe);
-        this.coreGroup.add(corePoints);
-        scene.add(this.coreGroup);
-        // bloom (glow)
-        const centralGlowTexture = this.createCentralGlowTexture();
-        const centralGlowMaterial = new SpriteMaterial({
-            transparent: true,
-            depthWrite: false,
-            map: centralGlowTexture,
-            blending: AdditiveBlending,
-        });
-        const centralGlow = new Sprite(centralGlowMaterial);
-        centralGlow.scale.set(7, 7, 1);
-        scene.add(centralGlow);
-        const ambientLight = new AmbientLight(0x021111, 0.5);
-        scene.add(ambientLight);
-        // anel
-        scene = new Scene();
-        const ringGroup = new Group();
-        this.scenes.push(scene);
-        for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 32) {
-            const ringGeo = new RingGeometry(1.2, // innerRadius
-            1.5, // outerRadius
-            1, // thetaSegments
-            1, // phiSegments
-            i, // thetaStart
-            Math.PI / 40 // thetaEnd
-            );
-            const ringMat = new MeshBasicMaterial({
-                color: 0x00ffff,
-                wireframe: false,
-                transparent: true,
-                side: DoubleSide,
-                blending: AdditiveBlending,
-            });
-            const techRing = new Mesh(ringGeo, ringMat);
-            techRing.userData.angle = i;
-            this.ringSegments.push(techRing);
-            ringGroup.add(techRing);
-        }
-        scene.add(ringGroup);
     }
     getScenes() {
         return this.scenes;
@@ -32611,37 +32752,8 @@ class Agent {
     animate() {
         const time = Date.now() * 0.001;
         this.particles.animate(time);
-        // Rotação suave para mostrar a complexidade 3D
-        this.coreGroup.rotation.y += 0.001;
-        this.coreGroup.rotation.x += 0.0005;
-        // Iluminação orbital do anel
-        // Começa em 45 graus (Math.PI / 4) e se move no tempo
-        const lightPos = (Math.PI / 4) + (time * 0.05);
-        for (const segment of this.ringSegments) {
-            const angle = segment.userData.angle;
-            // Calcula a distância angular curta entre o segmento e o ponto de luz
-            const dist = Math.atan2(Math.sin(angle - lightPos), Math.cos(angle - lightPos));
-            // Intensidade baseada no cosseno da distância (mais próximo = mais iluminado)
-            // Elevamos ao cubo para tornar o feixe mais "fechado" e menos simétrico (degradê rápido)
-            const intensity = Math.pow(Math.max(0, Math.cos(dist)), 3);
-            const mat = segment.material;
-            mat.opacity = 0.1 + intensity * 0.9;
-        }
-        // // OPCIONAL: Adicionar uma pulsação sutil na opacidade para simular o "pensamento"
-        // this.coreGroup.material.opacity = 0.7 + Math.sin(time * 2) * 0.2
-    }
-    createCentralGlowTexture() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 128;
-        canvas.height = 128;
-        const context = canvas.getContext('2d');
-        const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
-        gradient.addColorStop(0, 'rgba(0, 255, 255, 0.4)');
-        gradient.addColorStop(0.4, 'rgba(0, 150, 150, 0.1)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        context.fillStyle = gradient;
-        context.fillRect(0, 0, 128, 128);
-        return new CanvasTexture(canvas);
+        this.core.animate();
+        this.rings.animate(time);
     }
 }
 

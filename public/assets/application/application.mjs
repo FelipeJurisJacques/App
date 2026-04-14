@@ -12,7 +12,7 @@ class Web {
         if (children) {
             for (const child of children) {
                 if (tag === 'style' && child instanceof HTMLElement) {
-                    element.textContent += toCSS(child);
+                    element.textContent += Web.toCSS(child);
                 }
                 else if (typeof child === 'string') {
                     element.insertAdjacentText('beforeend', child);
@@ -24,33 +24,33 @@ class Web {
         }
         return element;
     }
-}
-/**
- * Converte um elemento e seus filhos em uma string CSS (Nesting)
- */
-function toCSS(element) {
-    let selector = element.tagName.toLowerCase();
-    if (element.id)
-        selector += `#${element.id}`;
-    if (element.className)
-        selector += `.${element.className.split(/\s+/).filter(Boolean).join('.')}`;
-    let css = `${selector} {\n`;
-    for (const attr of Array.from(element.attributes)) {
-        const { name, value } = attr;
-        if (name !== 'id' && name !== 'class') {
-            css += `    ${name}: ${value};\n`;
+    /**
+     * Converte um elemento e seus filhos em uma string CSS (Nesting)
+     */
+    static toCSS(element) {
+        let selector = element.tagName.toLowerCase();
+        if (element.id)
+            selector += `#${element.id}`;
+        if (element.className)
+            selector += `.${element.className.split(/\s+/).filter(Boolean).join('.')}`;
+        let css = `${selector} {\n`;
+        for (const attr of Array.from(element.attributes)) {
+            const { name, value } = attr;
+            if (name !== 'id' && name !== 'class') {
+                css += `    ${name}: ${value};\n`;
+            }
         }
+        for (const child of Array.from(element.childNodes)) {
+            if (child instanceof HTMLElement) {
+                css += Web.toCSS(child).split('\n').map(line => `    ${line}`).join('\n') + '\n';
+            }
+            else if (child.nodeType === Node.TEXT_NODE) {
+                css += `    ${child.textContent}\n`;
+            }
+        }
+        css += '}\n';
+        return css;
     }
-    for (const child of Array.from(element.childNodes)) {
-        if (child instanceof HTMLElement) {
-            css += toCSS(child).split('\n').map(line => `    ${line}`).join('\n') + '\n';
-        }
-        else if (child.nodeType === Node.TEXT_NODE) {
-            css += `    ${child.textContent}\n`;
-        }
-    }
-    css += '}\n';
-    return css;
 }
 
 class View extends HTMLElement {

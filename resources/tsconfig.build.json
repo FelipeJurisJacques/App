@@ -3,6 +3,6 @@
   "include": [
     "/workspace/resources/application/index.ts",
     "/workspace/resources/application/service-worker.ts",
-    "/workspace/resources/application/dls/HyperTextMarkupLanguage.ts"
+    "/workspace/resources/application/dls/Web.ts"
   ]
 }

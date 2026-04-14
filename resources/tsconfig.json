@@ -38,8 +38,8 @@
     "skipLibCheck": true,
     /* JSX */
     "jsx": "react",
-    "jsxFactory": "HyperTextMarkupLanguage.create",
-    "jsxFragmentFactory": "HyperTextMarkupLanguage.Fragment"
+    "jsxFactory": "Web.create",
+    "jsxFragmentFactory": "Web.Fragment"
   },
   "include": [
     "**/*.ts",

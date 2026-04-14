@@ -5,7 +5,7 @@ description: Regras de sintaxe para implementação de regras CSS diretamente em
 
 # CSS-in-TSX Syntax Skill
 
-Esta skill define como escrever regras CSS diretamente dentro de arquivos TSX (JSX) utilizando o builder `HyperTextMarkupLanguage`.
+Esta skill define como escrever regras CSS diretamente dentro de arquivos TSX (JSX) utilizando o builder `Web`.
 
 ## 1. Implementação de CSS em TSX
 
@@ -56,7 +56,7 @@ sheet.replace(Stylesheet);
 ```
 
 ### Configuração:
-Esta funcionalidade é suportada pelo módulo `HyperTextMarkupLanguage.ts` que declara:
+Esta funcionalidade é suportada pelo módulo `Web.ts` que declara:
 ```typescript
 declare module '*.css' {
     const content: string

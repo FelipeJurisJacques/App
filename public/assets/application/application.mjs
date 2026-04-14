@@ -1,7 +1,7 @@
 /**
  * Domain Specific Language (DLS) de HyperText Markup Language (HTML)
  */
-const HyperTextMarkupLanguage = {
+const Web = {
     create(tag, props, ...children) {
         const element = window.document.createElement(tag);
         if (props) {
@@ -34260,10 +34260,10 @@ class Main extends View {
             sheet,
         ];
         return [
-            HyperTextMarkupLanguage.create("canvas", { id: "agent-canvas" }),
-            HyperTextMarkupLanguage.create("custom-shape", null,
-                HyperTextMarkupLanguage.create("p", { class: "top" }, "00:00:00"),
-                HyperTextMarkupLanguage.create("button", { type: "button" }, "tema"))
+            Web.create("canvas", { id: "agent-canvas" }),
+            Web.create("custom-shape", null,
+                Web.create("p", { class: "top" }, "00:00:00"),
+                Web.create("button", { type: "button" }, "tema"))
         ];
     }
     handler() {
@@ -34460,11 +34460,11 @@ class CustomShape extends View {
      * Renderiza a estrutura do componente
      */
     render() {
-        this.canvas = HyperTextMarkupLanguage.create("canvas", { id: "background-canvas" });
+        this.canvas = Web.create("canvas", { id: "background-canvas" });
         return [
             this.canvas,
-            HyperTextMarkupLanguage.create("div", { class: "content-slot" },
-                HyperTextMarkupLanguage.create("slot", null))
+            Web.create("div", { class: "content-slot" },
+                Web.create("slot", null))
         ];
     }
     /**

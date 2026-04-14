@@ -20,7 +20,7 @@ const commonPlugins = [
   resolve(),
   commonjs(),
   inject({
-    'HyperTextMarkupLanguage': ['/workspace/resources/application/dls/HyperTextMarkupLanguage', 'HyperTextMarkupLanguage']
+    'Web': ['/workspace/resources/application/dls/Web', 'Web']
   }),
   typescript({
     tsconfig: './tsconfig.build.json'

@@ -1,7 +1,7 @@
 /**
  * Domain Specific Language (DLS) de HyperText Markup Language (HTML)
  */
-export const HyperTextMarkupLanguage = {
+export const Web = {
     create(tag: string, props: any, ...children: any[]) {
         const element = window.document.createElement(tag)
         if (props) {
@@ -59,7 +59,7 @@ declare global {
         }
         interface Element extends globalThis.Element { }
     }
-    const HyperTextMarkupLanguage: any
+    const Web: any
 }
 
 declare module '*.css' {

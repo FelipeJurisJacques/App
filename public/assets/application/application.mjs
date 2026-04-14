@@ -1,8 +1,8 @@
 /**
  * Domain Specific Language (DLS) de HyperText Markup Language (HTML)
  */
-const Web = {
-    create(tag, props, ...children) {
+class Web {
+    static create(tag, props, ...children) {
         const element = window.document.createElement(tag);
         if (props) {
             for (const key in props) {
@@ -24,7 +24,7 @@ const Web = {
         }
         return element;
     }
-};
+}
 /**
  * Converte um elemento e seus filhos em uma string CSS (Nesting)
  */
@@ -32757,7 +32757,8 @@ class Agent {
     }
 }
 
-var Stylesheet$1 = "* {\r\n    z-index: 0;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n}\r\n\r\np.top {\r\n    top: 10px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    color: var(--font-color);\r\n    pointer-events: none;\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 1;\r\n    position: fixed;\r\n    pointer-events: auto;\r\n    touch-action: none;\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 15px;\r\n    bottom: 15px;\r\n    position: fixed;\r\n    z-index: 10;\r\n    pointer-events: auto;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n    z-index: 2;\r\n    pointer-events: none;\r\n}\r\n\r\ndiv.bacground {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 50px;\r\n    position: fixed;\r\n    overflow: hidden;\r\n    background-color: var(--primary-color);\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground::before {\r\n    inset: 0;\r\n    content: '';\r\n    position: absolute;\r\n    pointer-events: none;\r\n    background:\r\n        repeating-linear-gradient(0deg,\r\n            #062627 0px,\r\n            #062627 1px,\r\n            transparent 1px,\r\n            transparent 3px);\r\n}";
+const sheet$1 = new CSSStyleSheet();
+sheet$1.replaceSync("* {\r\n    z-index: 0;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n}\r\n\r\np.top {\r\n    top: 10px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    color: var(--font-color);\r\n    pointer-events: none;\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 1;\r\n    position: fixed;\r\n    pointer-events: auto;\r\n    touch-action: none;\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 15px;\r\n    bottom: 15px;\r\n    position: fixed;\r\n    z-index: 10;\r\n    pointer-events: auto;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n    z-index: 2;\r\n    pointer-events: none;\r\n}\r\n\r\ndiv.bacground {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 50px;\r\n    position: fixed;\r\n    overflow: hidden;\r\n    background-color: var(--primary-color);\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground::before {\r\n    inset: 0;\r\n    content: '';\r\n    position: absolute;\r\n    pointer-events: none;\r\n    background:\r\n        repeating-linear-gradient(0deg,\r\n            #062627 0px,\r\n            #062627 1px,\r\n            transparent 1px,\r\n            transparent 3px);\r\n}");
 
 // OrbitControls performs orbiting, dollying (zooming), and panning.
 // Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
@@ -34254,10 +34255,8 @@ class Main extends View {
         return '#E0E0E0'; // Light and High-Contrast
     }
     render() {
-        const sheet = new CSSStyleSheet();
-        sheet.replace(Stylesheet$1);
         this.shadow.adoptedStyleSheets = [
-            sheet,
+            sheet$1,
         ];
         return [
             Web.create("canvas", { id: "agent-canvas" }),
@@ -34385,7 +34384,8 @@ class Main extends View {
 }
 window.customElements.define('view-main', Main);
 
-var Stylesheet = ":host {\r\n    display: block;\r\n    position: relative;\r\n    overflow: hidden;\r\n    width: 100%;\r\n    height: 100%;\r\n    min-height: 50px;\r\n}\r\n\r\n#background-canvas {\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    width: 100%;\r\n    height: 100%;\r\n    z-index: -1;\r\n    pointer-events: none;\r\n}\r\n\r\n.content-slot {\r\n    display: block;\r\n    position: relative;\r\n    z-index: 1;\r\n    width: 100%;\r\n    height: 100%;\r\n}";
+const sheet = new CSSStyleSheet();
+sheet.replaceSync(":host {\r\n    display: block;\r\n    position: relative;\r\n    overflow: hidden;\r\n    width: 100%;\r\n    height: 100%;\r\n    min-height: 50px;\r\n}\r\n\r\n#background-canvas {\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    width: 100%;\r\n    height: 100%;\r\n    z-index: -1;\r\n    pointer-events: none;\r\n}\r\n\r\n.content-slot {\r\n    display: block;\r\n    position: relative;\r\n    z-index: 1;\r\n    width: 100%;\r\n    height: 100%;\r\n}");
 
 /**
  * Componente CustomShape
@@ -34393,7 +34393,6 @@ var Stylesheet = ":host {\r\n    display: block;\r\n    position: relative;\r\n 
  * Utiliza Shadow DOM e a técnica de Layering para manter o canvas como background.
  */
 class CustomShape extends View {
-    static sheet;
     observer = null;
     canvas = null;
     tasks = [];
@@ -34401,12 +34400,8 @@ class CustomShape extends View {
     constructor() {
         super(true);
         this.tasks = [];
-        if (!CustomShape.sheet) {
-            CustomShape.sheet = new CSSStyleSheet();
-            CustomShape.sheet.replace(Stylesheet);
-        }
         this.shadow.adoptedStyleSheets = [
-            CustomShape.sheet,
+            sheet,
         ];
     }
     get width() {

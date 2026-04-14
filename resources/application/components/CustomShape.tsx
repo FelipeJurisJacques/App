@@ -12,7 +12,6 @@ interface Polygon {
  * Utiliza Shadow DOM e a técnica de Layering para manter o canvas como background.
  */
 export default class CustomShape extends View {
-    private static sheet: CSSStyleSheet
     private observer: ResizeObserver | null = null
     private canvas: HTMLCanvasElement | null = null
     private tasks: Array<() => void> = []
@@ -21,12 +20,8 @@ export default class CustomShape extends View {
     public constructor() {
         super(true)
         this.tasks = []
-        if (!CustomShape.sheet) {
-            CustomShape.sheet = new CSSStyleSheet()
-            CustomShape.sheet.replace(Stylesheet)
-        }
         this.shadow.adoptedStyleSheets = [
-            CustomShape.sheet,
+            Stylesheet,
         ]
     }
 

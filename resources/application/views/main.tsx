@@ -37,10 +37,8 @@ export default class Main extends View {
         return '#E0E0E0' // Light and High-Contrast
     }
     public render(): Element[] {
-        const sheet = new CSSStyleSheet()
-        sheet.replace(Stylesheet)
         this.shadow.adoptedStyleSheets = [
-            sheet,
+            Stylesheet,
         ]
         return [
             <canvas id="agent-canvas"></canvas>,

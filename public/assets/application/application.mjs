@@ -32758,7 +32758,43 @@ class Agent {
 }
 
 const sheet$1 = new CSSStyleSheet();
-sheet$1.replaceSync("* {\r\n    z-index: 0;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n}\r\n\r\np.top {\r\n    top: 10px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    color: var(--font-color);\r\n    pointer-events: none;\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 1;\r\n    position: fixed;\r\n    pointer-events: auto;\r\n    touch-action: none;\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 15px;\r\n    bottom: 15px;\r\n    position: fixed;\r\n    z-index: 10;\r\n    pointer-events: auto;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n    z-index: 2;\r\n    pointer-events: none;\r\n}\r\n\r\ndiv.bacground {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 50px;\r\n    position: fixed;\r\n    overflow: hidden;\r\n    background-color: var(--primary-color);\r\n}\r\n\r\n:host-context(body[theme=\"dark\"]) div.bacground::before {\r\n    inset: 0;\r\n    content: '';\r\n    position: absolute;\r\n    pointer-events: none;\r\n    background:\r\n        repeating-linear-gradient(0deg,\r\n            #062627 0px,\r\n            #062627 1px,\r\n            transparent 1px,\r\n            transparent 3px);\r\n}");
+sheet$1.replaceSync(":host {\r\n    background-color: var(--primary-color);\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n    border: 0px;\r\n    margin: 0px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\nbutton {\r\n    width: 30px;\r\n    border: 0px;\r\n    margin: 0px;\r\n    height: 30px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\np.top {\r\n    top: 10px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 1;\r\n    position: fixed;\r\n    touch-action: none;\r\n    pointer-events: auto;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 50px;\r\n    z-index: 10;\r\n    bottom: 15px;\r\n    position: fixed;\r\n    pointer-events: auto;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 2;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}");
+
+const template$2 = document.createElement('div');
+template$2.innerHTML = "<svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n    <path d=\"M22.5 16.5A11.25 11.25 0 1 1 10.26 1.5 8.75 8.75 0 0 0 22.5 16.5Z\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>";
+const source$2 = template$2.firstChild;
+const svg$2 = document.createElementNS('http://www.w3.org/2000/svg', source$2.tagName ? source$2.tagName.toLowerCase() : 'svg');
+if (source$2.attributes) {
+  for (let i = 0; i < source$2.attributes.length; i++) {
+    const attr = source$2.attributes[i];
+    svg$2.setAttribute(attr.name, attr.value);
+  }
+}
+svg$2.innerHTML = source$2.innerHTML;
+
+const template$1 = document.createElement('div');
+template$1.innerHTML = "<svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n    <circle cx=\"15\" cy=\"15\" r=\"6\" stroke=\"currentColor\" stroke-width=\"2\"/>\n    <line x1=\"15\" y1=\"3\" x2=\"15\" y2=\"7\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <line x1=\"15\" y1=\"23\" x2=\"15\" y2=\"27\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <line x1=\"3\" y1=\"15\" x2=\"7\" y2=\"15\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <line x1=\"23\" y1=\"15\" x2=\"27\" y2=\"15\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <line x1=\"6.52\" y1=\"6.52\" x2=\"9.34\" y2=\"9.34\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <line x1=\"20.66\" y1=\"20.66\" x2=\"23.48\" y2=\"23.48\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <line x1=\"6.52\" y1=\"23.48\" x2=\"9.34\" y2=\"20.66\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n    <line x1=\"20.66\" y1=\"9.34\" x2=\"23.48\" y2=\"6.52\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/>\n</svg>";
+const source$1 = template$1.firstChild;
+const svg$1 = document.createElementNS('http://www.w3.org/2000/svg', source$1.tagName ? source$1.tagName.toLowerCase() : 'svg');
+if (source$1.attributes) {
+  for (let i = 0; i < source$1.attributes.length; i++) {
+    const attr = source$1.attributes[i];
+    svg$1.setAttribute(attr.name, attr.value);
+  }
+}
+svg$1.innerHTML = source$1.innerHTML;
+
+const template = document.createElement('div');
+template.innerHTML = "<svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n    <circle cx=\"15\" cy=\"15\" r=\"11\" stroke=\"currentColor\" stroke-width=\"2\"/>\n    <line x1=\"15\" y1=\"4\" x2=\"15\" y2=\"26\" stroke=\"currentColor\" stroke-width=\"2\"/>\n    <line x1=\"12\" y1=\"5.6\" x2=\"12\" y2=\"24.4\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"/>\n    <line x1=\"9\" y1=\"8.6\" x2=\"9\" y2=\"21.4\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"/>\n</svg>";
+const source = template.firstChild;
+const svg = document.createElementNS('http://www.w3.org/2000/svg', source.tagName ? source.tagName.toLowerCase() : 'svg');
+if (source.attributes) {
+  for (let i = 0; i < source.attributes.length; i++) {
+    const attr = source.attributes[i];
+    svg.setAttribute(attr.name, attr.value);
+  }
+}
+svg.innerHTML = source.innerHTML;
 
 // OrbitControls performs orbiting, dollying (zooming), and panning.
 // Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
@@ -34226,33 +34262,63 @@ class OrbitControls extends EventDispatcher {
 }
 
 class Main extends View {
-    themes = ['dark', 'light', 'high-contrast'];
-    themeIndex = 0;
+    theme;
     allowCameraRotation = true;
     constructor() {
         super(true);
-        const savedTheme = window.localStorage.getItem('theme') || 'dark';
-        this.themeIndex = this.themes.indexOf(savedTheme);
-        if (this.themeIndex === -1)
-            this.themeIndex = 0;
+        this.theme = window.localStorage.getItem('theme') || 'dark';
         this.applyTheme();
     }
     applyTheme() {
-        const theme = this.themes[this.themeIndex];
-        document.body.setAttribute('theme', theme);
-        window.localStorage.setItem('theme', theme);
+        switch (this.theme) {
+            case 'light':
+                window.document.documentElement.style.setProperty('--theme', 'light');
+                window.document.documentElement.style.setProperty('--font-color', '#32514E');
+                window.document.documentElement.style.setProperty('--primary-color', '#E0E0E0');
+                break;
+            case 'high-contrast':
+                window.document.documentElement.style.setProperty('--theme', 'high-contrast');
+                window.document.documentElement.style.setProperty('--font-color', '#000000');
+                window.document.documentElement.style.setProperty('--primary-color', '#FFFFFF');
+                break;
+            case 'dark':
+            default:
+                window.document.documentElement.style.setProperty('--theme', 'dark');
+                window.document.documentElement.style.setProperty('--font-color', '#E0E0E0');
+                window.document.documentElement.style.setProperty('--primary-color', '#32514E');
+                break;
+        }
     }
     toggleTheme() {
-        this.themeIndex = (this.themeIndex + 1) % this.themes.length;
+        const button = this.shadow.querySelector('button[type="button"]');
+        button.innerHTML = '';
+        switch (this.theme) {
+            case 'light':
+                this.theme = 'high-contrast';
+                button.append(svg);
+                break;
+            case 'high-contrast':
+                this.theme = 'dark';
+                button.append(svg$2);
+                break;
+            case 'dark':
+                this.theme = 'light';
+                button.append(svg$1);
+                break;
+        }
+        window.localStorage.setItem('theme', this.theme);
         this.applyTheme();
-        // Repintar o componente para atualizar as cores do custom-shape
-        this.handler();
     }
     getThemeColor() {
-        const theme = this.themes[this.themeIndex];
-        if (theme === 'dark')
-            return '#071F1F';
-        return '#E0E0E0'; // Light and High-Contrast
+        switch (this.theme) {
+            case 'light':
+                return '#E0E0E0';
+            case 'high-contrast':
+                return '#FFFFFF';
+            case 'dark':
+            default:
+                return '#32514E';
+        }
     }
     render() {
         this.shadow.adoptedStyleSheets = [
@@ -34262,7 +34328,9 @@ class Main extends View {
             Web.create("canvas", { id: "agent-canvas" }),
             Web.create("custom-shape", null,
                 Web.create("p", { class: "top" }, "00:00:00"),
-                Web.create("button", { type: "button" }, "tema"))
+                Web.create("button", { type: "button" }, this.theme === 'light' ? svg$1 :
+                    this.theme === 'high-contrast' ? svg :
+                        svg$2))
         ];
     }
     handler() {

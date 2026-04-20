@@ -3,39 +3,75 @@ import * as THREE from 'three'
 import Agent from '../utils/agent/Agent'
 import CustomShape from '../components/CustomShape'
 import Stylesheet from '../../stylesheets/views/main.css'
+import ThemeDark from '../../graphics/buttons/ThemeDark.svg'
+import ThemeLight from '../../graphics/buttons/ThemeLight.svg'
+import ThemeHighContrast from '../../graphics/buttons/ThemeHighContrast.svg'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 export default class Main extends View {
-    private themes = ['dark', 'light', 'high-contrast']
-    private themeIndex = 0
+    private theme: string
     private allowCameraRotation = true
 
     public constructor() {
         super(true)
-        const savedTheme = window.localStorage.getItem('theme') || 'dark'
-        this.themeIndex = this.themes.indexOf(savedTheme)
-        if (this.themeIndex === -1) this.themeIndex = 0
+        this.theme = window.localStorage.getItem('theme') || 'dark'
         this.applyTheme()
     }
 
     private applyTheme(): void {
-        const theme = this.themes[this.themeIndex]!
-        document.body.setAttribute('theme', theme)
-        window.localStorage.setItem('theme', theme)
+        switch (this.theme) {
+            case 'light':
+                window.document.documentElement.style.setProperty('--theme', 'light')
+                window.document.documentElement.style.setProperty('--font-color', '#32514E')
+                window.document.documentElement.style.setProperty('--primary-color', '#E0E0E0')
+                break
+            case 'high-contrast':
+                window.document.documentElement.style.setProperty('--theme', 'high-contrast')
+                window.document.documentElement.style.setProperty('--font-color', '#000000')
+                window.document.documentElement.style.setProperty('--primary-color', '#FFFFFF')
+                break
+            case 'dark':
+            default:
+                window.document.documentElement.style.setProperty('--theme', 'dark')
+                window.document.documentElement.style.setProperty('--font-color', '#E0E0E0')
+                window.document.documentElement.style.setProperty('--primary-color', '#32514E')
+                break
+        }
     }
 
     private toggleTheme(): void {
-        this.themeIndex = (this.themeIndex + 1) % this.themes.length
+        const button = this.shadow.querySelector('button[type="button"]') as HTMLButtonElement
+        button.innerHTML = ''
+        switch (this.theme) {
+            case 'light':
+                this.theme = 'high-contrast'
+                button.append(ThemeHighContrast)
+                break
+            case 'high-contrast':
+                this.theme = 'dark'
+                button.append(ThemeDark)
+                break
+            case 'dark':
+                this.theme = 'light'
+                button.append(ThemeLight)
+                break
+        }
+        window.localStorage.setItem('theme', this.theme)
         this.applyTheme()
-        // Repintar o componente para atualizar as cores do custom-shape
-        this.handler()
     }
 
     private getThemeColor(): string {
-        const theme = this.themes[this.themeIndex]
-        if (theme === 'dark') return '#071F1F'
-        return '#E0E0E0' // Light and High-Contrast
+        switch (this.theme) {
+            case 'light':
+                return '#E0E0E0'
+            case 'high-contrast':
+                return '#FFFFFF'
+            case 'dark':
+            default:
+                return '#32514E'
+        }
     }
+
     public render(): Element[] {
         this.shadow.adoptedStyleSheets = [
             Stylesheet,
@@ -47,7 +83,11 @@ export default class Main extends View {
                     00:00:00
                 </p>
                 <button type="button">
-                    tema
+                    {
+                        this.theme === 'light' ? ThemeLight :
+                            this.theme === 'high-contrast' ? ThemeHighContrast :
+                                ThemeDark
+                    }
                 </button>
             </custom-shape>
         ]

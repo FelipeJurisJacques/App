@@ -1,10 +1,22 @@
-* {
-    z-index: 0;
-    transform: translate(-50%, -50%);
+:host {
+    background-color: var(--primary-color);
 }
 
 ::slotted(*) {
     z-index: 1;
+    border: 0px;
+    margin: 0px;
+    color: var(--font-color);
+    background-color: transparent;
+}
+
+button {
+    width: 30px;
+    border: 0px;
+    margin: 0px;
+    height: 30px;
+    color: var(--font-color);
+    background-color: transparent;
 }
 
 p.top {
@@ -13,8 +25,8 @@ p.top {
     position: fixed;
     font-size: 10pt;
     text-align: center;
-    color: var(--font-color);
     pointer-events: none;
+    transform: translate(-50%, -50%);
 }
 
 #agent-canvas {
@@ -22,47 +34,26 @@ p.top {
     left: 50%;
     z-index: 1;
     position: fixed;
-    pointer-events: auto;
     touch-action: none;
+    pointer-events: auto;
+    transform: translate(-50%, -50%);
 }
 
 button[type="button"] {
-    right: 15px;
+    right: 50px;
+    z-index: 10;
     bottom: 15px;
     position: fixed;
-    z-index: 10;
     pointer-events: auto;
 }
 
 custom-shape {
     top: 50%;
     left: 50%;
+    z-index: 2;
     width: 100%;
     height: 100%;
     position: fixed;
-    z-index: 2;
     pointer-events: none;
-}
-
-div.bacground {
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 50px;
-    position: fixed;
-    overflow: hidden;
-    background-color: var(--primary-color);
-}
-
-:host-context(body[theme="dark"]) div.bacground::before {
-    inset: 0;
-    content: '';
-    position: absolute;
-    pointer-events: none;
-    background:
-        repeating-linear-gradient(0deg,
-            #062627 0px,
-            #062627 1px,
-            transparent 1px,
-            transparent 3px);
+    transform: translate(-50%, -50%);
 }

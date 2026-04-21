@@ -1,4 +1,4 @@
-import View from './view'
+import View from './View'
 import * as THREE from 'three'
 import Agent from '../utils/agent/Agent'
 import CustomShape from '../components/CustomShape'
@@ -24,14 +24,14 @@ export default class Main extends View {
                 window.document.documentElement.style.colorScheme = 'light'
                 window.document.documentElement.style.setProperty('--theme', 'light')
                 window.document.documentElement.style.setProperty('--font-color', '#32514E')
-                window.document.documentElement.style.setProperty('--primary-color', '#E0E0E0')
+                window.document.documentElement.style.setProperty('--primary-color', '#32514E')
                 window.document.documentElement.style.setProperty('--background-color', '#E0E0E0')
                 break
             case 'high-contrast':
                 window.document.documentElement.style.colorScheme = 'light'
                 window.document.documentElement.style.setProperty('--theme', 'high-contrast')
                 window.document.documentElement.style.setProperty('--font-color', '#000000')
-                window.document.documentElement.style.setProperty('--primary-color', '#FFFFFF')
+                window.document.documentElement.style.setProperty('--primary-color', '#000000')
                 window.document.documentElement.style.setProperty('--background-color', '#FFFFFF')
                 break
             case 'dark':
@@ -66,18 +66,6 @@ export default class Main extends View {
         this.applyTheme()
     }
 
-    private getThemeColor(): string {
-        switch (this.theme) {
-            case 'light':
-                return '#E0E0E0'
-            case 'high-contrast':
-                return '#FFFFFF'
-            case 'dark':
-            default:
-                return '#32514E'
-        }
-    }
-
     public render(): Element[] {
         this.shadow.adoptedStyleSheets = [
             Stylesheet,
@@ -85,9 +73,7 @@ export default class Main extends View {
         return [
             <canvas id="agent-canvas"></canvas>,
             <custom-shape>
-                <p class="top">
-                    00:00:00
-                </p>
+                <p class="top"></p>
                 <button type="button">
                     {
                         this.theme === 'light' ? ThemeLight :
@@ -187,8 +173,8 @@ export default class Main extends View {
                 }
                 path.push([0, 0])
                 return {
-                    color: this.getThemeColor(),
                     points: path,
+                    color: window.document.documentElement.style.getPropertyValue('--primary-color'),
                 }
             })
 
@@ -197,7 +183,6 @@ export default class Main extends View {
                 const top = shape.height - 50
                 const center = shape.width / 2.0
                 return {
-                    color: this.getThemeColor(),
                     points: [
                         [0, top],
                         [Math.min(center - 128, 10), top],
@@ -224,8 +209,23 @@ export default class Main extends View {
                         [0, top - 2],
                         [0, top],
                     ],
+                    color: window.document.documentElement.style.getPropertyValue('--primary-color'),
                 }
             })
+        }
+
+        const top = this.shadow.querySelector('p.top') as HTMLElement
+        if (top) {
+            const time = function () {
+                const theme = window.document.documentElement.style.getPropertyValue('--theme')
+                if (theme === 'high-contrast') {
+                    top.innerText = new Date().toLocaleTimeString().substring(0, 5)
+                } else {
+                    top.innerText = new Date().toLocaleTimeString()
+                }
+            }
+            time()
+            setInterval(time, 1000)
         }
     }
 }

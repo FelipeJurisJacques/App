@@ -32012,6 +32012,48 @@ class Core {
     }
 }
 
+class Basic {
+    ring1;
+    ring2;
+    scene;
+    constructor() {
+        this.ring1 = new Mesh(new RingGeometry(0.8, // innerRadius
+        1.0, // outerRadius
+        64, // thetaSegments
+        1, // phiSegments
+        0, // thetaStart
+        Math.PI * 2.0 // thetaEnd
+        ), new MeshBasicMaterial({
+            color: 0xaaaaaa,
+            wireframe: false,
+            transparent: false,
+            side: DoubleSide,
+            blending: AdditiveBlending,
+        }));
+        this.ring2 = new Mesh(new RingGeometry(1.0, // innerRadius
+        1.2, // outerRadius
+        64, // thetaSegments
+        1, // phiSegments
+        0, // thetaStart
+        Math.PI * 2.0 // thetaEnd
+        ), new MeshBasicMaterial({
+            color: 0xdddddd,
+            wireframe: false,
+            transparent: false,
+            side: DoubleSide,
+            blending: AdditiveBlending,
+        }));
+        this.scene = new Scene();
+        this.scene.add(this.ring1);
+        this.scene.add(this.ring2);
+    }
+    getScene() {
+        return this.scene;
+    }
+    animate() {
+    }
+}
+
 class Rings {
     ring1;
     ring2;
@@ -32726,21 +32768,33 @@ class Particles {
 
 class Agent {
     core;
+    basic;
     rings;
     particles;
-    scenes;
+    scenesDark;
+    scenesLight;
     constructor() {
         this.core = new Core();
-        this.particles = new Particles();
+        this.basic = new Basic();
         this.rings = new Rings();
-        this.scenes = [
+        this.particles = new Particles();
+        this.scenesDark = [
             this.core.getScene(),
             this.rings.getScene(),
             this.particles.getScene(),
         ];
+        this.scenesLight = [
+            this.basic.getScene(),
+        ];
     }
     getScenes() {
-        return this.scenes;
+        const theme = window.document.documentElement.style.getPropertyValue('--theme');
+        if (theme === 'dark') {
+            return this.scenesDark;
+        }
+        else {
+            return this.scenesLight;
+        }
     }
     speak(message) {
         const speak = new SpeechSynthesisUtterance(message);
@@ -32750,15 +32804,18 @@ class Agent {
         window.speechSynthesis.speak(speak);
     }
     animate() {
-        const time = Date.now() * 0.001;
-        this.particles.animate(time);
-        this.core.animate();
-        this.rings.animate(time);
+        const theme = window.document.documentElement.style.getPropertyValue('--theme');
+        if (theme === 'dark') {
+            const time = Date.now() * 0.001;
+            this.particles.animate(time);
+            this.core.animate();
+            this.rings.animate(time);
+        }
     }
 }
 
 const sheet$1 = new CSSStyleSheet();
-sheet$1.replaceSync(":host {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 100%;\r\n    display: block;\r\n    position: fixed;\r\n    color: var(--font-color);\r\n    color-scheme: light dark;\r\n    background-color: var(--background-color);\r\n}\r\n\r\n::slotted(*),\r\np {\r\n    z-index: 1;\r\n    border: 0px;\r\n    margin: 0px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\nbutton {\r\n    width: 30px;\r\n    border: 0px;\r\n    margin: 0px;\r\n    height: 30px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\np.top {\r\n    top: 10px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 1;\r\n    position: fixed;\r\n    touch-action: none;\r\n    pointer-events: auto;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 50px;\r\n    z-index: 10;\r\n    bottom: 15px;\r\n    position: fixed;\r\n    pointer-events: auto;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 2;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}");
+sheet$1.replaceSync(":host {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 100%;\r\n    display: block;\r\n    position: fixed;\r\n    color: var(--font-color);\r\n    color-scheme: light dark;\r\n    background-color: var(--background-color);\r\n}\r\n\r\n::slotted(*),\r\np {\r\n    z-index: 1;\r\n    border: 0px;\r\n    margin: 0px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\nbutton {\r\n    width: 30px;\r\n    border: 0px;\r\n    margin: 0px;\r\n    height: 30px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\np.top {\r\n    top: 20px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 18pt;\r\n    text-align: center;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 1;\r\n    position: fixed;\r\n    touch-action: none;\r\n    pointer-events: auto;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 50px;\r\n    z-index: 10;\r\n    bottom: 15px;\r\n    position: fixed;\r\n    pointer-events: auto;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 2;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}");
 
 const template$2 = document.createElement('div');
 template$2.innerHTML = "<svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n    <path d=\"M22.5 16.5A11.25 11.25 0 1 1 10.26 1.5 8.75 8.75 0 0 0 22.5 16.5Z\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>";
@@ -34272,26 +34329,26 @@ class Main extends View {
     applyTheme() {
         switch (this.theme) {
             case 'light':
+                window.document.documentElement.style.colorScheme = 'light';
                 window.document.documentElement.style.setProperty('--theme', 'light');
                 window.document.documentElement.style.setProperty('--font-color', '#32514E');
-                window.document.documentElement.style.setProperty('--primary-color', '#E0E0E0');
+                window.document.documentElement.style.setProperty('--primary-color', '#32514E');
                 window.document.documentElement.style.setProperty('--background-color', '#E0E0E0');
-                window.document.documentElement.style.colorScheme = 'light';
                 break;
             case 'high-contrast':
+                window.document.documentElement.style.colorScheme = 'light';
                 window.document.documentElement.style.setProperty('--theme', 'high-contrast');
                 window.document.documentElement.style.setProperty('--font-color', '#000000');
-                window.document.documentElement.style.setProperty('--primary-color', '#FFFFFF');
+                window.document.documentElement.style.setProperty('--primary-color', '#000000');
                 window.document.documentElement.style.setProperty('--background-color', '#FFFFFF');
-                window.document.documentElement.style.colorScheme = 'light';
                 break;
             case 'dark':
             default:
+                window.document.documentElement.style.colorScheme = 'dark';
                 window.document.documentElement.style.setProperty('--theme', 'dark');
                 window.document.documentElement.style.setProperty('--font-color', '#E0E0E0');
                 window.document.documentElement.style.setProperty('--primary-color', '#32514E');
                 window.document.documentElement.style.setProperty('--background-color', '#00508');
-                window.document.documentElement.style.colorScheme = 'dark';
                 break;
         }
     }
@@ -34315,17 +34372,6 @@ class Main extends View {
         window.localStorage.setItem('theme', this.theme);
         this.applyTheme();
     }
-    getThemeColor() {
-        switch (this.theme) {
-            case 'light':
-                return '#E0E0E0';
-            case 'high-contrast':
-                return '#FFFFFF';
-            case 'dark':
-            default:
-                return '#32514E';
-        }
-    }
     render() {
         this.shadow.adoptedStyleSheets = [
             sheet$1,
@@ -34333,7 +34379,7 @@ class Main extends View {
         return [
             Web.create("canvas", { id: "agent-canvas" }),
             Web.create("custom-shape", null,
-                Web.create("p", { class: "top" }, "00:00:00"),
+                Web.create("p", { class: "top" }),
                 Web.create("button", { type: "button" }, this.theme === 'light' ? svg$1 :
                     this.theme === 'high-contrast' ? svg :
                         svg$2))
@@ -34415,8 +34461,8 @@ class Main extends View {
                 }
                 path.push([0, 0]);
                 return {
-                    color: this.getThemeColor(),
                     points: path,
+                    color: window.document.documentElement.style.getPropertyValue('--primary-color'),
                 };
             });
             // bottom
@@ -34424,7 +34470,6 @@ class Main extends View {
                 const top = shape.height - 50;
                 const center = shape.width / 2.0;
                 return {
-                    color: this.getThemeColor(),
                     points: [
                         [0, top],
                         [Math.min(center - 128, 10), top],
@@ -34451,8 +34496,23 @@ class Main extends View {
                         [0, top - 2],
                         [0, top],
                     ],
+                    color: window.document.documentElement.style.getPropertyValue('--primary-color'),
                 };
             });
+        }
+        const top = this.shadow.querySelector('p.top');
+        if (top) {
+            const time = function () {
+                const theme = window.document.documentElement.style.getPropertyValue('--theme');
+                if (theme === 'high-contrast') {
+                    top.innerText = new Date().toLocaleTimeString().substring(0, 5);
+                }
+                else {
+                    top.innerText = new Date().toLocaleTimeString();
+                }
+            };
+            time();
+            setInterval(time, 1000);
         }
     }
 }
@@ -34467,9 +34527,10 @@ sheet.replaceSync(":host {\r\n    display: block;\r\n    position: relative;\r\n
  * Utiliza Shadow DOM e a técnica de Layering para manter o canvas como background.
  */
 class CustomShape extends View {
-    observer = null;
-    canvas = null;
     tasks = [];
+    observer = null;
+    styleObserver = null;
+    canvas = null;
     static dpr = window.devicePixelRatio || 1;
     constructor() {
         super(true);
@@ -34544,6 +34605,11 @@ class CustomShape extends View {
         if (this.canvas) {
             this.observer = new ResizeObserver(() => this.handler());
             this.observer.observe(this);
+            this.styleObserver = new MutationObserver(() => this.handler());
+            this.styleObserver.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
             this.handler();
         }
     }
@@ -34554,6 +34620,10 @@ class CustomShape extends View {
         if (this.observer) {
             this.observer.disconnect();
             this.observer = null;
+        }
+        if (this.styleObserver) {
+            this.styleObserver.disconnect();
+            this.styleObserver = null;
         }
         super.disconnectedCallback();
     }

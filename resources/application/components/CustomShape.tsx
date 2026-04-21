@@ -1,4 +1,4 @@
-import View from '../views/view'
+import View from '../views/View'
 import Stylesheet from '../../stylesheets/components/CustomShape.css'
 
 interface Polygon {
@@ -12,9 +12,10 @@ interface Polygon {
  * Utiliza Shadow DOM e a técnica de Layering para manter o canvas como background.
  */
 export default class CustomShape extends View {
-    private observer: ResizeObserver | null = null
-    private canvas: HTMLCanvasElement | null = null
     private tasks: Array<() => void> = []
+    private observer: ResizeObserver | null = null
+    private styleObserver: MutationObserver | null = null
+    private canvas: HTMLCanvasElement | null = null
     private static dpr: number = window.devicePixelRatio || 1
 
     public constructor() {
@@ -99,6 +100,13 @@ export default class CustomShape extends View {
         if (this.canvas) {
             this.observer = new ResizeObserver(() => this.handler())
             this.observer.observe(this)
+
+            this.styleObserver = new MutationObserver(() => this.handler())
+            this.styleObserver.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            })
+
             this.handler()
         }
     }
@@ -110,6 +118,10 @@ export default class CustomShape extends View {
         if (this.observer) {
             this.observer.disconnect()
             this.observer = null
+        }
+        if (this.styleObserver) {
+            this.styleObserver.disconnect()
+            this.styleObserver = null
         }
         super.disconnectedCallback()
     }

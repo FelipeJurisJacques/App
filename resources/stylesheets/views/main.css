@@ -29,10 +29,10 @@ button {
 }
 
 p.top {
-    top: 10px;
+    top: 20px;
     left: 50%;
     position: fixed;
-    font-size: 10pt;
+    font-size: 18pt;
     text-align: center;
     pointer-events: none;
     transform: translate(-50%, -50%);

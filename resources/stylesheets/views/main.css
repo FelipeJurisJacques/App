@@ -1,8 +1,17 @@
 :host {
-    background-color: var(--primary-color);
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: fixed;
+    color: var(--font-color);
+    color-scheme: light dark;
+    background-color: var(--background-color);
 }
 
-::slotted(*) {
+::slotted(*),
+p {
     z-index: 1;
     border: 0px;
     margin: 0px;

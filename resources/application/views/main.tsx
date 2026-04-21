@@ -21,20 +21,26 @@ export default class Main extends View {
     private applyTheme(): void {
         switch (this.theme) {
             case 'light':
+                window.document.documentElement.style.colorScheme = 'light'
                 window.document.documentElement.style.setProperty('--theme', 'light')
                 window.document.documentElement.style.setProperty('--font-color', '#32514E')
                 window.document.documentElement.style.setProperty('--primary-color', '#E0E0E0')
+                window.document.documentElement.style.setProperty('--background-color', '#E0E0E0')
                 break
             case 'high-contrast':
+                window.document.documentElement.style.colorScheme = 'light'
                 window.document.documentElement.style.setProperty('--theme', 'high-contrast')
                 window.document.documentElement.style.setProperty('--font-color', '#000000')
                 window.document.documentElement.style.setProperty('--primary-color', '#FFFFFF')
+                window.document.documentElement.style.setProperty('--background-color', '#FFFFFF')
                 break
             case 'dark':
             default:
+                window.document.documentElement.style.colorScheme = 'dark'
                 window.document.documentElement.style.setProperty('--theme', 'dark')
                 window.document.documentElement.style.setProperty('--font-color', '#E0E0E0')
                 window.document.documentElement.style.setProperty('--primary-color', '#32514E')
+                window.document.documentElement.style.setProperty('--background-color', '#00508')
                 break
         }
     }

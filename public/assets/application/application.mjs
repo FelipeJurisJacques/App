@@ -32758,7 +32758,7 @@ class Agent {
 }
 
 const sheet$1 = new CSSStyleSheet();
-sheet$1.replaceSync(":host {\r\n    background-color: var(--primary-color);\r\n}\r\n\r\n::slotted(*) {\r\n    z-index: 1;\r\n    border: 0px;\r\n    margin: 0px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\nbutton {\r\n    width: 30px;\r\n    border: 0px;\r\n    margin: 0px;\r\n    height: 30px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\np.top {\r\n    top: 10px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 1;\r\n    position: fixed;\r\n    touch-action: none;\r\n    pointer-events: auto;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 50px;\r\n    z-index: 10;\r\n    bottom: 15px;\r\n    position: fixed;\r\n    pointer-events: auto;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 2;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}");
+sheet$1.replaceSync(":host {\r\n    top: 0px;\r\n    left: 0px;\r\n    width: 100%;\r\n    height: 100%;\r\n    display: block;\r\n    position: fixed;\r\n    color: var(--font-color);\r\n    color-scheme: light dark;\r\n    background-color: var(--background-color);\r\n}\r\n\r\n::slotted(*),\r\np {\r\n    z-index: 1;\r\n    border: 0px;\r\n    margin: 0px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\nbutton {\r\n    width: 30px;\r\n    border: 0px;\r\n    margin: 0px;\r\n    height: 30px;\r\n    color: var(--font-color);\r\n    background-color: transparent;\r\n}\r\n\r\np.top {\r\n    top: 10px;\r\n    left: 50%;\r\n    position: fixed;\r\n    font-size: 10pt;\r\n    text-align: center;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\n#agent-canvas {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 1;\r\n    position: fixed;\r\n    touch-action: none;\r\n    pointer-events: auto;\r\n    transform: translate(-50%, -50%);\r\n}\r\n\r\nbutton[type=\"button\"] {\r\n    right: 50px;\r\n    z-index: 10;\r\n    bottom: 15px;\r\n    position: fixed;\r\n    pointer-events: auto;\r\n}\r\n\r\ncustom-shape {\r\n    top: 50%;\r\n    left: 50%;\r\n    z-index: 2;\r\n    width: 100%;\r\n    height: 100%;\r\n    position: fixed;\r\n    pointer-events: none;\r\n    transform: translate(-50%, -50%);\r\n}");
 
 const template$2 = document.createElement('div');
 template$2.innerHTML = "<svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n    <path d=\"M22.5 16.5A11.25 11.25 0 1 1 10.26 1.5 8.75 8.75 0 0 0 22.5 16.5Z\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>";
@@ -34275,17 +34275,23 @@ class Main extends View {
                 window.document.documentElement.style.setProperty('--theme', 'light');
                 window.document.documentElement.style.setProperty('--font-color', '#32514E');
                 window.document.documentElement.style.setProperty('--primary-color', '#E0E0E0');
+                window.document.documentElement.style.setProperty('--background-color', '#E0E0E0');
+                window.document.documentElement.style.colorScheme = 'light';
                 break;
             case 'high-contrast':
                 window.document.documentElement.style.setProperty('--theme', 'high-contrast');
                 window.document.documentElement.style.setProperty('--font-color', '#000000');
                 window.document.documentElement.style.setProperty('--primary-color', '#FFFFFF');
+                window.document.documentElement.style.setProperty('--background-color', '#FFFFFF');
+                window.document.documentElement.style.colorScheme = 'light';
                 break;
             case 'dark':
             default:
                 window.document.documentElement.style.setProperty('--theme', 'dark');
                 window.document.documentElement.style.setProperty('--font-color', '#E0E0E0');
                 window.document.documentElement.style.setProperty('--primary-color', '#32514E');
+                window.document.documentElement.style.setProperty('--background-color', '#00508');
+                window.document.documentElement.style.colorScheme = 'dark';
                 break;
         }
     }

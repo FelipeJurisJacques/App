@@ -104,7 +104,11 @@ export default class CustomShape extends View {
             this.styleObserver = new MutationObserver(() => this.handler())
             this.styleObserver.observe(document.documentElement, {
                 attributes: true,
-                attributeFilter: ['style', 'class']
+                attributeFilter: [
+                    'style',
+                    'class',
+                    'theme',
+                ]
             })
 
             this.handler()

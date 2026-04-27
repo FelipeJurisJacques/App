@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import Agent from '../utils/agent/Agent'
 import CustomShape from '../components/CustomShape'
 import Stylesheet from '../../stylesheets/views/main.css'
+import FolderIcon from '../../graphics/buttons/Folder.svg'
 import ThemeDark from '../../graphics/buttons/ThemeDark.svg'
 import ThemeLight from '../../graphics/buttons/ThemeLight.svg'
 import ThemeHighContrast from '../../graphics/buttons/ThemeHighContrast.svg'
@@ -22,27 +23,16 @@ export default class Main extends View {
         switch (this.theme) {
             case 'light':
                 window.document.documentElement.style.colorScheme = 'light'
-                window.document.documentElement.style.setProperty('--theme', 'light')
-                window.document.documentElement.style.setProperty('--font-color', '#32514E')
-                window.document.documentElement.style.setProperty('--primary-color', '#32514E')
-                window.document.documentElement.style.setProperty('--background-color', '#E0E0E0')
                 break
             case 'high-contrast':
                 window.document.documentElement.style.colorScheme = 'light'
-                window.document.documentElement.style.setProperty('--theme', 'high-contrast')
-                window.document.documentElement.style.setProperty('--font-color', '#000000')
-                window.document.documentElement.style.setProperty('--primary-color', '#000000')
-                window.document.documentElement.style.setProperty('--background-color', '#FFFFFF')
                 break
             case 'dark':
             default:
                 window.document.documentElement.style.colorScheme = 'dark'
-                window.document.documentElement.style.setProperty('--theme', 'dark')
-                window.document.documentElement.style.setProperty('--font-color', '#E0E0E0')
-                window.document.documentElement.style.setProperty('--primary-color', '#32514E')
-                window.document.documentElement.style.setProperty('--background-color', '#00508')
                 break
         }
+        window.document.documentElement.setAttribute('theme', this.theme)
     }
 
     private toggleTheme(): void {
@@ -74,12 +64,15 @@ export default class Main extends View {
             <canvas id="agent-canvas"></canvas>,
             <custom-shape>
                 <p class="top"></p>
-                <button type="button">
+                <button type="button" class="theme">
                     {
                         this.theme === 'light' ? ThemeLight :
                             this.theme === 'high-contrast' ? ThemeHighContrast :
                                 ThemeDark
                     }
+                </button>
+                <button type="button" class="files">
+                    {FolderIcon}
                 </button>
             </custom-shape>
         ]
@@ -135,7 +128,7 @@ export default class Main extends View {
                 renderer.setSize(window.innerWidth, window.innerHeight)
             })
         }
-        const themeButton = this.shadow.querySelector('button[type="button"]')
+        const themeButton = this.shadow.querySelector('button.theme')
         if (themeButton) {
             themeButton.addEventListener('click', () => this.toggleTheme())
         }
@@ -174,7 +167,7 @@ export default class Main extends View {
                 path.push([0, 0])
                 return {
                     points: path,
-                    color: window.document.documentElement.style.getPropertyValue('--primary-color'),
+                    color: getComputedStyle(window.document.documentElement).getPropertyValue('--primary-color'),
                 }
             })
 
@@ -209,7 +202,19 @@ export default class Main extends View {
                         [0, top - 2],
                         [0, top],
                     ],
-                    color: window.document.documentElement.style.getPropertyValue('--primary-color'),
+                    color: getComputedStyle(window.document.documentElement).getPropertyValue('--primary-color'),
+                }
+            })
+        }
+
+        const files = this.shadow.querySelector('button.files') as HTMLButtonElement
+        if (files) {
+            files.addEventListener('click', event => {
+                event.preventDefault()
+                const container = window.document.querySelector('#container')
+                if (container) {
+                    container.innerHTML = ''
+                    container.append(<view-files></view-files>)
                 }
             })
         }
@@ -217,7 +222,7 @@ export default class Main extends View {
         const top = this.shadow.querySelector('p.top') as HTMLElement
         if (top) {
             const time = function () {
-                const theme = window.document.documentElement.style.getPropertyValue('--theme')
+                const theme = window.document.documentElement.getAttribute('theme')
                 if (theme === 'high-contrast') {
                     top.innerText = new Date().toLocaleTimeString().substring(0, 5)
                 } else {

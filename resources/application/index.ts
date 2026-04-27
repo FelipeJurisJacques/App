@@ -1,7 +1,7 @@
-import './views/main'
+import './views/Main'
+import './views/Files'
 import './components/CustomShape'
 
-window.document.body.insertAdjacentHTML(
-    'beforeend',
-    '<view-main></view-main>'
+window.document.querySelector('#container')?.append(
+    window.document.createElement('view-main')
 )

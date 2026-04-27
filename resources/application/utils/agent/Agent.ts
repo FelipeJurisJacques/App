@@ -28,7 +28,7 @@ export default class Agent {
     }
 
     public getScenes(): THREE.Scene[] {
-        const theme = window.document.documentElement.style.getPropertyValue('--theme')
+        const theme = window.document.documentElement.getAttribute('theme')
         if (theme === 'dark') {
             return this.scenesDark
         } else {
@@ -45,7 +45,7 @@ export default class Agent {
     }
 
     public animate(): void {
-        const theme = window.document.documentElement.style.getPropertyValue('--theme')
+        const theme = window.document.documentElement.getAttribute('theme')
         if (theme === 'dark') {
             const time = Date.now() * 0.001
             this.particles.animate(time)

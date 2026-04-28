@@ -1,14 +1,11 @@
-FROM alpine:latest
+FROM debian:stable-slim
 
 # Instalação de dependências necessárias
-# gcompat e libstdc++ são essenciais para rodar o JDK da Oracle (glibc) no Alpine (musl)
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     curl \
     tar \
     bash \
-    gcompat \
-    libstdc++ \
-    libc6-compat
+    && rm -rf /var/lib/apt/lists/*
 
 # Configuração do JAVA_HOME
 ENV JAVA_HOME=/opt/jdk
@@ -24,5 +21,5 @@ WORKDIR /workspace/
 # Expondo a porta padrão do Spring Boot
 EXPOSE 8080
 
-# Mantém o container rodando (pode ser alterado para ./gradlew bootRun se preferir)
-CMD ["tail", "-f", "/dev/null"]
+# Comando para rodar a aplicação Spring Boot
+CMD ["sh", "./gradlew", "bootRun"]

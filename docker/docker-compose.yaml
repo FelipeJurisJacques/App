@@ -24,26 +24,26 @@ services:
     ports:
       - 8080:8080
     build: ./java/
-    working_dir: /workspace/
     volumes:
       - ../:/workspace/
+    working_dir: /workspace/
     container_name: application_java_container
 
-  turnserver:
-    image: instrumentisto/coturn
-    container_name: turn_server_container
+  application_turn:
     restart: unless-stopped
+    image: instrumentisto/coturn
     ports:
-      - "3478:3478"
-      - "3478:3478/udp"
-      - "5349:5349"
-      - "5349:5349/udp"
-      - "49152-65535:49152-65535/udp"
+      - 3478:3478
+      - 3478:3478/udp
+      - 5349:5349
+      - 5349:5349/udp
+      - 49152-49200:49152-49200/udp
     command:
       - -n
-      - --log-file=stdout
+      - --lt-cred-mech
       - --min-port=49152
-      - --max-port=65535
+      - --max-port=49200
+      - --log-file=stdout
       - --realm=localhost
       - --user=user:password
-      - --lt-cred-mech
+    container_name: application_turn_container

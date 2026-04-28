@@ -186,9 +186,9 @@
             </div>
             <div class="stat-item">
                 <span class="label">Load Status</span>
-                <span class="value" th:text="${stats.cpu.load + '%'}">12.5%</span>
+                <span class="value" th:text="${#numbers.formatDecimal(stats.cpu.load, 1, 2) + '%'}">12.5%</span>
                 <div class="progress-container">
-                    <div class="progress-bar" th:style="'width: ' + ${stats.cpu.load} + '%'" th:classappend="${#numbers.formatDecimal(stats.cpu.load, 1, 0) > 80 ? 'danger' : ''}"></div>
+                    <div class="progress-bar" th:style="'width: ' + ${stats.cpu.load} + '%'" th:classappend="${stats.cpu.load > 80 ? 'danger' : ''}"></div>
                 </div>
             </div>
             <div class="stat-item">
@@ -209,9 +209,9 @@
             </div>
             <div class="stat-item">
                 <span class="label">Utilization</span>
-                <span class="value" th:text="${stats.memory.percent + '%'}">25%</span>
+                <span class="value" th:text="${#numbers.formatDecimal(stats.memory.percent, 1, 2) + '%'}">25%</span>
                 <div class="progress-container">
-                    <div class="progress-bar" th:style="'width: ' + ${stats.memory.percent} + '%'" th:classappend="${#numbers.formatDecimal(stats.memory.percent, 1, 0) > 80 ? 'danger' : ''}"></div>
+                    <div class="progress-bar" th:style="'width: ' + ${stats.memory.percent} + '%'" th:classappend="${stats.memory.percent > 80 ? 'danger' : ''}"></div>
                 </div>
             </div>
             <div class="stat-item">
@@ -232,9 +232,9 @@
             </div>
             <div class="stat-item">
                 <span class="label">Capacity</span>
-                <span class="value" th:text="${stats.storage.percent + '%'}">50%</span>
+                <span class="value" th:text="${#numbers.formatDecimal(stats.storage.percent, 1, 2) + '%'}">50%</span>
                 <div class="progress-container">
-                    <div class="progress-bar" th:style="'width: ' + ${stats.storage.percent} + '%'" th:classappend="${#numbers.formatDecimal(stats.storage.percent, 1, 0) > 90 ? 'danger' : ''}"></div>
+                    <div class="progress-bar" th:style="'width: ' + ${stats.storage.percent} + '%'" th:classappend="${stats.storage.percent > 90 ? 'danger' : ''}"></div>
                 </div>
             </div>
             <div class="stat-item">

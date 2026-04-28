@@ -40,7 +40,7 @@ public class SystemStatsService {
         double load = processor.getSystemCpuLoadBetweenTicks(prevTicks) * 100;
         
         Map<String, Object> cpu = new HashMap<>();
-        cpu.put("load", String.format("%.2f", load));
+        cpu.put("load", load);
         cpu.put("cores", processor.getLogicalProcessorCount());
         cpu.put("name", processor.getProcessorIdentifier().getName());
         return cpu;
@@ -57,7 +57,7 @@ public class SystemStatsService {
         mem.put("total", formatBytes(total));
         mem.put("used", formatBytes(used));
         mem.put("available", formatBytes(available));
-        mem.put("percent", String.format("%.2f", percent));
+        mem.put("percent", percent);
         return mem;
     }
 
@@ -72,7 +72,7 @@ public class SystemStatsService {
         storage.put("total", formatBytes(totalSpace));
         storage.put("used", formatBytes(usedSpace));
         storage.put("free", formatBytes(freeSpace));
-        storage.put("percent", String.format("%.2f", percent));
+        storage.put("percent", percent);
         return storage;
     }
 

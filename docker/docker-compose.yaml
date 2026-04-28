@@ -18,3 +18,32 @@ services:
     volumes:
       - ../public/:/usr/share/nginx/html/
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+
+  application_java:
+    tty: true
+    ports:
+      - 8080:8080
+    build: ./java/
+    working_dir: /workspace/
+    volumes:
+      - ../:/workspace/
+    container_name: application_java_container
+
+  turnserver:
+    image: instrumentisto/coturn
+    container_name: turn_server_container
+    restart: unless-stopped
+    ports:
+      - "3478:3478"
+      - "3478:3478/udp"
+      - "5349:5349"
+      - "5349:5349/udp"
+      - "49152-65535:49152-65535/udp"
+    command:
+      - -n
+      - --log-file=stdout
+      - --min-port=49152
+      - --max-port=65535
+      - --realm=localhost
+      - --user=user:password
+      - --lt-cred-mech

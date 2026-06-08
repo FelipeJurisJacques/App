@@ -62,3 +62,11 @@ services:
     container_name: application_python_container
     environment:
       - OLLAMA_API_BASE=http://host.docker.internal:11434
+
+  application_go:
+    tty: true
+    build: ./go
+    volumes:
+      - ../:/workspace/
+    working_dir: /workspace/
+    container_name: application_go_container

@@ -18,6 +18,12 @@
             "request": "launch",
             "type": "node-terminal",
             "command": "docker exec -it application_node_container sh -c 'cd resources && npx rollup -c'"
+        },
+        {
+            "name": "AIDER",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker exec -it application_python_container aider --map-tokens 0 --chat-language portuguese"
         }
     ]
 }

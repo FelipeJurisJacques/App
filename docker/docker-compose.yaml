@@ -47,3 +47,18 @@ services:
       - --realm=localhost
       - --user=user:password
     container_name: application_turn_container
+
+  application_python:
+    tty: true
+    build: ./python
+    env_file:
+      - ./python/.env
+    volumes:
+      - ../:/workspace/
+    restart: unless-stopped
+    working_dir: /workspace/
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    container_name: application_python_container
+    environment:
+      - OLLAMA_API_BASE=http://host.docker.internal:11434

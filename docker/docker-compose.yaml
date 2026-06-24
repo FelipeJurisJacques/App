@@ -6,9 +6,10 @@ services:
     build: ./typescript/
     working_dir: /workspace/
     volumes:
-      - ../:/workspace/
+      - ../frontend/:/workspace/
       - ../data/:/root/.npm/_logs/
     container_name: application_node_container
+
   application_nginx:
     ports:
       - 80:80
@@ -16,7 +17,7 @@ services:
     restart: unless-stopped
     container_name: application_nginx_container
     volumes:
-      - ../public/:/usr/share/nginx/html/
+      - ../frontend/public/:/usr/share/nginx/html/
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
 
   application_java:
@@ -24,9 +25,9 @@ services:
     ports:
       - 8080:8080
     build: ./java/
-    volumes:
-      - ../:/workspace/
     working_dir: /workspace/
+    volumes:
+      - ../backend/:/workspace/
     container_name: application_java_container
 
   application_turn:
@@ -62,11 +63,10 @@ services:
     container_name: application_python_container
     environment:
       - OLLAMA_API_BASE=http://host.docker.internal:11434
-
-  application_go:
-    tty: true
-    build: ./go
-    volumes:
-      - ../:/workspace/
-    working_dir: /workspace/
-    container_name: application_go_container
+  # application_go:
+  #   tty: true
+  #   build: ./go
+  #   volumes:
+  #     - ../:/workspace/
+  #   working_dir: /workspace/
+  #   container_name: application_go_container

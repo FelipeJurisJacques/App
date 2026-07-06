@@ -1,5 +1,12 @@
 services:
-
+  application_nginx:
+    ports:
+      - 80:80
+    build: ./nginx/
+    restart: unless-stopped
+    volumes:
+      - ../frontend/:/usr/share/nginx/html/
+    container_name: application_nginx_container
   application_alpine:
     tty: true
     build: ./alpine/
@@ -11,12 +18,3 @@ services:
       - ./alpine/build.go:/workspace/build.go
       - ./alpine/package.json:/workspace/package.json
       - ./alpine/tsconfig.json:/workspace/tsconfig.json
-
-  application_nginx:
-    ports:
-      - 80:80
-    build: ./nginx/
-    restart: unless-stopped
-    volumes:
-      - ../frontend/:/usr/share/nginx/html/
-    container_name: application_nginx_container

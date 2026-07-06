@@ -1,17 +1,8 @@
-# Use a imagem oficial do Go como base
 FROM golang:latest
 
-# Defina o diretório de trabalho dentro do contêiner
-WORKDIR /app
+WORKDIR /workspace/
 
-# Copie o código Go para o diretório de trabalho
-COPY . .
+COPY ./entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Instale dependências
-RUN go mod tidy
-
-# Exponha a porta 8080 (se necessário)
-EXPOSE 8080
-
-# Comando padrão para executar o aplicativo Go
-CMD ["go", "run", "main.go"]
+CMD ["/usr/local/bin/entrypoint.sh"]

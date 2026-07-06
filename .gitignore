@@ -1,10 +1,7 @@
+*.js
+*.mjs
 *.log
 .aider*
+*.js.map
 **/node_modules/**
 **/package-lock.json
-frontend/public/**.js
-frontend/public/**.mjs
-frontend/public/assets/application/application.mjs
-frontend/public/assets/application/application.mjs.map
-frontend/public/assets/application/service-worker.js
-frontend/public/assets/application/service-worker.js.map

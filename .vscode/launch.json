@@ -8,16 +8,22 @@
             "command": "docker compose -f ./docker/docker-compose.yaml up"
         },
         {
-            "name": "TERMINAL",
+            "name": "COMPILAR PARA DESENVOLVIMENTO",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_node_container bash"
+            "command": "docker exec -it application_alpine_container bash -c \"go run build.go\""
         },
         {
-            "name": "COMPILAR",
+            "name": "TERMINAL NODE",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_node_container sh -c 'cd resources && npx rollup -c'"
+            "command": "docker exec -it application_alpine_container bash"
+        },
+        {
+            "name": "COMPILAR FRONTEND",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker exec -it application_alpine_container sh -c 'cd resources/application && npx rollup -c'"
         },
         {
             "name": "AIDER",

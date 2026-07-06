@@ -96,7 +96,7 @@ export default class Main extends View {
                 0.1,
                 1000
             )
-            camera.position.z = 5
+            camera.position.z = 7.0
 
             let controls: OrbitControls | undefined
             if (this.allowCameraRotation) {

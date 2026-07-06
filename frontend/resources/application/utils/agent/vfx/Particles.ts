@@ -87,7 +87,7 @@ export default class Particles {
             bx * noiseScale,
             by * noiseScale,
             bz * noiseScale,
-            time * 0.4
+            time
         )
         const offset = (noise * 0.5 + 0.5) * noiseFactor
 

@@ -1,0 +1,71 @@
+services:
+
+  application_go:
+    tty: true
+    build: ./go/
+    restart: unless-stopped
+    volumes:
+      - ../frontend/:/workspace/
+    container_name: application_go_container
+
+  application_node:
+    tty: true
+    build: ./typescript/
+    restart: unless-stopped
+    volumes:
+      - ../frontend/:/workspace/
+      - ../data/:/root/.npm/_logs/
+    container_name: application_node_container
+
+  application_nginx:
+    ports:
+      - 80:80
+    build: ./nginx/
+    restart: unless-stopped
+    volumes:
+      - ../frontend/:/usr/share/nginx/html/
+    container_name: application_nginx_container
+
+  application_java:
+    tty: true
+    ports:
+      - 8080:8080
+    build: ./java/
+    working_dir: /workspace/
+    volumes:
+      - ../backend/:/workspace/
+    container_name: application_java_container
+
+  application_turn:
+    restart: unless-stopped
+    image: instrumentisto/coturn
+    ports:
+      - 3478:3478
+      - 3478:3478/udp
+      - 5349:5349
+      - 5349:5349/udp
+      - 49152-49200:49152-49200/udp
+    command:
+      - -n
+      - --lt-cred-mech
+      - --min-port=49152
+      - --max-port=49200
+      - --log-file=stdout
+      - --realm=localhost
+      - --user=user:password
+    container_name: application_turn_container
+
+  application_python:
+    tty: true
+    build: ./python
+    env_file:
+      - ./python/.env
+    volumes:
+      - ../:/workspace/
+    restart: unless-stopped
+    working_dir: /workspace/
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    container_name: application_python_container
+    environment:
+      - OLLAMA_API_BASE=http://host.docker.internal:11434

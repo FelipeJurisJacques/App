@@ -1,0 +1,42 @@
+{
+  "include": [
+    "/workspace/source/*",
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "compilerOptions": {
+    "noEmit": false,
+    "strict": true,
+    "lib": [
+      "DOM",
+      "ESNext",
+      "DOM.Iterable"
+    ],
+    "sourceMap": true,
+    "module": "ESNext",
+    "target": "ESNext",
+    "alwaysStrict": true,
+    "skipLibCheck": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "resolveJsonModule": true,
+    "noUnusedParameters": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "moduleResolution": "bundler",
+    "outDir": "/workspace/.build/",
+    "rootDir": "/workspace/source/",
+    "useDefineForClassFields": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    "strictPropertyInitialization": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

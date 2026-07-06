@@ -3,5 +3,8 @@
 *.log
 .aider*
 *.js.map
+**/production/**
+**/development/**
 **/node_modules/**
 **/package-lock.json
+*tsconfig.tsbuildinfo

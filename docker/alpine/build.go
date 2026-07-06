@@ -52,31 +52,74 @@ func jsToMjs(from string, to string) {
 	defer file.Close()
 }
 
-func main() {
-	fmt.Println("Compiling Type Script...")
+func compileTypeScript() {
 	cmd := exec.Command("npx", "tsc")
 	result, err := cmd.Output()
 	if err == nil {
-		fmt.Println(string(result))
-		fmt.Println("Compiling ECMA Script...")
-		origin := "/workspace/.build/"
-		files, err := os.ReadDir(origin)
-		if err == nil {
-			for _, file := range files {
-				if (!file.IsDir()) {
-					name := file.Name()
-					length := len(name)
-					if (name[length - 2: length] == "js") {
-						from := origin + name
-						to := "/workspace/development/application/" + name[0: length - 3] + ".mjs"
-						jsToMjs(from, to)
-					}
-				}
-			}
-		} else {
-			fmt.Println(err)
+		message := string(result)
+		if message != "" {
+			fmt.Println(message)
 		}
 	} else {
 		fmt.Println(err)
 	}
+}
+
+func compileEcmaScript(origin string) {
+	files, err := os.ReadDir(origin)
+	if err == nil {
+		for _, file := range files {
+			if (!file.IsDir()) {
+				name := file.Name()
+				length := len(name)
+				if (name[length - 2: length] == "js") {
+					from := origin + name
+					to := "/workspace/development/application/" + name[0: length - 3] + ".mjs"
+					jsToMjs(from, to)
+				}
+			}
+		}
+	} else {
+		fmt.Println(err)
+	}
+}
+
+func compileMarkups(from string, to string) {
+	to = strings.TrimSuffix(to, "/")
+	from = strings.TrimSuffix(from, "/")
+	err := os.MkdirAll(to, 0755)
+	if err == nil {
+		files, err := os.ReadDir(from)
+		if err == nil {
+			for _, file := range files {
+				name := file.Name()
+				path := from + "/" + name
+				if (file.IsDir()) {
+					compileMarkups(path, to + "/" + name)
+				} else {
+					content, err := os.ReadFile(path)
+					if err == nil {
+						write(to + "/" + name, content)
+					} else {
+						fmt.Println(err)
+					}
+				}
+			}
+		} else {
+			fmt.Println(err)	
+		}
+	} else {
+		fmt.Println(err)
+	}
+}
+
+func main() {
+	fmt.Println("Compiling Type Script...")
+	compileTypeScript()
+
+	fmt.Println("Compiling ECMA Script...")
+	compileEcmaScript("/workspace/.build/")
+
+	fmt.Println("Compiling public files...")
+	compileMarkups("/workspace/public/", "/workspace/development/")
 }

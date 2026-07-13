@@ -1,12 +1,10 @@
 #!/bin/bash
 
 rm -rf /root/.npm/_logs/*
-mkdir -p /workspace/.build/
-mkdir -p /workspace/public/
-mkdir -p /workspace/assets/
-mkdir -p /workspace/source/
-mkdir -p /workspace/resources/
-mkdir -p /workspace/production/application/
-mkdir -p /workspace/development/application/
+mkdir -p /workspace/app/build/
+mkdir -p /workspace/app/public/
+mkdir -p /workspace/app/assets/
+mkdir -p /workspace/app/source/
+mkdir -p /workspace/app/resources/
 
 tail -f /dev/null

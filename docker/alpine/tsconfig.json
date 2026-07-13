@@ -1,13 +1,16 @@
 {
   "include": [
-    "/workspace/source/*",
+    "/workspace/jsx.ts",
+    "/workspace/global.d.ts",
+    "/workspace/app/source/**/*",
   ],
   "exclude": [
-    "node_modules"
+    "/workspace/app/node_modules/*"
   ],
   "compilerOptions": {
-    "noEmit": false,
+    "jsx": "react",
     "strict": true,
+    "noEmit": false,
     "lib": [
       "DOM",
       "ESNext",
@@ -24,15 +27,17 @@
     "noUnusedLocals": true,
     "esModuleInterop": true,
     "isolatedModules": true,
+    "jsxFactory": "DLS.html",
+    "rootDir": "/workspace/",
     "strictNullChecks": true,
     "noImplicitReturns": true,
     "resolveJsonModule": true,
     "noUnusedParameters": true,
+    "skipDefaultLibCheck": true,
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
     "moduleResolution": "bundler",
-    "outDir": "/workspace/.build/",
-    "rootDir": "/workspace/source/",
+    "outDir": "/workspace/build/",
     "useDefineForClassFields": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,

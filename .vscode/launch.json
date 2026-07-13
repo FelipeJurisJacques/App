@@ -8,13 +8,13 @@
             "command": "docker compose -f ./docker/docker-compose.yaml up"
         },
         {
-            "name": "COMPILAR PARA DESENVOLVIMENTO",
+            "name": "COMPILAR FRONTEND PARA DESENVOLVIMENTO",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_alpine_container bash -c \"go run build.go\""
+            "command": "docker exec -it application_alpine_container bash -c \"go run /workspace/build.go\""
         },
         {
-            "name": "TERMINAL NODE",
+            "name": "TERMINAL ALPINE",
             "request": "launch",
             "type": "node-terminal",
             "command": "docker exec -it application_alpine_container bash"

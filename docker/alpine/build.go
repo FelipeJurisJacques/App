@@ -52,17 +52,47 @@ func jsToMjs(from string, to string) {
 	defer file.Close()
 }
 
-func compileTypeScript() {
+func compileTypeScript(from string, to string) bool {
+	to = strings.TrimSuffix(to, "/")
+	from = strings.TrimSuffix(from, "/")
+	if _, err := os.Stat(to); os.IsNotExist(err) {
+		err := os.MkdirAll(to, 0755)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 	cmd := exec.Command("npx", "tsc")
-	result, err := cmd.Output()
-	if err == nil {
+	result, err := cmd.CombinedOutput()
+	if err != nil {
 		message := string(result)
 		if message != "" {
-			fmt.Println(message)
+			lines := strings.Split(message, "\n")
+			fmt.Println(lines[0])
 		}
-	} else {
-		fmt.Println(err)
+		return false
 	}
+	return true
+	// files, err := os.ReadDir(from)
+	// if err == nil {
+	// 	for _, file := range files {
+	// 		if (!file.IsDir()) {
+	// 			name := file.Name()
+	// 			length := len(name)
+	// 			if (name[length - 2: length] == "ts") {
+	// 				cmd := exec.Command("npx", "tsc", from + "/" + name)
+	// 				result, err := cmd.CombinedOutput()
+	// 				if err != nil {
+	// 					message := string(result)
+	// 					if message != "" {
+	// 						fmt.Println(message)
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// } else {
+	// 	fmt.Println(err)
+	// }
 }
 
 func compileEcmaScript(origin string) {
@@ -115,11 +145,11 @@ func compileMarkups(from string, to string) {
 
 func main() {
 	fmt.Println("Compiling Type Script...")
-	compileTypeScript()
+	if compileTypeScript("/workspace/app/source/", "/workspace/build/") {
+		fmt.Println("Compiling ECMA Script...")
+		compileEcmaScript("/workspace/build/")
 
-	fmt.Println("Compiling ECMA Script...")
-	compileEcmaScript("/workspace/.build/")
-
-	fmt.Println("Compiling public files...")
-	compileMarkups("/workspace/public/", "/workspace/development/")
+		fmt.Println("Compiling public files...")
+		compileMarkups("/workspace/app/public/", "/workspace/app/build/")
+	}
 }

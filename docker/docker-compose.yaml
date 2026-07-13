@@ -2,19 +2,26 @@ services:
   application_nginx:
     ports:
       - 80:80
-    build: ./nginx/
+    image: nginx:alpine
     restart: unless-stopped
-    volumes:
-      - ../frontend/:/usr/share/nginx/html/
+    extra_hosts:
+      - host.docker.internal:host-gateway
     container_name: application_nginx_container
+    volumes:
+      - ../data/nginx/logs:/var/log/nginx
+      - ../frontend/build/:/usr/share/nginx/html/
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
   application_alpine:
     tty: true
     build: ./alpine/
     restart: unless-stopped
     container_name: application_alpine_container
     volumes:
-      - ../frontend/:/workspace/
-      - ../data/:/root/.npm/_logs/
+      - ../frontend/:/workspace/app/
+      - ./alpine/jsx.ts:/workspace/jsx.ts
+      - ../data/alpine/log/:/root/.npm/_logs/
       - ./alpine/build.go:/workspace/build.go
-      - ./alpine/package.json:/workspace/package.json
+      - ../data/alpine/build/:/workspace/build/
+      - ./alpine/global.d.ts:/workspace/global.d.ts
       - ./alpine/tsconfig.json:/workspace/tsconfig.json
+      - ./alpine/package.json:/workspace/app/package.json

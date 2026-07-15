@@ -1,13 +1,13 @@
 package main
 
-import (
-    "os"
-	"fmt"
-	"bytes"
-	"bufio"
-	"os/exec"
-	"strings"
-)
+import "os"
+import "fmt"
+import "bytes"
+import "os/exec"
+import "strings"
+import "encoding/json"
+import "path/filepath"
+import "github.com/evanw/esbuild/pkg/api"
 
 func write(path string, content []byte) {
 	_, err := os.Stat(path)
@@ -25,92 +25,6 @@ func write(path string, content []byte) {
 	err = os.WriteFile(path, content, 0644)
 	if err != nil {
 		fmt.Println("Erro ao escrever arquivo:", err)
-	}
-}
-
-func jsToMjs(from string, to string) {
-	var content strings.Builder
-	file, err := os.Open(from)
-	if err == nil {
-		reader := bufio.NewScanner(file)
-		for reader.Scan() {
-			line := reader.Text()
-			if strings.Contains(line, "from") && strings.Contains(line, "import") {
-				line = line[0: len(line) - 2] + ".mjs';"
-			}
-			content.WriteString(line + "\n")
-		}
-		err = reader.Err()
-		if err == nil {
-			write(to, []byte(content.String()))
-		} else {
-			fmt.Println(err)
-		}
-	} else {
-		fmt.Println(err)
-	}
-	defer file.Close()
-}
-
-func compileTypeScript(from string, to string) bool {
-	to = strings.TrimSuffix(to, "/")
-	from = strings.TrimSuffix(from, "/")
-	if _, err := os.Stat(to); os.IsNotExist(err) {
-		err := os.MkdirAll(to, 0755)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-	cmd := exec.Command("npx", "tsc")
-	result, err := cmd.CombinedOutput()
-	if err != nil {
-		message := string(result)
-		if message != "" {
-			lines := strings.Split(message, "\n")
-			fmt.Println(lines[0])
-		}
-		return false
-	}
-	return true
-	// files, err := os.ReadDir(from)
-	// if err == nil {
-	// 	for _, file := range files {
-	// 		if (!file.IsDir()) {
-	// 			name := file.Name()
-	// 			length := len(name)
-	// 			if (name[length - 2: length] == "ts") {
-	// 				cmd := exec.Command("npx", "tsc", from + "/" + name)
-	// 				result, err := cmd.CombinedOutput()
-	// 				if err != nil {
-	// 					message := string(result)
-	// 					if message != "" {
-	// 						fmt.Println(message)
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// } else {
-	// 	fmt.Println(err)
-	// }
-}
-
-func compileEcmaScript(origin string) {
-	files, err := os.ReadDir(origin)
-	if err == nil {
-		for _, file := range files {
-			if (!file.IsDir()) {
-				name := file.Name()
-				length := len(name)
-				if (name[length - 2: length] == "js") {
-					from := origin + name
-					to := "/workspace/development/application/" + name[0: length - 3] + ".mjs"
-					jsToMjs(from, to)
-				}
-			}
-		}
-	} else {
-		fmt.Println(err)
 	}
 }
 
@@ -144,12 +58,128 @@ func compileMarkups(from string, to string) {
 }
 
 func main() {
-	fmt.Println("Compiling Type Script...")
-	if compileTypeScript("/workspace/app/source/", "/workspace/build/") {
-		fmt.Println("Compiling ECMA Script...")
-		compileEcmaScript("/workspace/build/")
+	cssPlugin := api.Plugin{
+		Name: "css-stylesheet-loader",
+		Setup: func(build api.PluginBuild) {
+			build.OnResolve(api.OnResolveOptions{Filter: `\.css$`},
+				func(args api.OnResolveArgs) (api.OnResolveResult, error) {
+					return api.OnResolveResult{
+						Namespace: "css-stylesheet-namespace",
+						Path: filepath.Join(args.ResolveDir, args.Path),
+					}, nil
+				},
+			)
+			build.OnLoad(
+				api.OnLoadOptions{
+					Filter: `.*`,
+					Namespace: "css-stylesheet-namespace",
+				},
+				func(args api.OnLoadArgs) (api.OnLoadResult, error) {
+					bytes, err := os.ReadFile(args.Path)
+					if err != nil {
+						return api.OnLoadResult{}, err
+					}
+					cssRawContent, err := json.Marshal(string(bytes))
+					if err != nil {
+						return api.OnLoadResult{}, err
+					}
+					jsContents := fmt.Sprintf(`export default class extends CSSStyleSheet { constructor() { super(); this.replaceSync(%s); } };`, cssRawContent)
+					return api.OnLoadResult{
+						Loader: api.LoaderJS,
+						Contents: &jsContents,
+					}, nil
+				},
+			)
+		},
+	}
+	svgPlugin := api.Plugin{
+		Name: "svg-class-loader",
+		Setup: func(build api.PluginBuild) {
+			build.OnResolve(api.OnResolveOptions{Filter: `\.svg$`},
+				func(args api.OnResolveArgs) (api.OnResolveResult, error) {
+					return api.OnResolveResult{
+						Namespace: "svg-namespace",
+						Path: filepath.Join(args.ResolveDir, args.Path),
+					}, nil
+				},
+			)
+			build.OnLoad(
+				api.OnLoadOptions{
+					Filter: `.*`,
+					Namespace: "svg-namespace",
+				},
+				func(args api.OnLoadArgs) (api.OnLoadResult, error) {
+					bytes, err := os.ReadFile(args.Path)
+					if err != nil {
+						return api.OnLoadResult{}, err
+					}
+					svgRawContent, err := json.Marshal(string(bytes))
+					if err != nil {
+						return api.OnLoadResult{}, err
+					}
+					jsContents := fmt.Sprintf(`export default class { toString() { return %s; } };`, svgRawContent)
+					return api.OnLoadResult{
+						Loader: api.LoaderJS,
+						Contents: &jsContents,
+					}, nil
+				},
+			)
+		},
+	}
 
-		fmt.Println("Compiling public files...")
-		compileMarkups("/workspace/app/public/", "/workspace/app/build/")
+	method := ""
+	if len(os.Args) > 1 {
+		method = os.Args[1]
+	}
+	from := "/workspace/source/"
+	if method == "check" || method == "compile" {
+		cmd := exec.Command("npx", "tsc")
+		result, err := cmd.CombinedOutput()
+		if err != nil {
+			message := string(result)
+			if message != "" {
+				lines := strings.Split(message, "\n")
+				fmt.Println(lines[0])
+			}
+			method = ""
+		}
+	}
+	files, err := os.ReadDir(from)
+	if err == nil {
+		for _, file := range files {
+			if (!file.IsDir()) {
+				name := file.Name()
+				length := len(name)
+				if (name[length - 2: length] == "ts") {
+					path := filepath.Join(from, name)
+					if method == "build" || method == "compile" {
+						result := api.Build(api.BuildOptions{
+							Write: true,
+							Bundle: true,
+							Plugins: []api.Plugin{
+								cssPlugin,
+								svgPlugin,
+							},
+							JSX: api.JSXTransform,
+							JSXFactory: "DLS.html",
+							JSXFragment: "Fragment",
+							LogLevel: api.LogLevelInfo,
+							EntryPoints: []string{path},
+							Outdir: "/workspace/build/",
+							Inject: []string{"/workspace/global.ts"}, 
+						})
+						for _, err := range result.Errors {
+							fmt.Println(err.Text)
+						}
+					}
+				}
+			}
+		}
+		if method == "build" || method == "compile" {
+			fmt.Println("Compiling public files...")
+			compileMarkups("/workspace/public/", "/workspace/build/")
+		}
+	} else {
+		fmt.Println(err)
 	}
 }

@@ -1,4 +1,13 @@
 services:
+  application_alpine:
+    tty: true
+    build: ./alpine/
+    restart: unless-stopped
+    volumes:
+      - ../frontend/:/workspace/
+      - ../data/alpine/log/:/root/.npm/_logs/
+      - ./alpine/build.go:/workspace/build.go
+    container_name: application_alpine_container
   application_nginx:
     ports:
       - 80:80
@@ -11,17 +20,17 @@ services:
       - ../data/nginx/logs:/var/log/nginx
       - ../frontend/build/:/usr/share/nginx/html/
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-  application_alpine:
+  application_python:
     tty: true
-    build: ./alpine/
-    restart: unless-stopped
-    container_name: application_alpine_container
+    build: ./python
+    env_file:
+      - ./python/.env
     volumes:
-      - ../frontend/:/workspace/app/
-      - ./alpine/jsx.ts:/workspace/jsx.ts
-      - ../data/alpine/log/:/root/.npm/_logs/
-      - ./alpine/build.go:/workspace/build.go
-      - ../data/alpine/build/:/workspace/build/
-      - ./alpine/global.d.ts:/workspace/global.d.ts
-      - ./alpine/tsconfig.json:/workspace/tsconfig.json
-      - ./alpine/package.json:/workspace/app/package.json
+      - ../:/workspace/
+    restart: unless-stopped
+    working_dir: /workspace/
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    container_name: application_python_container
+    environment:
+      - OLLAMA_API_BASE=http://host.docker.internal:11434

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/" />
+    <meta charset="utf-8" />
+    <title>Application</title>
+    <meta name="color-scheme" content="light dark">
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet" href="./stylesheets/stylesheet.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+    <div id="container"></div>
+    <script type="text/javascript" defer>
+        window.addEventListener('load', function () {
+            const element = window.document.createElement('script')
+            element.type = 'module'
+            element.src = './application/application.mjs'
+            window.document.body.append(element)
+        })
+    </script>
+</body>
+
+</html>

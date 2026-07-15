@@ -8,22 +8,28 @@
             "command": "docker compose -f ./docker/docker-compose.yaml up"
         },
         {
+            "name": "CHECAR FRONTEND",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker exec -it application_alpine_container bash -c \"go run /workspace/build.go check\""
+        },
+        {
             "name": "COMPILAR FRONTEND PARA DESENVOLVIMENTO",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_alpine_container bash -c \"go run /workspace/build.go\""
+            "command": "docker exec -it application_alpine_container bash -c \"go run /workspace/build.go build\""
+        },
+        {
+            "name": "COMPILAR FRONTEND PARA PRODUCAO",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker exec -it application_alpine_container bash -c \"go run /workspace/build.go compile\""
         },
         {
             "name": "TERMINAL ALPINE",
             "request": "launch",
             "type": "node-terminal",
             "command": "docker exec -it application_alpine_container bash"
-        },
-        {
-            "name": "COMPILAR FRONTEND",
-            "request": "launch",
-            "type": "node-terminal",
-            "command": "docker exec -it application_alpine_container sh -c 'cd resources/application && npx rollup -c'"
         },
         {
             "name": "AIDER",

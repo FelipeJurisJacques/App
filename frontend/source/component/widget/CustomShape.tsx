@@ -1,5 +1,5 @@
-import View from '../infrastructure/View'
 import Stylesheet from './CustomShape.css'
+import View from '../../infrastructure/View'
 
 interface Polygon {
     color: string
@@ -14,15 +14,19 @@ interface Polygon {
 export default class CustomShape extends View {
     private tasks: Array<() => void> = []
     private observer: ResizeObserver | null = null
-    private styleObserver: MutationObserver | null = null
     private canvas: HTMLCanvasElement | null = null
+    private styleObserver: MutationObserver | null = null
+    private static stylesheet: null | CSSStyleSheet = null
     private static dpr: number = window.devicePixelRatio || 1
 
     public constructor() {
         super(true)
         this.tasks = []
+        if (!CustomShape.stylesheet) {
+            CustomShape.stylesheet = new Stylesheet()
+        }
         this.shadow.adoptedStyleSheets = [
-            Stylesheet,
+            CustomShape.stylesheet,
         ]
     }
 

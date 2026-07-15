@@ -8,8 +8,6 @@ ENV GOPATH=/go
 ENV PATH=$PATH:$GOPATH/bin
 
 WORKDIR /workspace/
-WORKDIR /workspace/app/
-WORKDIR /workspace/build/
 
 COPY ./entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

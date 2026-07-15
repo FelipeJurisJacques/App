@@ -1,26 +1,28 @@
 {
-  "include": [
-    "/workspace/jsx.ts",
-    "/workspace/global.d.ts",
-    "/workspace/app/source/**/*",
-  ],
   "exclude": [
-    "/workspace/app/node_modules/*"
+    "node_modules"
+  ],
+  "include": [
+    "./global.ts",
+    "./global.d.ts",
+    "./source/**/*",
   ],
   "compilerOptions": {
     "jsx": "react",
     "strict": true,
-    "noEmit": false,
+    "noEmit": true,
     "lib": [
       "DOM",
       "ESNext",
       "DOM.Iterable"
     ],
+    "rootDir": "./",
     "sourceMap": true,
     "module": "ESNext",
     "target": "ESNext",
     "incremental": true,
     "alwaysStrict": true,
+    "outDir": "./build/",
     "skipLibCheck": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
@@ -28,7 +30,6 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "jsxFactory": "DLS.html",
-    "rootDir": "/workspace/",
     "strictNullChecks": true,
     "noImplicitReturns": true,
     "resolveJsonModule": true,
@@ -37,8 +38,8 @@
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
     "moduleResolution": "bundler",
-    "outDir": "/workspace/build/",
     "useDefineForClassFields": true,
+    "jsxFragmentFactory": "Fragment",
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
     "useUnknownInCatchVariables": true,

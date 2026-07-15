@@ -1,6 +1,6 @@
+import Stylesheet from './Files.css'
 import View from '../infrastructure/View'
-import CloseIcon from '../../graphics/buttons/Close.svg'
-import Stylesheet from '../../stylesheets/views/files.css'
+import CloseIcon from '../component/icon/Close.svg'
 
 export default class Files extends View {
     public constructor() {

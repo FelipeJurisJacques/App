@@ -1,13 +1,13 @@
 import * as THREE from 'three'
+import Stylesheet from './Main.css'
 import View from '../infrastructure/View'
 import Agent from '../feature/agent/Agent'
-import CustomShape from '../component/CustomShape'
-import Stylesheet from '../../stylesheets/views/main.css'
-import FolderIcon from '../../graphics/buttons/Folder.svg'
-import ThemeDark from '../../graphics/buttons/ThemeDark.svg'
-import ThemeLight from '../../graphics/buttons/ThemeLight.svg'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import ThemeHighContrast from '../../graphics/buttons/ThemeHighContrast.svg'
+import FolderIcon from '../component/icon/Folder.svg'
+import ThemeDark from '../component/icon/ThemeDark.svg'
+import ThemeLight from '../component/icon/ThemeLight.svg'
+import CustomShape from '../component/widget/CustomShape'
+import ThemeHighContrast from '../component/icon/ThemeHighContrast.svg'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 export default class Main extends View {
     private theme: string

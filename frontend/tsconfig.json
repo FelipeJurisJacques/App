@@ -1,0 +1,49 @@
+{
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "./global.ts",
+    "./global.d.ts",
+    "./source/**/*",
+  ],
+  "compilerOptions": {
+    "jsx": "react",
+    "strict": true,
+    "noEmit": true,
+    "lib": [
+      "DOM",
+      "ESNext",
+      "DOM.Iterable"
+    ],
+    "rootDir": "./",
+    "sourceMap": true,
+    "module": "ESNext",
+    "target": "ESNext",
+    "incremental": true,
+    "alwaysStrict": true,
+    "outDir": "./build/",
+    "skipLibCheck": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "jsxFactory": "DLS.html",
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "resolveJsonModule": true,
+    "noUnusedParameters": true,
+    "skipDefaultLibCheck": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "moduleResolution": "bundler",
+    "useDefineForClassFields": true,
+    "jsxFragmentFactory": "Fragment",
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    "strictPropertyInitialization": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

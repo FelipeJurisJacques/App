@@ -12,6 +12,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 export default class Main extends View {
     private theme: string
     private allowCameraRotation = true
+    private static stylesheet: null | CSSStyleSheet = null
 
     public constructor() {
         super(true)
@@ -41,15 +42,15 @@ export default class Main extends View {
         switch (this.theme) {
             case 'light':
                 this.theme = 'high-contrast'
-                button.append(ThemeHighContrast)
+                button.innerHTML = `${new ThemeHighContrast()}`
                 break
             case 'high-contrast':
                 this.theme = 'dark'
-                button.append(ThemeDark)
+                button.innerHTML = `${new ThemeDark()}`
                 break
             case 'dark':
                 this.theme = 'light'
-                button.append(ThemeLight)
+                button.innerHTML = `${new ThemeLight()}`
                 break
         }
         window.localStorage.setItem('theme', this.theme)
@@ -57,8 +58,11 @@ export default class Main extends View {
     }
 
     public render(): Element[] {
+        if (!Main.stylesheet) {
+            Main.stylesheet = new Stylesheet()
+        }
         this.shadow.adoptedStyleSheets = [
-            Stylesheet,
+            Main.stylesheet,
         ]
         return [
             <canvas id="agent-canvas"></canvas>,
@@ -66,13 +70,13 @@ export default class Main extends View {
                 <p class="top"></p>
                 <button type="button" class="theme">
                     {
-                        this.theme === 'light' ? ThemeLight :
-                            this.theme === 'high-contrast' ? ThemeHighContrast :
-                                ThemeDark
+                        this.theme === 'light' ? new ThemeLight() :
+                            this.theme === 'high-contrast' ? new ThemeHighContrast() :
+                                new ThemeDark()
                     }
                 </button>
                 <button type="button" class="files">
-                    {FolderIcon}
+                    {new FolderIcon()}
                 </button>
             </custom-shape>
         ]

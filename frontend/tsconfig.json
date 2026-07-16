@@ -2,10 +2,14 @@
   "exclude": [
     "node_modules"
   ],
+  "files": [
+    "./global.ts",
+    "./global.d.ts"
+  ],
   "include": [
     "./global.ts",
     "./global.d.ts",
-    "./source/**/*",
+    "./source/**/*"
   ],
   "compilerOptions": {
     "jsx": "react",

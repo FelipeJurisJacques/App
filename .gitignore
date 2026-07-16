@@ -1,6 +1,8 @@
 *.js
 *.mjs
 *.log
+go.mod
+go.sum
 .aider*
 *.js.map
 **/production/**

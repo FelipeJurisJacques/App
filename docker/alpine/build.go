@@ -117,7 +117,7 @@ func main() {
 					if err != nil {
 						return api.OnLoadResult{}, err
 					}
-					jsContents := fmt.Sprintf(`export default class { toString() { return %s; } };`, svgRawContent)
+					jsContents := fmt.Sprintf(`export default class { [Symbol.toPrimitive](hint) { return hint === 'string' ? %s : null; } };`, svgRawContent)
 					return api.OnLoadResult{
 						Loader: api.LoaderJS,
 						Contents: &jsContents,
@@ -165,7 +165,7 @@ func main() {
 							JSXFragment: "Fragment",
 							LogLevel: api.LogLevelInfo,
 							EntryPoints: []string{path},
-							Outdir: "/workspace/build/",
+							Outdir: "/workspace/build/application",
 							Inject: []string{"/workspace/global.ts"}, 
 						})
 						for _, err := range result.Errors {

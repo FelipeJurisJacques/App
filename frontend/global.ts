@@ -13,10 +13,12 @@ export class DLS {
             for (const child of children) {
                 if (tag === 'style' && child instanceof HTMLElement) {
                     element.textContent += DLS.toCSS(child)
+                } else if (child instanceof HTMLElement) {
+                    element.appendChild(child)
                 } else if (typeof child === 'string') {
                     element.insertAdjacentText('beforeend', child)
                 } else {
-                    element.appendChild(child)
+                    element.insertAdjacentHTML('beforeend', `${child}`)
                 }
             }
         }

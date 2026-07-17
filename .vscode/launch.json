@@ -8,6 +8,12 @@
             "command": "docker compose -f ./docker/docker-compose.yaml up"
         },
         {
+            "name": "EXECUTAR COM NGROK",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker compose --profile ngrok -f ./docker/docker-compose.yaml up"
+        },
+        {
             "name": "CHECAR FRONTEND",
             "request": "launch",
             "type": "node-terminal",

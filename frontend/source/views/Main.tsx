@@ -1,7 +1,7 @@
-import * as THREE from 'three'
 import Stylesheet from './Main.css'
 import View from '../infrastructure/View'
 import Agent from '../feature/agent/Agent'
+import Parallax from '../feature/parallax/Parallax'
 import FolderIcon from '../component/icon/Folder.svg'
 import ThemeDark from '../component/icon/ThemeDark.svg'
 import ThemeLight from '../component/icon/ThemeLight.svg'
@@ -85,50 +85,28 @@ export default class Main extends View {
     public handler(): void {
         const canvas = this.shadow.querySelector('#agent-canvas') as HTMLCanvasElement
         if (canvas) {
-            const renderer = new THREE.WebGLRenderer({
-                canvas,
-                alpha: true,
-                antialias: true
-            })
-            renderer.localClippingEnabled = true
-            renderer.setSize(window.innerWidth, window.innerHeight)
-            renderer.setPixelRatio(window.devicePixelRatio)
-
-            const camera = new THREE.PerspectiveCamera(
-                75,
-                window.innerWidth / window.innerHeight,
-                0.1,
-                1000
-            )
-            camera.position.z = 7.0
-
+            const parallax = new Parallax(canvas)
             let controls: OrbitControls | undefined
             if (this.allowCameraRotation) {
-                controls = new OrbitControls(camera, renderer.domElement)
-                controls.enableDamping = true
-                controls.dampingFactor = 0.05
-                controls.screenSpacePanning = false
+                parallax.scenes.push((renderer, camera) => {
+                    if (!controls) {
+                        controls = new OrbitControls(camera, renderer.domElement)
+                        controls.enableDamping = true
+                        controls.dampingFactor = 0.05
+                        controls.screenSpacePanning = false
+                    }
+                    controls.update()
+                })
             }
 
             const agent = new Agent()
-
-            renderer.autoClear = false
-            const animate = () => {
-                requestAnimationFrame(animate)
+            parallax.scenes.push((renderer, camera) => {
                 agent.animate()
-                if (controls) controls.update()
-                renderer.clear()
                 renderer.render(agent.getScenes(this.theme), camera)
-            }
-            animate()
+            })
+            parallax.handler()
 
             // agent.speak('Olá, como posso ajudar você hoje?')
-
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight
-                camera.updateProjectionMatrix()
-                renderer.setSize(window.innerWidth, window.innerHeight)
-            })
         }
         const themeButton = this.shadow.querySelector('button.theme')
         if (themeButton) {

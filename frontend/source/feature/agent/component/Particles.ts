@@ -1,71 +1,88 @@
 import * as THREE from 'three'
 import { SimplexNoise } from 'three/examples/jsm/math/SimplexNoise.js'
 
-export default class Particles {
-    public readonly base: THREE.Group
-    private readonly numParticles: number
-    private readonly simplex: SimplexNoise
-    private readonly particleNoisePoints1: THREE.Points
-    private readonly particleNoisePoints2: THREE.Points
-    private readonly particleNoisePositions1: Float32Array
-    private readonly particleNoisePositions2: Float32Array
+interface Configuration {
+    size: number,
+    angle?: number
+    delta?: number
+    particles: number
+    noiseScale: number
+    noiseFactor: number
+    coronastar?: boolean
+    radiusInternal: number
+    radiusExternal: number
+}
 
-    public constructor() {
-        this.numParticles = 2048
-        this.base = new THREE.Group()
+export default class Particles {
+    public readonly base: THREE.Points
+    private readonly simplex: SimplexNoise
+    private readonly positions: Float32Array
+    private readonly configuration: Configuration
+
+    public constructor(configuration: Configuration) {
         this.simplex = new SimplexNoise()
-        const glowTexture = this.createGlowTexture()
-        const material = new THREE.PointsMaterial({
-            size: 0.05,
-            opacity: 0.5,
-            color: 0xaaffff,
-            map: glowTexture,
-            depthWrite: false,
-            transparent: true,
-            vertexColors: true,
-            sizeAttenuation: true,
-            blending: THREE.AdditiveBlending,
-        })
-        const sphereGeometry1 = new THREE.BufferGeometry()
-        const sphereGeometry2 = new THREE.BufferGeometry()
-        this.particleNoisePositions1 = this.sphereVertices(1.8, 1.7, this.numParticles)
-        this.particleNoisePositions2 = this.sphereVertices(1.7, 1.5, this.numParticles)
-        sphereGeometry1.setAttribute('position', new THREE.BufferAttribute(new Float32Array(this.particleNoisePositions1), 3))
-        sphereGeometry2.setAttribute('position', new THREE.BufferAttribute(new Float32Array(this.particleNoisePositions2), 3))
-        sphereGeometry1.setAttribute('color', new THREE.BufferAttribute(new Float32Array(this.numParticles * 3), 3))
-        sphereGeometry2.setAttribute('color', new THREE.BufferAttribute(new Float32Array(this.numParticles * 3), 3))
-        this.particleNoisePoints1 = new THREE.Points(sphereGeometry1, material)
-        this.particleNoisePoints2 = new THREE.Points(sphereGeometry2, material)
-        this.particleNoisePoints1.position.set(0, 0, 0)
-        this.particleNoisePoints2.position.set(0, 0, 0)
-        this.base.add(this.particleNoisePoints1)
-        this.base.add(this.particleNoisePoints2)
+        this.configuration = configuration
+        const geometry = new THREE.BufferGeometry()
+        this.positions = this.sphereVertices(
+            this.configuration.radiusExternal,
+            this.configuration.radiusInternal,
+            this.configuration.particles
+        )
+        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(this.positions), 3))
+        geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(this.configuration.particles * 3), 3))
+        if (this.configuration.coronastar) {
+            const glowTexture = this.createGlowTexture()
+            const material = new THREE.PointsMaterial({
+                opacity: 0.5,
+                color: 0xaaffff,
+                map: glowTexture,
+                depthWrite: false,
+                transparent: true,
+                vertexColors: true,
+                sizeAttenuation: true,
+                size: this.configuration.size,
+                blending: THREE.AdditiveBlending,
+            })
+            this.base = new THREE.Points(geometry, material)
+        } else {
+            const clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
+            const material = new THREE.PointsMaterial({
+                opacity: 0.5,
+                color: 0x00ffff,
+                depthWrite: false,
+                transparent: true,
+                sizeAttenuation: true,
+                clipIntersection: false,
+                size: this.configuration.size,
+                clippingPlanes: [clippingPlane],
+                blending: THREE.AdditiveBlending,
+            })
+            this.base = new THREE.Points(geometry, material)
+        }
+        this.base.position.set(0, 0, 0)
+        this.base.rotation.z = this.configuration.angle ?? 0.0
     }
 
     public animate(time: number): void {
-        const buffer1 = this.particleNoisePoints1.geometry.getAttribute('position') as THREE.BufferAttribute
-        const color1 = this.particleNoisePoints1.geometry.getAttribute('color') as THREE.BufferAttribute
-        for (let i = 0; i < this.numParticles; i++) {
-            this.noise(buffer1, color1, this.particleNoisePositions1, 0.4, 0.6, time, i)
+        const buffer1 = this.base.geometry.getAttribute('position') as THREE.BufferAttribute
+        const color1 = this.base.geometry.getAttribute('color') as THREE.BufferAttribute
+        for (let i = 0; i < this.configuration.particles; i++) {
+            this.noise(
+                buffer1,
+                color1,
+                this.positions,
+                this.configuration.delta ? time * this.configuration.delta : time,
+                i
+            )
         }
         buffer1.needsUpdate = true
         color1.needsUpdate = true
-
-        const buffer2 = this.particleNoisePoints2.geometry.getAttribute('position') as THREE.BufferAttribute
-        const color2 = this.particleNoisePoints2.geometry.getAttribute('color') as THREE.BufferAttribute
-        for (let i = 0; i < this.numParticles; i++) {
-            this.noise(buffer2, color2, this.particleNoisePositions2, 0.2, 0.4, time, i)
-        }
-        buffer2.needsUpdate = true
-        color2.needsUpdate = true
     }
 
     private noise(
         buffer: THREE.BufferAttribute,
         colorBuffer: THREE.BufferAttribute,
         positions: Float32Array,
-        noiseFactor: number,
-        noiseScale: number,
         time: number,
         index: number
     ): void {
@@ -80,12 +97,12 @@ export default class Particles {
         // Usamos noise * 0.5 + 0.5 para que o deslocamento seja sempre para fora,
         // evitando que as particulas "entrem" na esfera e causem visual de succao.
         const noise = this.simplex.noise4d(
-            bx * noiseScale,
-            by * noiseScale,
-            bz * noiseScale,
+            bx * this.configuration.noiseFactor,
+            by * this.configuration.noiseFactor,
+            bz * this.configuration.noiseFactor,
             time
         )
-        const offset = (noise * 0.5 + 0.5) * noiseFactor
+        const offset = (noise * 0.5 + 0.5) * this.configuration.noiseScale
 
         // Vetor normalizado a partir do centro
         const length = Math.sqrt(bx * bx + by * by + bz * bz) || 1

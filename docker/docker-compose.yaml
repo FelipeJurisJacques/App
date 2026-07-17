@@ -34,3 +34,16 @@ services:
     container_name: application_python_container
     environment:
       - OLLAMA_API_BASE=http://host.docker.internal:11434
+  application_ngrok:
+    profiles:
+      - ngrok
+    ports:
+      - 4040:4040
+    env_file:
+      - ./ngrok/.env
+    depends_on:
+      - application_nginx
+    restart: unless-stopped
+    image: ngrok/ngrok:latest
+    command: [ "http", "application_nginx:80" ]
+    container_name: application_ngrok_container

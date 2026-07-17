@@ -51,8 +51,8 @@ export default class Core {
     }
 
     public animate(): void {
-        this.coreGroup.rotation.y += 0.001
-        this.coreGroup.rotation.x += 0.0005
+        this.coreGroup.rotation.y += 0.01
+        this.coreGroup.rotation.x += 0.005
     }
 
     private createCentralGlowTexture(): THREE.CanvasTexture {

@@ -12,7 +12,19 @@
 </head>
 
 <body>
+    <style>
+        p.data {
+            left: 50%;
+            bottom: 20px;
+            position: fixed;
+            font-size: 18pt;
+            text-align: center;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+    </style>
     <div id="container"></div>
+    <p class="data">Teste</p>
     <script type="text/javascript" defer>
         window.addEventListener('load', function () {
             const element = window.document.createElement('script')

@@ -11,6 +11,7 @@ interface Configuration {
     coronastar?: boolean
     radiusInternal: number
     radiusExternal: number
+    noiseTangentialScale?: number
 }
 
 export default class Particles {
@@ -88,36 +89,66 @@ export default class Particles {
     ): void {
         const i3 = index * 3
 
-        // posicao base
+        // Posição base (original da esfera)
         const bx = positions[i3 + 0]!
         const by = positions[i3 + 1]!
         const bz = positions[i3 + 2]!
 
-        // Calculo do deslocamento coerente (onda)
-        // Usamos noise * 0.5 + 0.5 para que o deslocamento seja sempre para fora,
-        // evitando que as particulas "entrem" na esfera e causem visual de succao.
-        const noise = this.simplex.noise4d(
+        // 1. Ruído para o deslocamento Vertical (Radial - Para fora)
+        const noiseVertical = this.simplex.noise4d(
             bx * this.configuration.noiseFactor,
             by * this.configuration.noiseFactor,
             bz * this.configuration.noiseFactor,
             time
         )
-        const offset = (noise * 0.5 + 0.5) * this.configuration.noiseScale
+        const offsetVertical = (noiseVertical * 0.5 + 0.5) * this.configuration.noiseScale
 
-        // Vetor normalizado a partir do centro
+        // Vetor normalizado a partir do centro (direção para fora)
         const length = Math.sqrt(bx * bx + by * by + bz * bz) || 1
         const nx = bx / length
         const ny = by / length
         const nz = bz / length
 
-        // Aplicacao do deslocamento apenas para fora
-        const finalX = bx + nx * offset
-        const finalY = by + ny * offset
-        const finalZ = bz + nz * offset
+        // 2. ADICIONANDO O EFEITO HORIZONTAL (Tangencial)
+        // Criamos um segundo ruído defasado no tempo para que o movimento horizontal 
+        // não seja idêntico ao vertical (evitando movimentos puramente diagonais rígidos)
+        const noiseHorizontal = this.simplex.noise4d(
+            bx * this.configuration.noiseFactor,
+            by * this.configuration.noiseFactor,
+            bz * this.configuration.noiseFactor,
+            time + 50.0 // Defasagem temporal para aleatoriedade
+        )
+
+        // Intensidade do balanço horizontal (pode criar uma propriedade na Configuration se quiser)
+        const horizontalScale = this.configuration.noiseTangentialScale ?? this.configuration.noiseScale
+        const offsetHorizontal = noiseHorizontal * horizontalScale * 0.3
+
+        // Direção Horizontal: Criamos um vetor tangente à superfície da esfera.
+        // Uma forma simples é cruzar a normal com o eixo "Up" (0, 1, 0)
+        let tx = -ny
+        let ty = nx
+        let tz = 0
+
+        // Caso a partícula esteja exatamente no topo (rápida correção matemática)
+        if (Math.abs(nz) > 0.99) {
+            tx = 1; ty = 0; tz = 0;
+        }
+
+        // Normaliza o vetor tangente para garantir consistência
+        const tLength = Math.sqrt(tx * tx + ty * ty + tz * tz) || 1
+        tx /= tLength
+        ty /= tLength
+        tz /= tLength
+
+        // 3. Aplicação combinada dos dois deslocamentos
+        // final = Posição Base + (Empurrão para Fora) + (Balanço Lateral)
+        const finalX = bx + (nx * offsetVertical) + (tx * offsetHorizontal)
+        const finalY = by + (ny * offsetVertical) + (ty * offsetHorizontal)
+        const finalZ = bz + (nz * offsetVertical) + (tz * offsetHorizontal)
+
         buffer.setXYZ(index, finalX, finalY, finalZ)
 
-        // Brilho baseado na proximidade de Z a 0 (equador da esfera)
-        // O raio máximo é ~2.0, então usamos isso para o decaimento
+        // Brilho baseado na proximidade de Z a 0 (mantido o seu original)
         const falloff = 1.0
         const brightness = Math.pow(Math.max(0, 1.0 - Math.abs(finalZ) / falloff), 2)
         colorBuffer.setXYZ(index, brightness, brightness, brightness)

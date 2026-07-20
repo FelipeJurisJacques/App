@@ -1,25 +1,31 @@
 import * as THREE from 'three'
+import Scene from './type/Scene'
 import SceneDark from './hook/SceneDark'
 import SceneLight from './hook/SceneLight'
+import SceneHighContrast from './hook/SceneHighContrast'
 
 export default class Agent {
-    private dark: null | SceneDark = null
-    private light: null | SceneLight = null
+    private annimation: null | Scene = null
 
     public getScenes(theme: string): THREE.Scene {
-        if (theme === 'dark') {
-            if (!this.dark) {
-                this.light = null
-                this.dark = new SceneDark()
-            }
-            return this.dark.scene
-        } else {
-            if (!this.light) {
-                this.dark = null
-                this.light = new SceneLight()
-            }
-            return this.light.scene
+        switch (theme) {
+            case 'dark':
+                if (!this.annimation || !(this.annimation instanceof SceneDark)) {
+                    this.annimation = new SceneDark()
+                }
+                break
+            case 'light':
+                if (!this.annimation || !(this.annimation instanceof SceneLight)) {
+                    this.annimation = new SceneLight()
+                }
+                break
+            default:
+                if (!this.annimation || !(this.annimation instanceof SceneHighContrast)) {
+                    this.annimation = new SceneHighContrast()
+                }
+                break
         }
+        return this.annimation.scene
     }
 
     public speak(message: string): void {
@@ -31,8 +37,8 @@ export default class Agent {
     }
 
     public animate(): void {
-        if (this.dark) {
-            this.dark.animate()
+        if (this.annimation) {
+            this.annimation.animate()
         }
     }
 }

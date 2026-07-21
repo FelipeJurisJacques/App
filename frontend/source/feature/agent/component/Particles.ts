@@ -5,6 +5,7 @@ interface Configuration {
     size: number,
     angle?: number
     delta?: number
+    falloff: number,
     particles: number
     noiseScale: number
     noiseFactor: number
@@ -60,6 +61,7 @@ export default class Particles {
                 color: 0x00ffff,
                 depthWrite: false,
                 transparent: true,
+                vertexColors: true,
                 sizeAttenuation: true,
                 clipIntersection: false,
                 size: this.configuration.size,
@@ -157,9 +159,10 @@ export default class Particles {
 
         buffer.setXYZ(index, finalX, finalY, finalZ)
 
-        // Brilho baseado na proximidade de Z a 0 (mantido o seu original)
-        const falloff = 1.0
-        const brightness = Math.pow(Math.max(0, 1.0 - Math.abs(finalZ) / falloff), 2)
+        const brightness = Math.pow(Math.max(
+            0,
+            1.0 - Math.abs(finalZ) / this.configuration.falloff
+        ), 2)
         colorBuffer.setXYZ(index, brightness, brightness, brightness)
     }
 

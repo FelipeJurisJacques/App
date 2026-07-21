@@ -16,23 +16,28 @@ export default class SceneDark implements Scene {
         this.scene = new THREE.Scene()
         this.scene.add(this.core.base)
         this.particles1 = new Particles({
+            delta: 1.0,
             size: 0.015,
-            particles: 2999,
-            noiseScale: 0.3,
+            falloff: 1.7,
+            particles: 8001,
+            noiseScale: 0.2,
             noiseFactor: 1.0,
-            radiusInternal: 1.5,
             radiusExternal: 1.7,
+            radiusInternal: 0.7,
+            deltaTangetial: 0.5,
             noiseTangentialScale: 1.0,
         })
         this.particles2 = new Particles({
             size: 0.05,
             delta: 0.5,
+            falloff: 2.0,
             particles: 259,
-            noiseScale: 0.5,
+            noiseScale: 0.3,
             coronastar: true,
             noiseFactor: 0.4,
-            radiusInternal: 1.5,
+            radiusInternal: 1.0,
             radiusExternal: 1.7,
+            noiseTangentialScale: 1.0,
         })
         this.scene.add(this.particles1.base)
         this.scene.add(this.particles2.base)

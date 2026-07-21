@@ -4,8 +4,9 @@ import { SimplexNoise } from 'three/examples/jsm/math/SimplexNoise.js'
 interface Configuration {
     size: number,
     angle?: number
+    collor: number
     delta?: number
-    falloff: number,
+    falloff: number
     particles: number
     noiseScale: number
     noiseFactor: number
@@ -43,8 +44,7 @@ export default class Particles {
         if (this.configuration.coronastar) {
             const glowTexture = this.createGlowTexture()
             const material = new THREE.PointsMaterial({
-                opacity: 0.5,
-                color: 0xaaffff,
+                opacity: 1.0,
                 map: glowTexture,
                 depthWrite: false,
                 transparent: true,
@@ -52,13 +52,13 @@ export default class Particles {
                 sizeAttenuation: true,
                 size: this.configuration.size,
                 blending: THREE.AdditiveBlending,
+                color: this.configuration.collor,
             })
             this.base = new THREE.Points(geometry, material)
         } else {
             const clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
             const material = new THREE.PointsMaterial({
-                opacity: 0.5,
-                color: 0x00ffff,
+                opacity: 1.0,
                 depthWrite: false,
                 transparent: true,
                 vertexColors: true,
@@ -67,6 +67,7 @@ export default class Particles {
                 size: this.configuration.size,
                 clippingPlanes: [clippingPlane],
                 blending: THREE.AdditiveBlending,
+                color: this.configuration.collor,
             })
             this.base = new THREE.Points(geometry, material)
         }

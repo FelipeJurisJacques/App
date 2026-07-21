@@ -6,47 +6,73 @@ import Particles from '../component/Particles'
 export default class SceneDark implements Scene {
     private readonly core: Core
     public readonly scene: THREE.Scene
-    private readonly particles1: Particles
-    private readonly particles2: Particles
-    private readonly ringSegments: THREE.Mesh[] = []
+    private readonly ringSegments: THREE.Mesh[]
+    private readonly particles: Array<Particles>
 
     public constructor() {
         this.core = new Core()
         this.ringSegments = []
         this.scene = new THREE.Scene()
         this.scene.add(this.core.base)
-        this.particles1 = new Particles({
-            delta: 1.0,
-            size: 0.015,
-            falloff: 1.7,
-            particles: 8001,
-            noiseScale: 0.2,
-            noiseFactor: 1.0,
-            radiusExternal: 1.7,
-            radiusInternal: 0.7,
-            deltaTangetial: 0.5,
-            noiseTangentialScale: 1.0,
-        })
-        this.particles2 = new Particles({
-            size: 0.05,
-            delta: 0.5,
-            falloff: 2.0,
-            particles: 259,
-            noiseScale: 0.3,
-            coronastar: true,
-            noiseFactor: 0.4,
-            radiusInternal: 1.0,
-            radiusExternal: 1.7,
-            noiseTangentialScale: 1.0,
-        })
-        this.scene.add(this.particles1.base)
-        this.scene.add(this.particles2.base)
+        this.particles = [
+            new Particles({
+                size: 0.05,
+                delta: 0.5,
+                falloff: 2.0,
+                particles: 199,
+                noiseScale: 0.4,
+                collor: 0xaaffff,
+                coronastar: true,
+                noiseFactor: 0.4,
+                radiusInternal: 1.0,
+                radiusExternal: 1.7,
+                noiseTangentialScale: 1.0,
+            }),
+            new Particles({
+                delta: 1.0,
+                size: 0.015,
+                falloff: 1.8,
+                particles: 4996,
+                noiseScale: 0.2,
+                collor: 0xaaffff,
+                noiseFactor: 1.0,
+                radiusExternal: 1.7,
+                radiusInternal: 0.7,
+                deltaTangetial: 0.5,
+                noiseTangentialScale: 1.0,
+            }),
+            new Particles({
+                delta: 1.0,
+                size: 0.015,
+                falloff: 1.6,
+                particles: 4000,
+                noiseScale: 0.2,
+                noiseFactor: 1.0,
+                collor: 0xffffff,
+                radiusExternal: 1.5,
+                radiusInternal: 0.7,
+                deltaTangetial: 0.5,
+                noiseTangentialScale: 1.0,
+            }),
+            new Particles({
+                delta: 1.0,
+                size: 0.015,
+                falloff: 1.4,
+                particles: 3000,
+                noiseScale: 0.2,
+                collor: 0xffaaaa,
+                noiseFactor: 1.0,
+                radiusExternal: 1.3,
+                radiusInternal: 0.7,
+                deltaTangetial: 0.5,
+                noiseTangentialScale: 1.0,
+            }),
+        ]
         const ringGroup = new THREE.Group()
-        this.scene.add(ringGroup)
         for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 32) {
             const ringGeo = new THREE.RingGeometry(
-                1.2, // innerRadius
-                1.5, // outerRadius
+                1.0, // innerRadius
+                1.2, // outerRadius
                 1, // thetaSegments
                 1, // phiSegments
                 i, // thetaStart
@@ -64,13 +90,18 @@ export default class SceneDark implements Scene {
             this.ringSegments.push(techRing)
             ringGroup.add(techRing)
         }
+        this.scene.add(ringGroup)
+        for (let particles of this.particles) {
+            this.scene.add(particles.base)
+        }
     }
 
     public animate(): void {
         const time = Date.now() * 0.001
         this.core.animate()
-        this.particles1.animate(time)
-        this.particles2.animate(time)
+        for (let particles of this.particles) {
+            particles.animate(time)
+        }
         const lightPos = (Math.PI / 4) + (time * 0.05)
         for (const segment of this.ringSegments) {
             const angle = segment.userData.angle as number

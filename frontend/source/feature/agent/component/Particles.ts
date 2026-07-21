@@ -11,7 +11,9 @@ interface Configuration {
     coronastar?: boolean
     radiusInternal: number
     radiusExternal: number
+    deltaTangetial?: number
     noiseTangentialScale?: number
+    noiseTangentialFactor?: number
 }
 
 export default class Particles {
@@ -23,14 +25,20 @@ export default class Particles {
     public constructor(configuration: Configuration) {
         this.simplex = new SimplexNoise()
         this.configuration = configuration
-        const geometry = new THREE.BufferGeometry()
         this.positions = this.sphereVertices(
             this.configuration.radiusExternal,
             this.configuration.radiusInternal,
             this.configuration.particles
         )
-        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(this.positions), 3))
-        geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(this.configuration.particles * 3), 3))
+        const geometry = new THREE.BufferGeometry()
+        geometry.setAttribute(
+            'position',
+            new THREE.Float32BufferAttribute(this.positions, 3)
+        )
+        geometry.setAttribute(
+            'color',
+            new THREE.Float32BufferAttribute(this.configuration.particles * 3, 3)
+        )
         if (this.configuration.coronastar) {
             const glowTexture = this.createGlowTexture()
             const material = new THREE.PointsMaterial({
@@ -72,7 +80,7 @@ export default class Particles {
                 buffer1,
                 color1,
                 this.positions,
-                this.configuration.delta ? time * this.configuration.delta : time,
+                time,
                 i
             )
         }
@@ -99,7 +107,7 @@ export default class Particles {
             bx * this.configuration.noiseFactor,
             by * this.configuration.noiseFactor,
             bz * this.configuration.noiseFactor,
-            time
+            time * (this.configuration.delta ?? 1.0)
         )
         const offsetVertical = (noiseVertical * 0.5 + 0.5) * this.configuration.noiseScale
 
@@ -112,11 +120,12 @@ export default class Particles {
         // 2. ADICIONANDO O EFEITO HORIZONTAL (Tangencial)
         // Criamos um segundo ruído defasado no tempo para que o movimento horizontal 
         // não seja idêntico ao vertical (evitando movimentos puramente diagonais rígidos)
+        const delta = this.configuration.deltaTangetial ?? this.configuration.delta ?? 1.0
         const noiseHorizontal = this.simplex.noise4d(
-            bx * this.configuration.noiseFactor,
-            by * this.configuration.noiseFactor,
-            bz * this.configuration.noiseFactor,
-            time + 50.0 // Defasagem temporal para aleatoriedade
+            bx * (this.configuration.noiseTangentialFactor ?? this.configuration.noiseFactor),
+            by * (this.configuration.noiseTangentialFactor ?? this.configuration.noiseFactor),
+            bz * (this.configuration.noiseTangentialFactor ?? this.configuration.noiseFactor),
+            time * delta
         )
 
         // Intensidade do balanço horizontal (pode criar uma propriedade na Configuration se quiser)

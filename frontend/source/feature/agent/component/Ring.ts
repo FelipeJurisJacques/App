@@ -3,8 +3,10 @@ import * as THREE from 'three'
 interface Configuration {
     start: number
     speed: number
+    width: number
     length: number
     radius: number
+    collor: number
 }
 
 export default class Ring {
@@ -14,15 +16,15 @@ export default class Ring {
     public constructor(configuration: Configuration) {
         this.configuration = configuration
         const material = new THREE.MeshBasicMaterial({
-            color: 0x00ffff,
             wireframe: false,
             transparent: false,
             side: THREE.DoubleSide,
+            color: this.configuration.collor,
             blending: THREE.AdditiveBlending,
         })
         let geometry = new THREE.RingGeometry(
             this.configuration.radius, // innerRadius
-            this.configuration.radius + 0.05, // outerRadius
+            this.configuration.radius + this.configuration.width, // outerRadius
             Math.max(
                 1,
                 Math.trunc(this.configuration.radius * this.configuration.length * 8.0)

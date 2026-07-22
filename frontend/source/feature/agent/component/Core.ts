@@ -1,9 +1,10 @@
 import * as THREE from 'three'
 
 interface Configuration {
-    particles: boolean
+    collor: number
     rotationX: number
     rotationY: number
+    particles: boolean
 }
 
 export default class Core {
@@ -19,24 +20,24 @@ export default class Core {
         const clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
         this.coreGroup.add(new THREE.Mesh(coreGeometry, new THREE.MeshBasicMaterial({
             opacity: 0.3,
-            color: 0x00ffff,
             wireframe: true,
             depthWrite: false,
             transparent: true,
             clipIntersection: false,
             clippingPlanes: [clippingPlane],
+            color: this.configuration.collor,
             blending: THREE.AdditiveBlending,
         })))
         if (this.configuration.particles) {
             this.coreGroup.add(new THREE.Points(coreGeometry, new THREE.PointsMaterial({
                 size: 0.03,
                 opacity: 0.5,
-                color: 0x00ffff,
                 depthWrite: false,
                 transparent: true,
                 sizeAttenuation: true,
                 clipIntersection: false,
                 clippingPlanes: [clippingPlane],
+                color: this.configuration.collor,
                 blending: THREE.AdditiveBlending,
             })))
         }

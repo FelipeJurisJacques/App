@@ -13,6 +13,7 @@ export default class SceneDark implements Scene {
         this.core = new Core({
             particles: true,
             rotationX: 0.01,
+            collor: 0x00ffff,
             rotationY: 0.005,
         })
         this.ringSegments = []

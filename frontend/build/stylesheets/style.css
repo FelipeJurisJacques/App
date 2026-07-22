@@ -1,17 +1,17 @@
 :root[theme="dark"] {
     --theme: dark;
-    color-scheme: dark;
     --font-color: #E0E0E0;
     --primary-color: #32514E;
     --background-color: #000508;
     background-color: #000508;
     --glow-color: rgba(0, 242, 255, 0.15);
     --grid-opacity: 0.08;
+    color-scheme: only dark !important;
 }
 
 :root[theme="light"] {
     --theme: light;
-    color-scheme: light;
+    color-scheme: only light !important;
     --font-color: #32514E;
     --primary-color: #32514E;
     --background-color: #E0E0E0;
@@ -21,7 +21,7 @@
 }
 
 :root[theme="high-contrast"] {
-    color-scheme: light;
+    color-scheme: only light !important;
     --theme: high-contrast;
     --font-color: #000000;
     --primary-color: #000000;

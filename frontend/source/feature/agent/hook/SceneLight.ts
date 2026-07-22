@@ -10,7 +10,11 @@ export default class SceneLight implements Scene {
 
     public constructor() {
         this.rings = []
-        this.core = new Core()
+        this.core = new Core({
+            particles: false,
+            rotationX: 0.001,
+            rotationY: 0.0005,
+        })
         for (let radius = 0.8; radius < 2.0; radius += 0.06) {
             this.rings.push(new Ring({
                 radius: radius,

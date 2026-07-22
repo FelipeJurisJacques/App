@@ -1,14 +1,23 @@
 import * as THREE from 'three'
 
+interface Configuration {
+    particles: boolean
+    rotationX: number
+    rotationY: number
+}
+
 export default class Core {
     public readonly base: THREE.Group
     private readonly coreGroup: THREE.Group
+    private readonly configuration: Configuration
 
-    public constructor() {
+    public constructor(configuration: Configuration) {
         this.base = new THREE.Group
+        this.coreGroup = new THREE.Group()
+        this.configuration = configuration
         const coreGeometry = new THREE.IcosahedronGeometry(0.7, 5)
         const clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
-        const wireframeMaterial = new THREE.MeshBasicMaterial({
+        this.coreGroup.add(new THREE.Mesh(coreGeometry, new THREE.MeshBasicMaterial({
             opacity: 0.3,
             color: 0x00ffff,
             wireframe: true,
@@ -17,42 +26,35 @@ export default class Core {
             clipIntersection: false,
             clippingPlanes: [clippingPlane],
             blending: THREE.AdditiveBlending,
-        })
-        const coreWireframe = new THREE.Mesh(coreGeometry, wireframeMaterial)
-        const pointsMaterial = new THREE.PointsMaterial({
-            size: 0.03,
-            opacity: 0.5,
-            color: 0x00ffff,
-            depthWrite: false,
-            transparent: true,
-            sizeAttenuation: true,
-            clipIntersection: false,
-            clippingPlanes: [clippingPlane],
-            blending: THREE.AdditiveBlending,
-        })
-        const corePoints = new THREE.Points(coreGeometry, pointsMaterial)
-        this.coreGroup = new THREE.Group()
-        this.coreGroup.add(coreWireframe)
-        this.coreGroup.add(corePoints)
+        })))
+        if (this.configuration.particles) {
+            this.coreGroup.add(new THREE.Points(coreGeometry, new THREE.PointsMaterial({
+                size: 0.03,
+                opacity: 0.5,
+                color: 0x00ffff,
+                depthWrite: false,
+                transparent: true,
+                sizeAttenuation: true,
+                clipIntersection: false,
+                clippingPlanes: [clippingPlane],
+                blending: THREE.AdditiveBlending,
+            })))
+        }
         this.base.add(this.coreGroup)
-
-        const centralGlowTexture = this.createCentralGlowTexture()
-        const centralGlowMaterial = new THREE.SpriteMaterial({
+        this.base.add(new THREE.AmbientLight(0x021111, 0.5))
+        const centralGlow = new THREE.Sprite(new THREE.SpriteMaterial({
             transparent: true,
             depthWrite: false,
-            map: centralGlowTexture,
             blending: THREE.AdditiveBlending,
-        })
-        const centralGlow = new THREE.Sprite(centralGlowMaterial)
+            map: this.createCentralGlowTexture(),
+        }))
         centralGlow.scale.set(7, 7, 1)
         this.base.add(centralGlow)
-        const ambientLight = new THREE.AmbientLight(0x021111, 0.5)
-        this.base.add(ambientLight)
     }
 
     public animate(): void {
-        this.coreGroup.rotation.y += 0.01
-        this.coreGroup.rotation.x += 0.005
+        this.coreGroup.rotation.y += this.configuration.rotationX
+        this.coreGroup.rotation.x += this.configuration.rotationY
     }
 
     private createCentralGlowTexture(): THREE.CanvasTexture {

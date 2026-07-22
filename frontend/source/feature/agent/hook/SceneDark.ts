@@ -10,7 +10,11 @@ export default class SceneDark implements Scene {
     private readonly particles: Array<Particles>
 
     public constructor() {
-        this.core = new Core()
+        this.core = new Core({
+            particles: true,
+            rotationX: 0.01,
+            rotationY: 0.005,
+        })
         this.ringSegments = []
         this.scene = new THREE.Scene()
         this.scene.add(this.core.base)
@@ -19,7 +23,7 @@ export default class SceneDark implements Scene {
                 size: 0.05,
                 delta: 0.5,
                 falloff: 2.0,
-                particles: 199,
+                particles: 197,
                 noiseScale: 0.4,
                 collor: 0xaaffff,
                 coronastar: true,
@@ -32,7 +36,7 @@ export default class SceneDark implements Scene {
                 delta: 1.0,
                 size: 0.015,
                 falloff: 1.8,
-                particles: 4996,
+                particles: 6000,
                 noiseScale: 0.2,
                 collor: 0xaaffff,
                 noiseFactor: 1.0,
@@ -48,21 +52,8 @@ export default class SceneDark implements Scene {
                 particles: 4000,
                 noiseScale: 0.2,
                 noiseFactor: 1.0,
-                collor: 0xffffff,
+                collor: 0xaaffff,
                 radiusExternal: 1.5,
-                radiusInternal: 0.7,
-                deltaTangetial: 0.5,
-                noiseTangentialScale: 1.0,
-            }),
-            new Particles({
-                delta: 1.0,
-                size: 0.015,
-                falloff: 1.4,
-                particles: 3000,
-                noiseScale: 0.2,
-                collor: 0xffaaaa,
-                noiseFactor: 1.0,
-                radiusExternal: 1.3,
                 radiusInternal: 0.7,
                 deltaTangetial: 0.5,
                 noiseTangentialScale: 1.0,
@@ -70,14 +61,6 @@ export default class SceneDark implements Scene {
         ]
         const ringGroup = new THREE.Group()
         for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 32) {
-            const ringGeo = new THREE.RingGeometry(
-                1.0, // innerRadius
-                1.2, // outerRadius
-                1, // thetaSegments
-                1, // phiSegments
-                i, // thetaStart
-                Math.PI / 40 // thetaEnd
-            )
             const ringMat = new THREE.MeshBasicMaterial({
                 color: 0x00ffff,
                 wireframe: false,
@@ -85,9 +68,37 @@ export default class SceneDark implements Scene {
                 side: THREE.DoubleSide,
                 blending: THREE.AdditiveBlending,
             })
+            const ringGeo = new THREE.RingGeometry(
+                1.1, // innerRadius
+                1.4, // outerRadius
+                1, // thetaSegments
+                1, // phiSegments
+                i, // thetaStart
+                Math.PI / 40 // thetaEnd
+            )
             const techRing = new THREE.Mesh(ringGeo, ringMat)
             techRing.userData.angle = i
             this.ringSegments.push(techRing)
+            ringGroup.add(techRing)
+        }
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: 0x00cccc,
+            wireframe: false,
+            transparent: false,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+        })
+        for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 64) {
+            const ringGeo = new THREE.RingGeometry(
+                0.8, // innerRadius
+                0.85, // outerRadius
+                1, // thetaSegments
+                1, // phiSegments
+                i, // thetaStart
+                Math.PI / 128 // thetaEnd
+            )
+            const techRing = new THREE.Mesh(ringGeo, ringMat)
+            techRing.userData.angle = i
             ringGroup.add(techRing)
         }
         this.scene.add(ringGroup)

@@ -1,16 +1,11 @@
+import View from '../../support/view/View'
 import Stylesheet from './CustomShape.css'
-import View from '../../infrastructure/View'
 
 interface Polygon {
     color: string
     points: Array<[number, number]>
 }
 
-/**
- * Componente CustomShape
- * Encapsula um canvas que se auto-redesenha ao redimensionar a tag.
- * Utiliza Shadow DOM e a técnica de Layering para manter o canvas como background.
- */
 export default class CustomShape extends View {
     private tasks: Array<() => void> = []
     private observer: ResizeObserver | null = null
@@ -20,14 +15,15 @@ export default class CustomShape extends View {
     private static dpr: number = window.devicePixelRatio || 1
 
     public constructor() {
-        super(true)
+        super({
+            stylesheet: () => {
+                if (!CustomShape.stylesheet) {
+                    CustomShape.stylesheet = new Stylesheet()
+                }
+                return [CustomShape.stylesheet]
+            }
+        })
         this.tasks = []
-        if (!CustomShape.stylesheet) {
-            CustomShape.stylesheet = new Stylesheet()
-        }
-        this.shadow.adoptedStyleSheets = [
-            CustomShape.stylesheet,
-        ]
     }
 
     public get width(): number {
@@ -59,7 +55,7 @@ export default class CustomShape extends View {
         this.handler()
     }
 
-    public handler(): void {
+    protected handler(): void {
         if (!this.canvas) return
         const dpr = CustomShape.dpr
         const rect = this.getBoundingClientRect()
@@ -83,17 +79,12 @@ export default class CustomShape extends View {
         })
     }
 
-    /**
-     * Renderiza a estrutura do componente
-     */
-    public render(): Element[] {
+    protected render(): void {
         this.canvas = <canvas id="background-canvas"></canvas> as HTMLCanvasElement
-        return [
-            this.canvas,
-            <div class="content-slot">
-                <slot></slot>
-            </div>
-        ]
+        this.element.append(this.canvas)
+        this.element.append(<div class="content-slot">
+            <slot></slot>
+        </div>)
     }
 
     /**

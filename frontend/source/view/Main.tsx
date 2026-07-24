@@ -1,5 +1,5 @@
 import Stylesheet from './Main.css'
-import View from '../infrastructure/View'
+import View from '../support/view/View'
 import Agent from '../feature/agent/Agent'
 import Parallax from '../feature/parallax/Parallax'
 import FolderIcon from '../component/icon/Folder.svg'
@@ -12,10 +12,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 export default class Main extends View {
     private theme: string
     private allowCameraRotation = true
-    private static stylesheet: null | CSSStyleSheet = null
 
     public constructor() {
-        super(true)
+        super({
+            opened: true,
+            stylesheet: () => [new Stylesheet()]
+        })
         this.theme = window.localStorage.getItem('theme') || 'dark'
         this.applyTheme()
     }
@@ -37,7 +39,7 @@ export default class Main extends View {
     }
 
     private toggleTheme(): void {
-        const button = this.shadow.querySelector('button[type="button"]') as HTMLButtonElement
+        const button = this.element.querySelector('button[type="button"]') as HTMLButtonElement
         button.innerHTML = ''
         switch (this.theme) {
             case 'light':
@@ -57,33 +59,25 @@ export default class Main extends View {
         this.applyTheme()
     }
 
-    public render(): Element[] {
-        if (!Main.stylesheet) {
-            Main.stylesheet = new Stylesheet()
-        }
-        this.shadow.adoptedStyleSheets = [
-            Main.stylesheet,
-        ]
-        return [
-            <canvas id="agent-canvas"></canvas>,
-            <custom-shape>
-                <p class="top"></p>
-                <button type="button" class="theme">
-                    {
-                        this.theme === 'light' ? new ThemeLight() :
-                            this.theme === 'high-contrast' ? new ThemeHighContrast() :
-                                new ThemeDark()
-                    }
-                </button>
-                <button type="button" class="files">
-                    {new FolderIcon()}
-                </button>
-            </custom-shape>
-        ]
+    protected render(): void {
+        this.element.append(<canvas id="agent-canvas"></canvas>)
+        this.element.append(<custom-shape>
+            <p class="top"></p>
+            <button type="button" class="theme">
+                {
+                    this.theme === 'light' ? new ThemeLight() :
+                        this.theme === 'high-contrast' ? new ThemeHighContrast() :
+                            new ThemeDark()
+                }
+            </button>
+            <button type="button" class="files">
+                {new FolderIcon()}
+            </button>
+        </custom-shape>)
     }
 
-    public handler(): void {
-        const canvas = this.shadow.querySelector('#agent-canvas') as HTMLCanvasElement
+    protected handler(): void {
+        const canvas = this.element.querySelector('#agent-canvas') as HTMLCanvasElement
         if (canvas) {
             const parallax = new Parallax(canvas)
             let controls: OrbitControls | undefined
@@ -108,12 +102,8 @@ export default class Main extends View {
 
             // agent.speak('Olá, como posso ajudar você hoje?')
         }
-        const themeButton = this.shadow.querySelector('button.theme')
-        if (themeButton) {
-            themeButton.addEventListener('click', () => this.toggleTheme())
-        }
 
-        const shape = this.shadow.querySelector('custom-shape') as CustomShape
+        const shape = this.element.querySelector('custom-shape') as CustomShape
         if (shape) {
 
             // top
@@ -187,19 +177,7 @@ export default class Main extends View {
             })
         }
 
-        const files = this.shadow.querySelector('button.files') as HTMLButtonElement
-        if (files) {
-            files.addEventListener('click', event => {
-                event.preventDefault()
-                const container = window.document.querySelector('#container')
-                if (container) {
-                    container.innerHTML = ''
-                    container.append(<view-files></view-files>)
-                }
-            })
-        }
-
-        const top = this.shadow.querySelector('p.top') as HTMLElement
+        const top = this.element.querySelector('p.top') as HTMLElement
         if (top) {
             const time = function () {
                 const theme = window.document.documentElement.getAttribute('theme')
@@ -212,6 +190,17 @@ export default class Main extends View {
             time()
             setInterval(time, 1000)
         }
+
+        this.element.addEventListener('click', event => {
+            if (event.target && (event.target instanceof SVGElement || event.target instanceof HTMLElement)) {
+                if (event.target.closest('button.theme')) {
+                    this.toggleTheme()
+                } else if (event.target.closest('button.files')) {
+                    event.preventDefault()
+                    window.document.body.append(<view-files></view-files>)
+                }
+            }
+        })
     }
 }
 

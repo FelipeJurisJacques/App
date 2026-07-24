@@ -1,20 +1,18 @@
 :host {
     top: 0px;
     left: 0px;
+    opacity: 0;
+    z-index: 1;
     width: 100%;
     height: 100%;
-    display: flex;
     position: fixed;
+    overflow: hidden;
+    transform: scale(0.95);
+    color: var(--font-color);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+
     align-items: center;
     justify-content: center;
-    background: var(--background-color);
-    color: var(--font-color);
-    z-index: 1000;
-    overflow: hidden;
-    /* Opening animation */
-    opacity: 0;
-    transform: scale(0.95);
-    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
 
 :host(.visible) {
@@ -27,35 +25,15 @@
     transform: scale(0.95);
 }
 
-.background-fui {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.05) 0%, transparent 70%);
-    pointer-events: none;
-}
-
-.background-fui::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image:
-        linear-gradient(var(--primary-color) 1px, transparent 1px),
-        linear-gradient(90deg, var(--primary-color) 1px, transparent 1px);
-    background-size: 50px 50px;
-    opacity: 0.03;
-}
-
 .container {
+    top: 50%;
+    left: 50%;
     width: 80%;
     height: 70%;
-    background: rgba(0, 20, 30, 0.4);
-    backdrop-filter: blur(15px);
+    position: fixed;
+    background: #FFFFFF33;
+    backdrop-filter: blur(3px);
+    transform: translate(-50%, -50%);
     border: 1px solid rgba(0, 242, 255, 0.2);
     clip-path: polygon(0 20px, 20px 0,
             calc(100% - 20px) 0, 100% 20px,
@@ -64,7 +42,6 @@
     display: flex;
     flex-direction: column;
     padding: 40px;
-    position: relative;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -78,26 +55,6 @@
     letter-spacing: 2px;
     opacity: 0.5;
     color: var(--primary-color);
-}
-
-h1 {
-    font-family: 'Orbitron', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    margin: 0;
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 10px;
-}
-
-.content {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: monospace;
-    opacity: 0.6;
-    text-transform: uppercase;
 }
 
 .close-button {

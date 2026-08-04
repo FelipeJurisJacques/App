@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <g fill="#8B4513">
+    <!-- Trator de fazenda -->
+    <rect x="160" y="192" width="200" height="128" rx="16" ry="16"/>
+    <polygon points="256,192 288,144 320,192 320,272 288,320 256,272 224,320 224,192"/>
+    <rect x="224" y="352" width="64" height="64" rx="8" ry="8"/>
+    <circle cx="288" cy="352" r="16"/>
+    <polygon points="208,272 240,272 240,320 208,320"/>
+  </g>
+</svg>

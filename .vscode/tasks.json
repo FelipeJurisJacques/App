@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "RUN",
+            "type": "shell",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "command": "docker compose -f ./docker/docker-compose.yaml up"
+        },
+        {
+            "type": "shell",
+            "label": "BUILD WEB",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "command": "docker exec application_alpine_container bash -c \"go run /workspace/build.go build\""
+        }
+    ]
+}

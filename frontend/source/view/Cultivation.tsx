@@ -1,7 +1,9 @@
 import Stylesheet from "./Cultivation.css";
 import Window from "../support/window/Window";
+import Feature from "../feature/cultivation/Cultivation"
 
 export default class Cultivation extends Window {
+  private feature: null|Feature
   private static stylesheet: null | CSSStyleSheet = null;
 
   public constructor() {
@@ -13,18 +15,15 @@ export default class Cultivation extends Window {
         return [Cultivation.stylesheet];
       },
     });
+    this.feature = null
   }
 
   protected render(): void {
-    this.element.append(<h1>Files_Explorer</h1>);
-    this.element.append(
-      <div class="content">
-        <p>Repository data access initialized... [No files found]</p>
-      </div>,
-    );
+    const canvas = <canvas></canvas> as HTMLCanvasElement
+    this.element.append(canvas);
+    this.feature = new Feature(canvas)
+    this.feature.handler()
   }
-
-  protected handler(): void {}
 }
 
 window.customElements.define("view-cultivation", Cultivation);

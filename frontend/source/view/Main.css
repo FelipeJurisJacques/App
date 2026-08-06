@@ -83,3 +83,10 @@ button.files {
     display: flex;
     position: fixed;
 }
+
+button.cultivation {
+    left: 50px;
+    bottom: 15px;
+    display: flex;
+    position: fixed;
+}

@@ -1,5 +1,6 @@
 import Stylesheet from './Window.css'
 import CloseIcon from '../../component/icon/Close.svg'
+import CustomShape from '../../component/widget/CustomShape'
 
 interface Configuration {
     stylesheet?: () => Array<CSSStyleSheet>
@@ -31,14 +32,37 @@ export default abstract class Window extends HTMLElement {
         stylesheet.push(Window._stylesheet)
         this.shandow.adoptedStyleSheets = stylesheet
         this._element = <div class="container"></div>
-        this.shandow.append(<a href="/" class="close-button" id="close-window">{new CloseIcon()}</a>)
-        this.shandow.append(this.element)
+        const shape = <custom-shape id="window-header"></custom-shape> as CustomShape
+        this.shandow.append(shape)
+        this.shandow.append(this._element)
+        this.shandow.append(<a href="/" id="window-close">{new CloseIcon()}</a>)
         requestAnimationFrame(() => {
             this.classList.add('visible')
         })
+        if (shape) {
+            shape.polygon(() => {
+                const border = 3
+                const margin = 0
+                const height = shape.height / 2
+                const path: Array<[number, number]> = []
+                path.push([height, margin])
+                path.push([shape.width - (border + margin), margin])
+                path.push([shape.width - margin, border + margin])
+                path.push([shape.width - margin, shape.height - (border + margin)])
+                path.push([shape.width - (border + margin), shape.height - margin])
+                path.push([border + margin, shape.height - margin])
+                path.push([margin, shape.height - (border + margin)])
+                path.push([margin, height])
+                path.push([height, margin])
+                return {
+                    points: path,
+                    color: window.getComputedStyle(window.document.documentElement).getPropertyValue('--primary-color'),
+                }
+            })
+        }
         this.shandow.addEventListener('click', event => {
             if (event.target && (event.target instanceof SVGElement || event.target instanceof HTMLElement)) {
-                if (event.target.closest('#close-window')) {
+                if (event.target.closest('#window-close')) {
                     event.preventDefault()
                     this.classList.add('closing')
                     this.classList.remove('visible')

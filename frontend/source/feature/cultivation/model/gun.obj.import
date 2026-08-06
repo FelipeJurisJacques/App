@@ -1,0 +1,18 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/gun.obj-6b22685e0f108cac2fa4f8d09e83fa8b.mesh"
+
+[deps]
+
+files=[ "res://.import/gun.obj-6b22685e0f108cac2fa4f8d09e83fa8b.mesh" ]
+
+source_file="res://models/vehicle/car/gun.obj"
+dest_files=[ "res://.import/gun.obj-6b22685e0f108cac2fa4f8d09e83fa8b.mesh", "res://.import/gun.obj-6b22685e0f108cac2fa4f8d09e83fa8b.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+optimize_mesh=true

@@ -42,6 +42,8 @@ export default class Place {
     for (let grass of this.grases) {
       this.scene.add(grass.base)
     }
+    const ambient = new THREE.AmbientLight(0xffffff, 0.8)
+    this.scene.add(ambient)
   }
 
   public update(): void {

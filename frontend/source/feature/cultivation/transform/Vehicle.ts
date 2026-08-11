@@ -1,39 +1,41 @@
-import * as THREE from "three";
-import Wheel from "../model/Wheel";
-import Tractor from "../model/Tractor";
+import * as THREE from 'three'
+import Tractor from '../model/Tractor'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 export default class Vehicle {
-  public readonly base: THREE.Group;
+  public readonly base: THREE.Group
 
   public constructor() {
-    this.base = new THREE.Group();
-    const tractor = new Tractor();
-    this.base.add(tractor.transform);
+    this.base = new THREE.Group()
+    const tractor = new Tractor()
+    this.base.add(tractor.transform)
 
-    const wheelfl = new Wheel(0.7);
-    wheelfl.transform.position.z = 1.8;
-    wheelfl.transform.position.x = -1.2;
-    wheelfl.transform.position.y = -0.2;
-    this.base.add(wheelfl.transform);
+    const loader = new GLTFLoader()
+    loader.load('assets/cultivation/wheel.glb', data => {
+      data.scene.rotation.z = Math.PI / 2
+      const wheelfl = data.scene
+      const wheelfr = data.scene.clone()
+      const wheelrl = data.scene.clone()
+      const wheelrr = data.scene.clone()
 
-    const wheelfr = new Wheel(0.7);
-    wheelfr.transform.position.z = 1.8;
-    wheelfr.transform.position.x = 1.2;
-    wheelfr.transform.position.y = -0.2;
-    this.base.add(wheelfr.transform);
+      wheelfl.position.set(-1.2, -0.22, 1.8)
+      wheelfr.position.set(1.2, -0.22, 1.8)
+      wheelrr.position.set(1.2, -0.08, -1.8)
+      wheelrl.position.set(-1.2, -0.08, -1.8)
 
-    const wheelrl = new Wheel(1.0);
-    wheelrl.transform.position.z = -1.8;
-    wheelrl.transform.position.x = -1.2;
-    wheelrl.transform.position.y = 0.1;
-    this.base.add(wheelrl.transform);
+      wheelfl.scale.set(-1.4, -1.4, -1.4)
+      wheelfr.scale.set(1.4, 1.4, 1.4)
+      wheelrl.scale.set(-1.7, -1.7, -1.7)
+      wheelrr.scale.set(1.7, 1.7, 1.7)
 
-    const wheelrr = new Wheel(1.0);
-    wheelrr.transform.position.z = -1.8;
-    wheelrr.transform.position.x = 1.2;
-    wheelrr.transform.position.y = 0.1;
-    this.base.add(wheelrr.transform);
+      this.base.add(wheelfl)
+      this.base.add(wheelfr)
+      this.base.add(wheelrl)
+      this.base.add(wheelrr)
+    }, event => { }, error => {
+      console.error(error)
+    })
   }
 
-  public update(): void {}
+  public update(): void { }
 }

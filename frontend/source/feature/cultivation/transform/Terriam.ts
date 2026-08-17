@@ -15,8 +15,7 @@ export default class Terriam {
         this.repeat = 100
         this.size = 1024.0
         this.camera = camera
-        const loader = new THREE.TextureLoader()
-        this.texture = loader.load('assets/cultivation/grass.bmp')
+        this.texture = this.createGrassTexture()
         this.texture.repeat.set(this.repeat, this.repeat)
         this.texture.wrapS = THREE.RepeatWrapping
         this.texture.wrapT = THREE.RepeatWrapping
@@ -31,5 +30,28 @@ export default class Terriam {
         this.floor.position.z = this.camera.position.z
         this.texture.offset.x = (this.floor.position.x / this.size) * this.repeat
         this.texture.offset.y = (this.floor.position.z / this.size) * this.repeat * -1.0
+    }
+
+    private createGrassTexture(): THREE.CanvasTexture {
+        const canvas = document.createElement('canvas')
+        canvas.width = 256
+        canvas.height = 256
+        const ctx = canvas.getContext('2d')!
+        ctx.fillStyle = '#4FBF4F'
+        ctx.fillRect(0, 0, 256, 256)
+        for (let i = 0; i < 5000; i++) {
+            const x = Math.random() * 256
+            const y = Math.random() * 256
+            const alpha = Math.random() * 0.3
+            const green = Math.floor(100 + Math.random() * 80)
+            ctx.fillStyle = `rgba(35, ${green}, 30, ${alpha})`
+            ctx.fillRect(x, y, 2, 4)
+        }
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+
+        return texture;
     }
 }

@@ -1,13 +1,12 @@
 import * as THREE from "three"
-import Grass from "../transform/Grass"
+import Terriam from "../transform/Terriam"
 import Vehicle from "../transform/Vehicle"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
 export default class Place {
+  private readonly terriam: Terriam
   private readonly vehicle: Vehicle
-  private readonly floor: THREE.Mesh
   public readonly scene: THREE.Scene
-  private readonly grases: Array<Grass>
   private readonly controls: OrbitControls
   private readonly renderer: THREE.WebGLRenderer
   private readonly camera: THREE.PerspectiveCamera
@@ -18,8 +17,9 @@ export default class Place {
   ) {
     this.camera = camera
     this.renderer = renderer
-    this.scene = new THREE.Scene()
     this.vehicle = new Vehicle()
+    this.scene = new THREE.Scene()
+    this.terriam = new Terriam(this.camera)
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.dampingFactor = 0.05
     this.controls.enableDamping = true
@@ -32,25 +32,16 @@ export default class Place {
         console.error(error)
       })
     }
-    this.floor = new THREE.Mesh(new THREE.PlaneGeometry(1024.0, 1024.0, 1, 1), new THREE.MeshBasicMaterial({
-      color: 0xaaffaa,
-    }))
     this.vehicle.base.position.y = 0.85
-    this.floor.rotation.x = Math.PI / -2.0
-    this.scene.add(this.floor)
-    this.grases = [new Grass()]
-    for (let grass of this.grases) {
-      this.scene.add(grass.base)
-    }
     const ambient = new THREE.AmbientLight(0xffffff, 0.8)
     this.scene.add(ambient)
+    this.scene.add(this.terriam.base)
   }
 
   public update(): void {
     this.vehicle.update()
+    this.terriam.update()
     this.controls.update()
-    this.floor.position.x = this.camera.position.x
-    this.floor.position.z = this.camera.position.z
     this.renderer.render(this.scene, this.camera)
   }
 }

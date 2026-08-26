@@ -20,6 +20,16 @@
                 "panel": "dedicated"
             },
             "command": "docker exec application_alpine_container bash -c \"go run /workspace/build.go build\""
+        },
+        {
+            "type": "shell",
+            "label": "TAURI CLI",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "command": "docker exec application_alpine_container bash -c \"pnpm tauri dev --config desktop/tauri.conf.json\""
         }
     ]
 }

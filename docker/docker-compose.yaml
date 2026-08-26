@@ -1,13 +1,51 @@
 services:
-  application_alpine:
+  application_aider:
     tty: true
-    build: ./alpine/
+    build: ./aider
+    env_file:
+      - ./aider/.env
+    volumes:
+      - ../:/workspace/
+    restart: unless-stopped
+    working_dir: /workspace/
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    container_name: application_aider_container
+    environment:
+      - OLLAMA_API_BASE=http://host.docker.internal:11434
+  application_tauri:
+    tty: true
+    ports:
+      - 1420:1420
+    build: ./tauri/
+    restart: unless-stopped
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+      - PULSE_SERVER=${PULSE_SERVER}
+    volumes:
+      - ../:/workspace/
+      - /mnt/wslg:/mnt/wslg
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ../data/tauri/log/:/root/.npm/_logs/
+    container_name: application_tauri_container
+  application_esbuilder:
+    tty: true
+    build: ./esbuilder/
     restart: unless-stopped
     volumes:
       - ../frontend/:/workspace/
-      - ../data/alpine/log/:/root/.npm/_logs/
-      - ./alpine/build.go:/workspace/build.go
-    container_name: application_alpine_container
+      - ./esbuilder/build.go:/workspace/build.go
+    container_name: application_esbuilder_container
+  application_typescript:
+    tty: true
+    build: ./typescript/
+    restart: unless-stopped
+    volumes:
+      - ../frontend/:/workspace/
+      - ../data/typescript/log/:/root/.npm/_logs/
+    container_name: application_typescript_container
   application_nginx:
     ports:
       - 80:80
@@ -20,20 +58,6 @@ services:
       - ../data/nginx/logs:/var/log/nginx
       - ../frontend/build/:/usr/share/nginx/html/
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-  application_python:
-    tty: true
-    build: ./python
-    env_file:
-      - ./python/.env
-    volumes:
-      - ../:/workspace/
-    restart: unless-stopped
-    working_dir: /workspace/
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    container_name: application_python_container
-    environment:
-      - OLLAMA_API_BASE=http://host.docker.internal:11434
   application_ngrok:
     profiles:
       - ngrok

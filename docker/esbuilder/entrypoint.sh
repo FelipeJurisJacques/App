@@ -1,6 +1,5 @@
 #!/bin/bash
 
-rm -rf /root/.npm/_logs/*
 mkdir -p /workspace/build/
 mkdir -p /workspace/public/
 mkdir -p /workspace/assets/

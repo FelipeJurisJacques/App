@@ -1,0 +1,17 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w"
+  },
+  "devDependencies": {
+    "tslib": "^2.6.0",
+    "typescript": "^5.0.0",
+    "@types/three": "^0.160.0"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  }
+}

@@ -2,13 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "EXECUTAR",
+            "name": "EXECUTAR CONTAINERS",
             "request": "launch",
             "type": "node-terminal",
             "command": "docker compose -f ./docker/docker-compose.yaml up"
         },
         {
-            "name": "EXECUTAR COM NGROK",
+            "name": "EXECUTAR CONTAINERS COM NGROK",
             "request": "launch",
             "type": "node-terminal",
             "command": "docker compose --profile ngrok -f ./docker/docker-compose.yaml up"
@@ -17,31 +17,31 @@
             "name": "CHECAR FRONTEND",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_alpine_container bash -c \"go run /workspace/build.go check\""
+            "command": "docker exec -it application_typescript_container bash -c \"go run /workspace/build.go check\""
         },
         {
             "name": "COMPILAR FRONTEND PARA DESENVOLVIMENTO",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_alpine_container bash -c \"go run /workspace/build.go build\""
+            "command": "docker exec -it application_esbuild_container bash -c \"go run /workspace/build.go build\""
         },
         {
             "name": "COMPILAR FRONTEND PARA PRODUCAO",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_alpine_container bash -c \"go run /workspace/build.go compile\""
+            "command": "docker exec -it application_esbuild_container bash -c \"go run /workspace/build.go compile\""
         },
         {
-            "name": "TERMINAL ALPINE",
+            "name": "EXECUTAR TAURI",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_alpine_container bash"
+            "command": "docker exec application_tauri_container bash -c \"pnpm tauri dev --config desktop/tauri.conf.json\""
         },
         {
             "name": "AIDER",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_python_container aider --map-tokens 0 --chat-language portuguese"
+            "command": "docker exec -it application_aider_container aider --map-tokens 0 --chat-language portuguese"
         }
     ]
 }

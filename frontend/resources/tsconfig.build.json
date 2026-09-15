@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "include": [
-    "/workspace/resources/application/dls/*",
-    "/workspace/resources/application/index.ts",
-    "/workspace/resources/application/service-worker.ts"
-  ]
-}

@@ -1,3 +1,4 @@
+.env
 *.js
 *.mjs
 *.log
@@ -5,7 +6,6 @@ go.mod
 go.sum
 .aider*
 *.js.map
-**/ngrok/.env
 **/production/**
 **/.pnpm-store/**
 **/development/**

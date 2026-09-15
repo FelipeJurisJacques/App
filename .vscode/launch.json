@@ -17,19 +17,13 @@
             "name": "CHECAR FRONTEND",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_typescript_container bash -c \"go run /workspace/build.go check\""
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_typescript"
         },
         {
-            "name": "COMPILAR FRONTEND PARA DESENVOLVIMENTO",
+            "name": "COMPILAR FRONTEND",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_esbuild_container bash -c \"go run /workspace/build.go build\""
-        },
-        {
-            "name": "COMPILAR FRONTEND PARA PRODUCAO",
-            "request": "launch",
-            "type": "node-terminal",
-            "command": "docker exec -it application_esbuild_container bash -c \"go run /workspace/build.go compile\""
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_esbuilder"
         },
         {
             "name": "EXECUTAR TAURI",

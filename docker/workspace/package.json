@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "name": "application",
+  "scripts": {
+    "dev": "vite",
+    "tauri": "tauri",
+    "preview": "vite preview",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "three": "latest",
+    "@tauri-apps/api": "latest",
+    "@tauri-apps/plugin-opener": "latest"
+  },
+  "devDependencies": {
+    "vite": "latest",
+    "tslib": "latest",
+    "typescript": "latest",
+    "@types/three": "latest",
+    "@tauri-apps/cli": "latest"
+  }
+}

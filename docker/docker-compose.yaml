@@ -1,5 +1,8 @@
 services:
+
   application_aider:
+    profiles:
+      - aider
     tty: true
     build: ./aider
     env_file:
@@ -13,51 +16,45 @@ services:
     container_name: application_aider_container
     environment:
       - OLLAMA_API_BASE=http://host.docker.internal:11434
-  application_tauri:
-    tty: true
-    ports:
-      - 1420:1420
-    build: ./tauri/
-    restart: unless-stopped
-    environment:
-      - DISPLAY=${DISPLAY:-:0}
-      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
-      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
-      - PULSE_SERVER=${PULSE_SERVER}
-    volumes:
-      - ../:/workspace/
-      - /mnt/wslg:/mnt/wslg
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - ../data/tauri/log/:/root/.npm/_logs/
-    container_name: application_tauri_container
+
   application_esbuilder:
     tty: true
-    build: ./esbuilder/
-    restart: unless-stopped
-    volumes:
-      - ../frontend/:/workspace/
-      - ./esbuilder/build.go:/workspace/build.go
+    working_dir: /workspace/
+    build: ./esbuilder/Dockerfile
     container_name: application_esbuilder_container
+    volumes:
+      - workspace:/workspace/
+      - ../web/:/workspace/web/:Z
+      - ./workspace/build.go:/workspace/build.go:Z
+      - ./workspace/global.ts:/workspace/global.ts:Z
+      - ./workspace/package.json:/workspace/package.json:Z
+
   application_typescript:
     tty: true
-    build: ./typescript/
-    restart: unless-stopped
-    volumes:
-      - ../frontend/:/workspace/
-      - ../data/typescript/log/:/root/.npm/_logs/
+    working_dir: /workspace/
+    build: ./typescript/Dockerfile
     container_name: application_typescript_container
+    volumes:
+      - workspace:/workspace/
+      - data:/root/.npm/_logs/
+      - ../web/:/workspace/web/:Z
+      - ./workspace/global.d.ts:/workspace/global.d.ts:Z
+      - ./workspace/package.json:/workspace/package.json:Z
+
   application_nginx:
     ports:
       - 80:80
     image: nginx:alpine
     restart: unless-stopped
+    working_dir: /usr/share/nginx/html/
     extra_hosts:
       - host.docker.internal:host-gateway
     container_name: application_nginx_container
     volumes:
-      - ../data/nginx/logs:/var/log/nginx
-      - ../frontend/build/:/usr/share/nginx/html/
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - data:/var/log/nginx
+      - ../web/build/:/usr/share/nginx/html/:Z
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:Z
+
   application_ngrok:
     profiles:
       - ngrok
@@ -71,3 +68,7 @@ services:
     image: ngrok/ngrok:latest
     command: [ "http", "application_nginx:80" ]
     container_name: application_ngrok_container
+
+volumes:
+  data:
+  workspace:

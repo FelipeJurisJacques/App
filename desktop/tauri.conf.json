@@ -6,8 +6,8 @@
   "build": {
     "beforeDevCommand": "",
     "beforeBuildCommand": "",
-    "frontendDist": "../frontend/build",
-    "devUrl": "http://application_nginx_container:80"
+    "devUrl": "http://localhost:80",
+    "frontendDist": "../web/build"
   },
   "app": {
     "withGlobalTauri": true,

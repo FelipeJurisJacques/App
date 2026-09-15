@@ -1,0 +1,89 @@
+* {
+    z-index: 0;
+}
+
+::slotted(*) {
+    z-index: 1;
+}
+
+::slotted(:nth-child(1)) {
+    left: max(40px, calc(50% - 200px));
+    bottom: 5px;
+    position: fixed;
+}
+
+::slotted(:nth-child(2)) {
+    left: calc(50% - 100px);
+    bottom: 5px;
+    position: fixed;
+}
+
+div.bacground {
+    left: 0px;
+    width: 100%;
+    bottom: 0px;
+    height: 50px;
+    position: fixed;
+    overflow: hidden;
+    clip-path: polygon(0px 10px,
+    max(calc(50% - 230px), 10px) 10px,
+    max(calc(50% - 220px), 20px) 0px,
+    calc(50% - 50px) 0px,
+    calc(50% - 40px) 10px,
+    calc(50% + 40px) 10px,
+    calc(50% + 50px) 0px,
+    min(calc(50% + 220px), calc(100% - 20px)) 0px,
+    min(calc(50% + 230px), calc(100% - 10px)) 10px,
+    100% 10px,
+    100% 100%,
+    0px 100%,
+    0px 10px);
+}
+
+:host-context(body[theme="dark"]) div.bacground {
+    background-color: #071F1F;
+}
+
+div.customization {
+    inset: 0;
+    content: '';
+    position: absolute;
+    background-color: var(--primary-color);
+    clip-path: polygon(0px 0px,
+            100% 0px,
+            100% 12px,
+            min(calc(50% + 228px), calc(100% - 12px)) 12px,
+            min(calc(50% + 218px), calc(100% - 22px)) 2px,
+            calc(50% + 52px) 2px,
+            calc(50% + 42px) 12px,
+            calc(50% - 42px) 12px,
+            calc(50% - 52px) 2px,
+            max(calc(50% - 218px), 22px) 2px,
+            max(calc(50% - 228px), 12px) 12px,
+            0px 12px,
+            0px 0px);
+}
+
+/* div.bacground::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 100%,
+            rgba(0, 255, 255, 0.2) 0%,
+            transparent 50%);
+    pointer-events: none;
+} */
+
+:host-context(body[theme="dark"]) div.bacground::before {
+    inset: 0;
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(0deg,
+            #062627 0px,
+            #062627 1px,
+            transparent 1px,
+            transparent 3px);
+}

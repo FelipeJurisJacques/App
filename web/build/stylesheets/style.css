@@ -1,0 +1,75 @@
+:root[theme="dark"] {
+    --theme: dark;
+    --font-color: #E0E0E0;
+    --primary-color: #32514E;
+    --background-color: #000508;
+    background-color: #000508;
+    --glow-color: rgba(0, 242, 255, 0.15);
+    --grid-opacity: 0.08;
+    color-scheme: only dark !important;
+}
+
+:root[theme="light"] {
+    --theme: light;
+    color-scheme: only light !important;
+    --font-color: #32514E;
+    --primary-color: #32514E;
+    --background-color: #E0E0E0;
+    background-color: #E0E0E0;
+    --glow-color: rgba(50, 81, 78, 0.05);
+    --grid-opacity: 0.05;
+}
+
+:root[theme="high-contrast"] {
+    color-scheme: only light !important;
+    --theme: high-contrast;
+    --font-color: #000000;
+    --primary-color: #000000;
+    --background-color: #FFFFFF;
+    background-color: #FFFFFF;
+    --glow-color: transparent;
+    --grid-opacity: 0.1;
+}
+
+* {
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: var(--font-color);
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 10px var(--font-color);
+}
+
+:root[theme="high-contrast"] * {
+    text-shadow: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+}
+
+
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--background-color);
+}
+
+:root[theme="dark"] body,
+:root[theme="light"] body {
+    background-image: radial-gradient(circle at 50% 50%, var(--glow-color) 0%, transparent 70%);
+}
+
+:root[theme="dark"] body::before,
+:root[theme="light"] body::before {
+    content: '';
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-image:
+        linear-gradient(var(--primary-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--primary-color) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: var(--grid-opacity);
+}

@@ -1,0 +1,73 @@
+services:
+
+  application_tauri:
+    tty: true
+    profiles:
+      - tauri
+    ports:
+      - 1420: 1420
+    build: ./tauri/
+    restart: unless-stopped
+    working_dir: /workspace/
+    container_name: application_tauri_container
+    volumes:
+      - ../: /workspace/
+      - /mnt/wslg: /mnt/wslg
+      - data: /root/.npm/_logs/
+      - ../web/: /workspace/web/
+      - /tmp/.X11-unix: /tmp/.X11-unix
+      - ./global.ts: /workspace/global.ts
+      - pnpm_store: /workspace/.pnpm-store/
+      - ./global.d.ts: /workspace/global.d.ts
+      - node_modules: /workspace/node_modules/
+      - ./package.json: /workspace/package.json
+      - ./tsconfig.json: /workspace/tsconfig.json
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - PULSE_SERVER=unix:/mnt/wslg/PulseServer
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-0}
+
+  application_java:
+    tty: true
+    ports:
+      - 8080:8080
+    build: ./java/
+    working_dir: /workspace/
+    volumes:
+      - ../backend/:/workspace/
+    container_name: application_java_container
+
+  application_turn:
+    restart: unless-stopped
+    image: instrumentisto/coturn
+    ports:
+      - 3478:3478
+      - 3478:3478/udp
+      - 5349:5349
+      - 5349:5349/udp
+      - 49152-49200:49152-49200/udp
+    command:
+      - -n
+      - --lt-cred-mech
+      - --min-port=49152
+      - --max-port=49200
+      - --log-file=stdout
+      - --realm=localhost
+      - --user=user:password
+    container_name: application_turn_container
+
+  application_python:
+    tty: true
+    build: ./python
+    env_file:
+      - ./python/.env
+    volumes:
+      - ../:/workspace/
+    restart: unless-stopped
+    working_dir: /workspace/
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    container_name: application_python_container
+    environment:
+      - OLLAMA_API_BASE=http://host.docker.internal:11434

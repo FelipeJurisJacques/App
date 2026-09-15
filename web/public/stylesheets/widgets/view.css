@@ -1,0 +1,58 @@
+* {
+    z-index: 0;
+}
+
+::slotted(*) {
+    z-index: 1;
+}
+
+::slotted(:nth-child(1)) {
+    left: max(40px, calc(50% - 200px));
+    bottom: 5px;
+    position: fixed;
+}
+
+::slotted(:nth-child(2)) {
+    left: calc(50% - 100px);
+    bottom: 5px;
+    position: fixed;
+}
+
+div.bacground {
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    overflow: hidden;
+    clip-path: polygon(0px 10px,
+    max(calc(50% - 230px), 10px) 10px,
+    max(calc(50% - 220px), 20px) 0px,
+    calc(50% - 50px) 0px,
+    calc(50% - 40px) 10px,
+    calc(50% + 40px) 10px,
+    calc(50% + 50px) 0px,
+    min(calc(50% + 220px), calc(100% - 20px)) 0px,
+    min(calc(50% + 230px), calc(100% - 10px)) 10px,
+    100% 10px,
+    100% 100%,
+    0px 100%,
+    0px 10px);
+}
+
+:host-context(body[theme="dark"]) div.bacground {
+    background-color: #071F1F;
+}
+
+:host-context(body[theme="dark"]) div.bacground::before {
+    inset: 0;
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(0deg,
+            #062627 0px,
+            #062627 1px,
+            transparent 1px,
+            transparent 3px);
+}

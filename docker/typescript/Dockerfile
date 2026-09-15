@@ -1,11 +1,9 @@
 FROM alpine:latest
 
-RUN  curl --proto '=https' --tlv1.2 -sSf https://rustup.rs | sh
-
-RUN apk add --no-cache git bash npm nodejs
-RUN npm install -g tsx
-RUN npm install -g pnpm
-RUN npm install -g typescript
+RUN apk add --no-cache git
+RUN apk add --no-cache npm
+RUN apk add --no-cache bash
+RUN apk add --no-cache nodejs
 
 WORKDIR /workspace/
 

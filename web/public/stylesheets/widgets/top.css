@@ -1,0 +1,43 @@
+div.content {
+    left: 50%;
+    top: 15px;
+    position: fixed;
+    font-size: 10pt;
+    text-align: center;
+    transform: translate(-50%, -50%);
+}
+
+* {
+    z-index: 0;
+}
+
+::slotted(*) {
+    z-index: 1;
+}
+
+div.bacground {
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 50px;
+    position: fixed;
+    overflow: hidden;
+    background-color: #071F1F;
+}
+
+:host-context(body[theme="dark"]) div.bacground {
+    background-color: #071F1F;
+}
+
+:host-context(body[theme="dark"]) div.bacground::before {
+    inset: 0;
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(0deg,
+            #062627 0px,
+            #062627 1px,
+            transparent 1px,
+            transparent 3px);
+}

@@ -35,7 +35,7 @@
             "name": "AIDER",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec -it application_aider_container aider --map-tokens 0 --chat-language portuguese"
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_aider"
         }
     ]
 }

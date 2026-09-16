@@ -4,21 +4,29 @@ services:
     profiles:
       - aider
     tty: true
-    build: ./aider
     env_file:
-      - ./aider/.env
-    volumes:
-      - ../:/workspace/
-    restart: unless-stopped
+      - ../.env
+    build: ./aider
     working_dir: /workspace/
     extra_hosts:
       - host.docker.internal:host-gateway
     container_name: application_aider_container
-    environment:
-      - OLLAMA_API_BASE=http://host.docker.internal:11434
+    volumes:
+      - aider:/workspace/
+      - ../web/:/workspace/web/:Z
+      - ../.agent/:/workspace/.agent/:Z
+      - ./workspace/build.go:/workspace/build.go:Z
+      - ./workspace/global.ts:/workspace/global.ts:Z
+      - ./aider/.aiderignore:/workspace/.aiderignore:Z
+      - ./workspace/global.d.ts:/workspace/global.d.ts:Z
+      - ./workspace/package.json:/workspace/package.json:Z
+      - ./aider/.aider.conf.yml:/workspace/.aider.conf.yml:Z
+      - ./workspace/tsconfig.json:/workspace/tsconfig.json:Z
 
   application_esbuilder:
     tty: true
+    profiles:
+      - esbuilder
     working_dir: /workspace/
     build: ./esbuilder/Dockerfile
     container_name: application_esbuilder_container
@@ -31,6 +39,8 @@ services:
 
   application_typescript:
     tty: true
+    profiles:
+      - typescript
     working_dir: /workspace/
     build: ./typescript/Dockerfile
     container_name: application_typescript_container
@@ -40,6 +50,7 @@ services:
       - ../web/:/workspace/web/:Z
       - ./workspace/global.d.ts:/workspace/global.d.ts:Z
       - ./workspace/package.json:/workspace/package.json:Z
+      - ./workspace/tsconfig.json:/workspace/tsconfig.json:Z
 
   application_nginx:
     ports:
@@ -58,10 +69,10 @@ services:
   application_ngrok:
     profiles:
       - ngrok
+    env_file:
+      - ../.env
     ports:
       - 4040:4040
-    env_file:
-      - ./ngrok/.env
     depends_on:
       - application_nginx
     restart: unless-stopped
@@ -71,4 +82,5 @@ services:
 
 volumes:
   data:
+  aider:
   workspace:

@@ -15,13 +15,8 @@ services:
       - aider:/workspace/
       - ../web/:/workspace/web/:Z
       - ../.agent/:/workspace/.agent/:Z
-      - ./workspace/build.go:/workspace/build.go:Z
-      - ./workspace/global.ts:/workspace/global.ts:Z
       - ./aider/.aiderignore:/workspace/.aiderignore:Z
-      - ./workspace/global.d.ts:/workspace/global.d.ts:Z
-      - ./workspace/package.json:/workspace/package.json:Z
       - ./aider/.aider.conf.yml:/workspace/.aider.conf.yml:Z
-      - ./workspace/tsconfig.json:/workspace/tsconfig.json:Z
 
   application_esbuilder:
     tty: true
@@ -56,6 +51,8 @@ services:
     ports:
       - 80:80
     image: nginx:alpine
+    security_opt:
+      - apparmor:unconfined
     restart: unless-stopped
     working_dir: /usr/share/nginx/html/
     extra_hosts:

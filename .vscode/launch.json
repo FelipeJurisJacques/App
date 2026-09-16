@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "EXECUTAR CONTAINERS",
+            "name": "EXECUTAR",
             "request": "launch",
             "type": "node-terminal",
             "command": "docker compose -f ./docker/docker-compose.yaml up"

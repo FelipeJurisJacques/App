@@ -2,4 +2,4 @@
 
 rm -rf /root/.npm/_logs/*
 
-tail -f /dev/null
+pnpm tauri dev --config /workspace/desktop/tauri.conf.json

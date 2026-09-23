@@ -29,7 +29,7 @@
             "name": "EXECUTAR TAURI",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker exec application_tauri_container bash -c \"pnpm tauri dev --config desktop/tauri.conf.json\""
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_tauri"
         },
         {
             "name": "AIDER",

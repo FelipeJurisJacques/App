@@ -1,68 +1,5 @@
 services:
 
-  application_aider:
-    profiles:
-      - aider
-    tty: true
-    env_file:
-      - ../.env
-    build: ./aider
-    working_dir: /workspace/
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    container_name: application_aider_container
-    volumes:
-      - aider:/workspace/
-      - ../web/:/workspace/web/:Z
-      - ../.agent/:/workspace/.agent/:Z
-      - ./aider/.aiderignore:/workspace/.aiderignore:Z
-      - ./aider/.aider.conf.yml:/workspace/.aider.conf.yml:Z
-
-  application_esbuilder:
-    tty: true
-    profiles:
-      - esbuilder
-    working_dir: /workspace/
-    build: ./esbuilder/Dockerfile
-    container_name: application_esbuilder_container
-    volumes:
-      - workspace:/workspace/
-      - ../web/:/workspace/web/:Z
-      - ./workspace/build.go:/workspace/build.go:Z
-      - ./workspace/global.ts:/workspace/global.ts:Z
-      - ./workspace/package.json:/workspace/package.json:Z
-
-  application_typescript:
-    tty: true
-    profiles:
-      - typescript
-    working_dir: /workspace/
-    build: ./typescript/Dockerfile
-    container_name: application_typescript_container
-    volumes:
-      - workspace:/workspace/
-      - data:/root/.npm/_logs/
-      - ../web/:/workspace/web/:Z
-      - ./workspace/global.d.ts:/workspace/global.d.ts:Z
-      - ./workspace/package.json:/workspace/package.json:Z
-      - ./workspace/tsconfig.json:/workspace/tsconfig.json:Z
-
-  application_nginx:
-    ports:
-      - 80:80
-    image: nginx:alpine
-    security_opt:
-      - apparmor:unconfined
-    restart: unless-stopped
-    working_dir: /usr/share/nginx/html/
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    container_name: application_nginx_container
-    volumes:
-      - data:/var/log/nginx
-      - ../web/build/:/usr/share/nginx/html/:Z
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:Z
-
   application_ngrok:
     profiles:
       - ngrok
@@ -77,7 +14,120 @@ services:
     command: [ "http", "application_nginx:80" ]
     container_name: application_ngrok_container
 
+  application_nginx:
+    ipc: host
+    tty: true
+    ports:
+      - 80:80
+    networks:
+      - tauri
+    image: nginx:alpine
+    security_opt:
+      - apparmor:unconfined
+    restart: unless-stopped
+    working_dir: /usr/share/nginx/html/
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    container_name: application_nginx_container
+    volumes:
+      - data:/var/log/nginx
+      - ../web/build/:/usr/share/nginx/html/:Z
+      - ../configurations/nginx.conf:/etc/nginx/conf.d/default.conf:Z
+
+  application_aider:
+    profiles:
+      - aider
+    tty: true
+    env_file:
+      - ../.env
+    build: ./aider/
+    working_dir: /workspace/
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    container_name: application_aider_container
+    volumes:
+      - aider:/workspace/
+      - ../web/:/workspace/web/:Z
+      - ../.agent/:/workspace/.agent/:Z
+      - ../desktop/source/:/workspace/desktop/src/:Z
+      - ../desktop/assets/:/workspace/desktop/icons/:Z
+      - ../configurations/global.d.ts:/workspace/global.d.ts:Z
+      - ../configurations/.aiderignore:/workspace/.aiderignore:Z
+      - ../configurations/package.json:/workspace/package.json:Z
+      - ../configurations/tsconfig.json:/workspace/tsconfig.json:Z
+      - ../desktop/capabilities/:/workspace/desktop/capabilities/:Z
+      - ../configurations/.aider.conf.yml:/workspace/.aider.conf.yml:Z
+
+  application_esbuilder:
+    tty: true
+    profiles:
+      - esbuilder
+    build: ./esbuilder/
+    working_dir: /workspace/
+    container_name: application_esbuilder_container
+    volumes:
+      - workspace:/workspace/
+      - ../web/:/workspace/web/:Z
+      - ../configurations/build.go:/workspace/build.go:Z
+      - ../configurations/global.ts:/workspace/global.ts:Z
+      - ../configurations/package.json:/workspace/package.json:Z
+
+  application_typescript:
+    tty: true
+    profiles:
+      - typescript
+    build: ./typescript/
+    working_dir: /workspace/
+    container_name: application_typescript_container
+    volumes:
+      - workspace:/workspace/
+      - data:/root/.npm/_logs/
+      - ../web/:/workspace/web/:Z
+      - ../configurations/global.d.ts:/workspace/global.d.ts:Z
+      - ../configurations/package.json:/workspace/package.json:Z
+      - ../configurations/tsconfig.json:/workspace/tsconfig.json:Z
+
+  application_tauri:
+    ipc: host
+    tty: true
+    networks:
+      - tauri
+    profiles:
+      - tauri
+    env_file:
+      - ../.env
+    build: ./tauri/
+    stdin_open: true
+    network_mode: "host"
+    environment:
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=/tmp/.Xauthority
+      - XDG_RUNTIME_DIR=/run/user/1000
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+    working_dir: /workspace/
+    container_name: application_tauri_container
+    volumes:
+      - workspace:/workspace/
+      - data:/root/.npm/_logs/
+      - ../web/:/workspace/web/:Z
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ~/.Xauthority:/tmp/.Xauthority:ro
+      - ../desktop/source/:/workspace/desktop/src/:Z
+      - ../desktop/assets/:/workspace/desktop/icons/:Z
+      - ../desktop/build.rs:/workspace/desktop/build.rs:Z
+      - /run/user/1000/wayland-0:/run/user/1000/wayland-0:ro
+      - ../configurations/global.d.ts:/workspace/global.d.ts:Z
+      - ../configurations/package.json:/workspace/package.json:Z
+      - ../configurations/tsconfig.json:/workspace/tsconfig.json:Z
+      - ../desktop/capabilities/:/workspace/desktop/capabilities/:Z
+      - ../configurations/Cargo.toml:/workspace/desktop/Cargo.toml:Z
+      - ../configurations/tauri.conf.json:/workspace/desktop/tauri.conf.json:Z
+
 volumes:
   data:
   aider:
   workspace:
+
+networks:
+  tauri:
+    driver: bridge

@@ -3,4 +3,4 @@
 *.jsx
 *.mjs
 *.js.map
-configuration/.aider.conf
+configurations/.aider.conf

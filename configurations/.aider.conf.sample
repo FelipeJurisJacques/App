@@ -1,7 +1,9 @@
+env-file: /workspace/.env
+
 # modo de edicao: 'whole', 'diff' ou 'architect'
 edit-format: diff
 
-model: openai/qwen-3.8-max
+model: openrouter/qwen/qwen3.8-max:free
 
 openai-api-base: "https://api.xkiro.com/v1"
 
@@ -18,5 +20,7 @@ show-model-warnings: true
 # test-cmd: "npm test"
 # lint-cmd: "npm run lint"
 # model: ollama/qwen2.5-coder:7b
+# api-key:
+#   openrouter: "sua_chave_xtrouter_aqui"
 # openai-api-key: "sua_chave_xtrouter_aqui"
 # ollama-api-base: "http://host.docker.internal:11434"

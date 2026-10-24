@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "rootDir": "./",
+    },
+    "include": [
+        "./web/source/**/*"
+    ],
+    "extends": "./configurations/tsconfig.json"
+}

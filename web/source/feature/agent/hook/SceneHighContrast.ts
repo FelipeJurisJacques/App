@@ -12,5 +12,12 @@ export default class SceneHighContrast implements Scene {
         this.scene.add(this.basic.base)
     }
 
+    public get intensity(): number {
+        return 0.0
+    }
+
+    public set intensity(value: number) {
+    }
+
     public animate(): void { }
 }

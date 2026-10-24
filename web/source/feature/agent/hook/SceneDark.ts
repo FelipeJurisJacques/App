@@ -4,12 +4,16 @@ import Core from '../component/Core'
 import Particles from '../component/Particles'
 
 export default class SceneDark implements Scene {
+    private delta: number
+    private entropy: number
     private readonly core: Core
     public readonly scene: THREE.Scene
     private readonly ringSegments: THREE.Mesh[]
     private readonly particles: Array<Particles>
 
     public constructor() {
+        this.delta = 0.0
+        this.entropy = 0.0
         this.core = new Core({
             particles: true,
             rotationX: 0.01,
@@ -22,43 +26,53 @@ export default class SceneDark implements Scene {
         this.particles = [
             new Particles({
                 size: 0.05,
-                delta: 0.5,
                 falloff: 2.0,
                 particles: 197,
-                noiseScale: 0.4,
-                collor: 0xaaffff,
                 coronastar: true,
-                noiseFactor: 0.4,
+                collor: 0xaaffff,
                 radiusInternal: 1.0,
                 radiusExternal: 1.7,
-                noiseTangentialScale: 1.0,
+                waveAmplitude: 1.0,
+                waveMaxCount: 2,
+                waveSpeed: 0.3,          // ondas lentas
+                waveWidth: 0.5,          // envelope largo (ondas suaves)
+                waveWavelength: 6.0,
+                waveLife: 8.0,
+                waveRadialStrength: 0.5, // deslocamento grande
+                waveTangentialFactor: 0.4,
             }),
             new Particles({
-                delta: 1.0,
                 size: 0.015,
                 falloff: 1.8,
                 particles: 6000,
-                noiseScale: 0.2,
                 collor: 0xaaffff,
-                noiseFactor: 1.0,
-                radiusExternal: 1.7,
                 radiusInternal: 0.7,
-                deltaTangetial: 0.5,
-                noiseTangentialScale: 1.0,
+                radiusExternal: 1.7,
+                waveAmplitude: 1.0,
+                waveMaxCount: 10,         // mais ondas simultâneas
+                waveSpeed: 2.0,          // mais rápidas
+                waveWidth: 0.3,          // envelope estreito
+                waveWavelength: 5.0,
+                waveLife: 2.0,
+                waveRadialStrength: 0.2, // deslocamento menor
+                waveTangentialFactor: 0.3,
             }),
             new Particles({
-                delta: 1.0,
                 size: 0.015,
                 falloff: 1.6,
                 particles: 4000,
-                noiseScale: 0.2,
-                noiseFactor: 1.0,
                 collor: 0xaaffff,
-                radiusExternal: 1.5,
                 radiusInternal: 0.7,
-                deltaTangetial: 0.5,
-                noiseTangentialScale: 1.0,
-            }),
+                radiusExternal: 1.5,
+                waveAmplitude: 0.8,
+                waveMaxCount: 10,
+                waveSpeed: 2.0,
+                waveWidth: 0.35,
+                waveWavelength: 4.5,
+                waveLife: 2.0,
+                waveRadialStrength: 0.1,
+                waveTangentialFactor: 0.35,
+            })
         ]
         const ringGroup = new THREE.Group()
         for (let i = 0.01; i < Math.PI * 2; i += Math.PI / 32) {
@@ -108,11 +122,31 @@ export default class SceneDark implements Scene {
         }
     }
 
+    public get intensity(): number {
+        return this.entropy
+    }
+
+    public set intensity(value: number) {
+        if (value > 1.0) {
+            this.entropy = 1.0
+        } else if (value < 0.0) {
+            this.entropy = 0.0
+        } else {
+            this.entropy = value
+        }
+    }
+
     public animate(): void {
-        const time = Date.now() * 0.001
         this.core.animate()
+        const time = Date.now() * 0.001
+        const diff = this.entropy - this.delta
+        if (Math.abs(diff) < 0.005) {
+            this.delta = this.entropy
+        } else {
+            this.delta += diff * 0.1
+        }
         for (let particles of this.particles) {
-            particles.animate(time)
+            particles.animate(time, this.delta)
         }
         const lightPos = (Math.PI / 4) + (time * 0.05)
         for (const segment of this.ringSegments) {

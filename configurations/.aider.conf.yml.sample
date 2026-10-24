@@ -21,6 +21,6 @@ show-model-warnings: true
 # lint-cmd: "npm run lint"
 # model: ollama/qwen2.5-coder:7b
 # api-key:
-#   openrouter: "sua_chave_xtrouter_aqui"
+#   - openrouter: "sua_chave_xtrouter_aqui"
 # openai-api-key: "sua_chave_xtrouter_aqui"
 # ollama-api-base: "http://host.docker.internal:11434"

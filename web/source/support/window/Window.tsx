@@ -32,7 +32,7 @@ export default abstract class Window extends HTMLElement {
         stylesheet.push(Window._stylesheet)
         this.shandow.adoptedStyleSheets = stylesheet
         this._element = <div class="container"></div>
-        const shape = <custom-shape id="window-header"></custom-shape> as CustomShape
+        const shape = <component-custom-shape id="window-header"></component-custom-shape> as CustomShape
         this.shandow.append(shape)
         this.shandow.append(this._element)
         this.shandow.append(<a href="/" id="window-close">{new CloseIcon()}</a>)

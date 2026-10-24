@@ -62,7 +62,7 @@ export default class Main extends View {
         ]
         return [
             <canvas id="agent-canvas"></canvas>,
-            <custom-shape>
+            <component-custom-shape>
                 <p class="top"></p>
                 <button type="button" class="theme">
                     {
@@ -74,7 +74,7 @@ export default class Main extends View {
                 <button type="button" class="files">
                     {FolderIcon}
                 </button>
-            </custom-shape>
+            </component-custom-shape>
         ]
     }
 
@@ -133,7 +133,7 @@ export default class Main extends View {
             themeButton.addEventListener('click', () => this.toggleTheme())
         }
 
-        const shape = this.shadow.querySelector('custom-shape') as CustomShape
+        const shape = this.shadow.querySelector('component-custom-shape') as CustomShape
         if (shape) {
 
             // top

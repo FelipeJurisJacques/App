@@ -14,16 +14,28 @@
             "command": "docker compose --profile ngrok -f ./docker/docker-compose.yaml up"
         },
         {
+            "name": "COMPILAR BACKEND",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_java"
+        },
+        {
             "name": "CHECAR FRONTEND",
             "request": "launch",
             "type": "node-terminal",
             "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_typescript"
         },
         {
+            "name": "INSTALAR DEPENDÊNCIAS FRONTEND",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_esbuilder install"
+        },
+        {
             "name": "COMPILAR FRONTEND",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_esbuilder"
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_esbuilder build"
         },
         {
             "name": "EXECUTAR TAURI",

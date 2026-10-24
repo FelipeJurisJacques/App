@@ -1,5 +1,17 @@
 services:
 
+  application_java:
+    profiles:
+      - java
+    tty: true
+    build: ./java/
+    working_dir: /workspace/
+    container_name: application_java_container
+    volumes:
+      - workspace:/workspace/
+      - ../configurations/build.gradle:/workspace/backend/build.gradle
+      - ../backend/:/workspace/backend/src/main/java/com/application/:Z
+
   application_ngrok:
     profiles:
       - ngrok
@@ -41,14 +53,17 @@ services:
     env_file:
       - ../.env
     build: ./aider/
+    stdin_open: true
     working_dir: /workspace/
     extra_hosts:
       - host.docker.internal:host-gateway
     container_name: application_aider_container
     volumes:
       - aider:/workspace/
+      - ../.env:/workspace/.env:Z
       - ../web/:/workspace/web/:Z
       - ../.agent/:/workspace/.agent/:Z
+      - ../backend/:/workspace/backend/:Z
       - ../desktop/source/:/workspace/desktop/src/:Z
       - ../desktop/assets/:/workspace/desktop/icons/:Z
       - ../configurations/global.d.ts:/workspace/global.d.ts:Z
@@ -71,7 +86,6 @@ services:
       - ../configurations/build.go:/workspace/build.go:Z
       - ../configurations/global.ts:/workspace/global.ts:Z
       - ../configurations/package.json:/workspace/package.json:Z
-
   application_typescript:
     tty: true
     profiles:
@@ -99,19 +113,23 @@ services:
     build: ./tauri/
     stdin_open: true
     network_mode: "host"
+    devices:
+      - /dev/dri:/dev/dri
     environment:
       - DISPLAY=${DISPLAY}
       - XAUTHORITY=/tmp/.Xauthority
       - XDG_RUNTIME_DIR=/run/user/1000
       - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
     working_dir: /workspace/
-    container_name: application_tauri_container
+    container_name: application_tauri_container# ...
     volumes:
       - workspace:/workspace/
       - data:/root/.npm/_logs/
       - ../web/:/workspace/web/:Z
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - tauri_cargo_git:/root/.cargo/git/
       - ~/.Xauthority:/tmp/.Xauthority:ro
+      - tauri_cargo_registry:/root/.cargo/registry/
       - ../desktop/source/:/workspace/desktop/src/:Z
       - ../desktop/assets/:/workspace/desktop/icons/:Z
       - ../desktop/build.rs:/workspace/desktop/build.rs:Z
@@ -127,6 +145,8 @@ volumes:
   data:
   aider:
   workspace:
+  tauri_cargo_git:
+  tauri_cargo_registry:
 
 networks:
   tauri:

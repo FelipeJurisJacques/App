@@ -33,6 +33,13 @@ export default class SceneLight implements Scene {
         }
     }
 
+    public get intensity(): number {
+        return 0.0
+    }
+
+    public set intensity(value: number) {
+    }
+
     public animate(): void {
         this.core.animate()
         for (let instance of this.rings) {

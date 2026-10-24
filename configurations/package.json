@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "three": "latest",
+    "langchain": "latest",
+    "@mlc-ai/web-llm": "latest",
     "@tauri-apps/api": "latest",
+    "@langchain/core": "latest",
+    "@langchain/community": "latest",
     "@tauri-apps/plugin-opener": "latest"
   },
   "devDependencies": {

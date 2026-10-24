@@ -132,4 +132,4 @@ export default class CustomShape extends View {
 }
 
 // Registro do Custom Element
-window.customElements.define('custom-shape', CustomShape)
+window.customElements.define('component-custom-shape', CustomShape)

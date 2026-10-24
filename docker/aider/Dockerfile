@@ -9,4 +9,7 @@ RUN apt-get install -y git
 RUN rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir aider-chat
 
-CMD ["aider"]
+COPY ./entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+CMD ["/usr/local/bin/entrypoint.sh"]

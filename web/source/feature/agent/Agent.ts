@@ -11,29 +11,60 @@ export default class Agent {
     private intensity: number;
     private annimation: null | Scene;
     private readonly chat: ChatService;
+    private handler: ((message: ChatMessage) => void) | null;
 
     public constructor() {
         this.loaded = false;
         this.intensity = 0.0;
         this.annimation = null;
+        this.handler = null;
         this.chat = new ChatService(
             "SmolLM2-135M-Instruct-q0f32-MLC",
             "Você é um assistente amigável chamado SmolBot. Responda de forma concisa e natural em português brasileiro."
         );
     }
 
-    public setHandler(handler: (message: ChatMessage) => void) {
-        const message = this.chat.getInitialMessage()
-        if (message) {
-            handler(message)
+    public setHandler(handler: (message: ChatMessage) => void): void {
+        this.handler = handler;
+
+        this.chat.onLLMProgress((progress: number) => {
+            this.chat.updateLoadingProgress(progress);
+            this.renderHistory();
+        });
+
+        this.chat.onLLMStatusChange(() => {
+            this.renderHistory();
+        });
+
+        const initial = this.chat.getInitialMessage();
+        if (initial) {
+            handler(initial);
+        }
+    }
+
+    private renderHistory(): void {
+        if (!this.handler) return;
+        const messages = this.chat.getMessages();
+        for (const msg of messages) {
+            this.handler(msg);
         }
     }
 
     public async generateReply(message: string): Promise<void> {
-        if (!this.loaded) {
-            await this.chat.loadLLM()
+        if (this.handler) {
+            this.handler({ sender: "user", text: message });
         }
-        this.chat.generateReply(message)
+
+        if (!this.loaded) {
+            this.loaded = true;
+            await this.chat.loadLLM();
+            this.renderHistory();
+        }
+
+        const reply = await this.chat.generateReply(message);
+        if (this.handler) {
+            this.handler(reply);
+        }
     }
 
     public getScenes(theme: string): THREE.Scene {

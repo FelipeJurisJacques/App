@@ -44,44 +44,66 @@ export default class ChatBot extends View {
         ) as HTMLCanvasElement | null;
         if (chat && form && canvas && history) {
             const agent = new Agent();
-            const parallax = new Parallax(canvas);
-            // let controls: OrbitControls | undefined
-            // parallax.scenes.push((renderer, camera) => {
-            //     if (!controls) {
-            //         controls = new OrbitControls(camera, renderer.domElement)
-            //         controls.enableDamping = true
-            //         controls.dampingFactor = 0.05
-            //         controls.screenSpacePanning = false
-            //     }
-            //     controls.update()
-            // })
-            parallax.scenes.push((renderer, camera) => {
-                agent.animate();
-                renderer.render(agent.getScenes(this.theme), camera);
-            });
-            parallax.handler();
-            agent.setHandler(message => {
+            try {
+                const parallax = new Parallax(canvas);
+                // let controls: OrbitControls | undefined
+                // parallax.scenes.push((renderer, camera) => {
+                //     if (!controls) {
+                //         controls = new OrbitControls(camera, renderer.domElement)
+                //         controls.enableDamping = true
+                //         controls.dampingFactor = 0.05
+                //         controls.screenSpacePanning = false
+                //     }
+                //     controls.update()
+                // })
+                parallax.scenes.push((renderer, camera) => {
+                    agent.animate();
+                    renderer.render(agent.getScenes(this.theme), camera);
+                });
+                parallax.handler();
+            } catch (error) {
+                console.error(error)
+            }
+
+            const appendMessage = (message: { sender: string; text: string }) => {
+                const existing = Array.from(history.children).find(
+                    (el) => el.textContent === (message.sender === "bot" ? `Bot: ${message.text}` : `Você: ${message.text}`)
+                );
+                if (existing) {
+                    existing.textContent = message.sender === "bot" ? `Bot: ${message.text}` : `Você: ${message.text}`;
+                    return;
+                }
+
                 if (message.sender === "bot") {
                     history.append(<p class="bot-message">
                         Bot: {message.text}
                     </p>);
-                    history.scrollTop = history.scrollHeight;
-                    chat.disabled = false;
-                    agent.speak(message.text);
                 } else {
                     history.append(<p class="user-message">
                         Você: {message.text}
                     </p>);
                 }
+                history.scrollTop = history.scrollHeight;
+            };
+
+            agent.setHandler(message => {
+                appendMessage(message);
+                if (message.sender === "bot") {
+                    chat.disabled = false;
+                    chat.focus();
+                    if (!message.text.startsWith("Baixando modelo") && !message.text.startsWith("Modelo LLM") && !message.text.startsWith("Falha ao carregar")) {
+                        agent.speak(message.text);
+                    }
+                }
             });
+
             form.addEventListener("submit", (event: Event) => {
                 event.preventDefault();
                 const text = chat.value.trim();
-                if (text) {
+                if (text && !chat.disabled) {
                     chat.value = "";
                     chat.disabled = true;
                     agent.generateReply(text);
-                    // chat.focus();
                 }
             });
         }

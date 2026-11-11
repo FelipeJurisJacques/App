@@ -2,11 +2,13 @@ import Stylesheet from "./Main.css"
 import State from "../enumerator/Main"
 import View from "../support/view/View"
 import Bot from "../component/icon/Bot.svg"
+import Note from "../component/icon/Note.svg"
 import Folder from "../component/icon/Folder.svg"
 import Tractor from "../component/icon/Tractor.svg"
 import ThemeDark from "../component/icon/ThemeDark.svg"
 import ThemeLight from "../component/icon/ThemeLight.svg"
 import CustomShape from "../component/widget/CustomShape"
+import AssistMode from "../component/icon/AssistMode.svg"
 import ThemeHighContrast from "../component/icon/ThemeHighContrast.svg"
 
 export default class Main extends View {
@@ -79,8 +81,14 @@ export default class Main extends View {
         <button type="button" class="cultivation">
           {new Tractor()}
         </button>
+        <button type="button" class="note">
+          {new Note()}
+        </button>
         <button type="button" class="chat-bot">
           {new Bot()}
+        </button>
+        <button type="button" class="assist-mode">
+          {new AssistMode()}
         </button>
       </component-custom-shape>,
     );
@@ -90,6 +98,9 @@ export default class Main extends View {
         break
       case "#cultivation":
         window.document.body.append(<view-cultivation></view-cultivation>)
+        break
+      case "#note":
+        window.document.body.append(<view-note></view-note>)
         break
       default:
         break
@@ -188,7 +199,7 @@ export default class Main extends View {
       setInterval(time, 1000);
     }
 
-    this.element.addEventListener("click", (event) => {
+    this.element.addEventListener("click", async (event) => {
       if (
         event.target &&
         (event.target instanceof SVGElement ||
@@ -204,12 +215,32 @@ export default class Main extends View {
           event.preventDefault()
           window.location.hash = "cultivation"
           window.document.body.append(<view-cultivation></view-cultivation>)
+        } else if (event.target.closest("button.note")) {
+          event.preventDefault()
+          window.location.hash = "ocr"
+          window.document.body.append(<view-note></view-note>)
         } else if (event.target.closest("button.chat-bot")) {
           if (this.state !== State.CHAT) {
             event.preventDefault()
             this.state = State.CHAT
             window.location.hash = "chat-bot"
             window.document.body.append(<component-chat-bot></component-chat-bot>)
+          }
+        } else if (event.target.closest("button.assist-mode")) {
+          event.preventDefault()
+          try {
+            // Try to use the Tauri API - this will work when running in Tauri environment
+            if (typeof window !== 'undefined' && (window as any).__TAURI__?.invoke) {
+              await (window as any).__TAURI__.invoke("toggle_assist_mode")
+            }
+            // Try using the imported invoke function if available
+            else if (typeof (window as any).invoke === 'function') {
+              await (window as any).invoke("toggle_assist_mode")
+            } else {
+              console.warn("Tauri API not available - running in browser mode")
+            }
+          } catch (error) {
+            console.warn("Failed to toggle assist mode:", error)
           }
         }
       }

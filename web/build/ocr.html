@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>OCR Manuscrito Offline</title>
+  <style>
+    #canvas { border: 2px dashed #333; background: #fafafa; cursor: crosshair; }
+    #resultado { font-size: 24px; font-weight: bold; color: green; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h3>Escreva no quadro abaixo (Offline):</h3>
+  <canvas id="canvas" width="600" height="300"></canvas>
+  <div id="resultado">Texto detectado: <span id="texto">...</span></div>
+  <button id="limpar">Limpar</button>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let desenhando = false;
+    
+    // Variáveis da API de Reconhecimento do Navegador
+    let recognizer;
+    let drawing;
+
+    // 1. Inicializar o Reconhecedor Nativo do Navegador
+    async function iniciarOCR() {
+      if ('createHandwritingRecognizer' in navigator) {
+        try {
+          // Criamos o reconhecedor definindo o idioma desejado
+          recognizer = await navigator.createHandwritingRecognizer({ languages: ['pt'] });
+          drawing = recognizer.startDrawing();
+        } catch (e) {
+          console.error("O sistema operacional não possui o pacote de idioma 'pt' instalado.", e);
+        }
+      } else {
+        alert("Este navegador não suporta a Handwriting API nativa (Use Chrome/Edge atualizados).");
+      }
+    }
+
+    // 2. Capturar os movimentos no Canvas e alimentar a API
+    let pontosDoTraco = [];
+
+    canvas.addEventListener('pointerdown', (e) => {
+      desenhando = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+      pontosDoTraco = [{ x: e.offsetX, y: e.offsetY, t: Date.now() }];
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!desenhando) return;
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+      pontosDoTraco.push({ x: e.offsetX, y: e.offsetY, t: Date.now() });
+    });
+
+    canvas.addEventListener('pointerup', async () => {
+      if (!desenhando) return;
+      desenhando = false;
+
+      // Adiciona o traço feito à API do navegador
+      if (drawing) {
+        drawing.addStroke(pontosDoTraco);
+        
+        // Pede a previsão do texto em tempo real
+        const predictions = await drawing.getPrediction();
+        if (predictions && predictions.length > 0) {
+          document.getElementById('texto').innerText = predictions[0].text;
+        }
+      }
+    });
+
+    document.getElementById('limpar').addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (recognizer) drawing = recognizer.startDrawing(); // Reseta o desenho
+      document.getElementById('texto').innerText = "...";
+    });
+
+    iniciarOCR();
+  </script>
+</body>
+</html>

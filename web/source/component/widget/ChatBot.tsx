@@ -91,7 +91,11 @@ export default class ChatBot extends View {
                 if (message.sender === "bot") {
                     chat.disabled = false;
                     chat.focus();
-                    if (!message.text.startsWith("Baixando modelo") && !message.text.startsWith("Modelo LLM") && !message.text.startsWith("Falha ao carregar")) {
+                    if (
+                        !message.text.startsWith("Modelo LLM")
+                        && !message.text.startsWith("Baixando modelo")
+                        && !message.text.startsWith("Falha ao carregar")
+                    ) {
                         agent.speak(message.text);
                     }
                 }

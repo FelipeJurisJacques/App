@@ -87,14 +87,45 @@ export default class ChatService {
 
         let reply: string;
 
-        if (this.llm.isReady() && !this.llm.isGenerating()) {
+        console.log("[ChatService] generateReply()", {
+            isLoading: this.llm.isLoading(),
+            isReady: this.llm.isReady(),
+            isGenerating: this.llm.isGenerating(),
+        });
+
+        if (this.llm.isLoading()) {
+            console.log("[ChatService] Using ElizaBot (LLM still loading)");
+            reply = this.bot.transform(userText);
+        } else if (this.llm.isReady() && !this.llm.isGenerating()) {
+            console.log("[ChatService] Using LLM (ready and idle)");
             try {
                 reply = await this.llm.generate(userText);
+                console.log("[ChatService] LLM replied successfully");
             } catch (err) {
-                console.error("Erro na inferência LLM:", err);
+                console.error("[ChatService] LLM generation failed, falling back to ElizaBot:", err);
+                reply = this.bot.transform(userText);
+            }
+        } else if (this.llm.isReady() && this.llm.isGenerating()) {
+            console.log("[ChatService] LLM busy, waiting...");
+            let attempts = 0;
+            while (this.llm.isGenerating() && attempts < 50) {
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                attempts++;
+            }
+            if (this.llm.isReady() && !this.llm.isGenerating()) {
+                console.log("[ChatService] LLM free after waiting", attempts * 100, "ms");
+                try {
+                    reply = await this.llm.generate(userText);
+                } catch (err) {
+                    console.error("[ChatService] LLM generation failed after wait:", err);
+                    reply = this.bot.transform(userText);
+                }
+            } else {
+                console.warn("[ChatService] LLM still busy after timeout, using ElizaBot");
                 reply = this.bot.transform(userText);
             }
         } else {
+            console.log("[ChatService] Using ElizaBot (LLM not ready)");
             reply = this.bot.transform(userText);
         }
 

@@ -8,16 +8,18 @@ import SceneHighContrast from "./hook/SceneHighContrast";
 
 export default class Agent {
     private loaded: boolean;
+    private loadingPromise: Promise<void> | null;
     private intensity: number;
     private annimation: null | Scene;
     private readonly chat: ChatService;
     private handler: ((message: ChatMessage) => void) | null;
 
     public constructor() {
+        this.handler = null;
         this.loaded = false;
+        this.loadingPromise = null;
         this.intensity = 0.0;
         this.annimation = null;
-        this.handler = null;
         this.chat = new ChatService(
             "SmolLM2-135M-Instruct-q0f32-MLC",
             "Você é um assistente amigável chamado SmolBot. Responda de forma concisa e natural em português brasileiro."
@@ -57,8 +59,13 @@ export default class Agent {
 
         if (!this.loaded) {
             this.loaded = true;
-            await this.chat.loadLLM();
-            this.renderHistory();
+            this.loadingPromise = this.chat.loadLLM().then(() => {
+                this.renderHistory();
+            });
+        }
+
+        if (this.loadingPromise) {
+            await this.loadingPromise;
         }
 
         const reply = await this.chat.generateReply(message);

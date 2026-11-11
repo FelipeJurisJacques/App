@@ -86,6 +86,7 @@ services:
       - ../configurations/build.go:/workspace/build.go:Z
       - ../configurations/global.ts:/workspace/global.ts:Z
       - ../configurations/package.json:/workspace/package.json:Z
+      - ../configurations/tsconfig.json:/workspace/tsconfig.json:Z
   application_typescript:
     tty: true
     profiles:
@@ -112,7 +113,6 @@ services:
       - ../.env
     build: ./tauri/
     stdin_open: true
-    network_mode: "host"
     devices:
       - /dev/dri:/dev/dri
     environment:
@@ -121,7 +121,7 @@ services:
       - XDG_RUNTIME_DIR=/run/user/1000
       - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
     working_dir: /workspace/
-    container_name: application_tauri_container# ...
+    container_name: application_tauri_container
     volumes:
       - workspace:/workspace/
       - data:/root/.npm/_logs/

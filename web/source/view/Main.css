@@ -87,3 +87,17 @@ button.chat-bot {
     position: fixed;
     left: calc(50% - 15px);
 }
+
+button.note {
+    left: 100px;
+    bottom: 15px;
+    display: flex;
+    position: fixed;
+}
+
+button.assist-mode {
+    right: 150px;
+    bottom: 15px;
+    display: flex;
+    position: fixed;
+}

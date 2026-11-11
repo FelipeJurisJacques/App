@@ -1,4 +1,5 @@
 import "./view/Main";
+import "./view/Note";
 import "./view/Files";
 import "./view/Cultivation";
 import "./component/widget/ChatBot";

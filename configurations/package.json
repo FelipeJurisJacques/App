@@ -12,6 +12,7 @@
   "dependencies": {
     "three": "latest",
     "langchain": "latest",
+    "tesseract.js": "latest",
     "@mlc-ai/web-llm": "latest",
     "@tauri-apps/api": "latest",
     "@langchain/core": "latest",

@@ -1,25 +1,19 @@
 FROM debian:stable-slim
 
-# Instalação de dependências necessárias
-RUN apt-get update && apt-get install -y \
-    curl \
-    tar \
-    bash \
+ENV DEBIAN_FRONTEND=noninteractive
+ENV JAVA_HOME=/root/.sdkman/candidates/java/current
+ENV GRADLE_HOME=/root/.sdkman/candidates/gradle/current
+ENV PATH="${JAVA_HOME}/bin:${GRADLE_HOME}/bin:${PATH}"
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        tar curl bash unzip zip sed grep \
+        binaryen libz-dev zlib1g-dev build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Configuração do JAVA_HOME
-ENV JAVA_HOME=/opt/jdk
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
-
-# Download e extração do Oracle JDK 26
-RUN mkdir -p /opt/jdk && \
-    curl -L https://download.oracle.com/java/26/latest/jdk-26_linux-x64_bin.tar.gz | tar -xz -C /opt/jdk --strip-components=1
-
-# Configuração do diretório de trabalho
 WORKDIR /workspace/
 
-# Expondo a porta padrão do Spring Boot
-EXPOSE 8080
+COPY ./entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Comando para rodar a aplicação Spring Boot
-CMD ["sh", "./gradlew", "bootRun"]
+CMD ["/usr/local/bin/entrypoint.sh"]

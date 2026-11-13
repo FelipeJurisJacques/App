@@ -3,7 +3,6 @@ package main
 import "os"
 import "fmt"
 import "bytes"
-import "os/exec"
 import "strings"
 import "encoding/json"
 import "path/filepath"
@@ -57,7 +56,7 @@ func compileMarkups(from string, to string) {
 	}
 }
 
-func main() {
+func build(files []string) {
 	cssPlugin := api.Plugin{
 		Name: "css-stylesheet-loader",
 		Setup: func(build api.PluginBuild) {
@@ -126,60 +125,47 @@ func main() {
 			)
 		},
 	}
+	result := api.Build(api.BuildOptions{
+		Write: true,
+		Bundle: true,
+		Plugins: []api.Plugin{
+			cssPlugin,
+			svgPlugin,
+		},
+		EntryPoints: files,
+		JSX: api.JSXTransform,
+		JSXFactory: "DLS.html",
+		JSXFragment: "Fragment",
+		LogLevel: api.LogLevelInfo,
+		Inject: []string{"/workspace/global.ts"}, 
+		Outdir: "/workspace/web/build/application",
+		NodePaths: []string{"/workspace/node_modules"},
+	})
+	for _, err := range result.Errors {
+		fmt.Println(err.Text)
+	}
+}
 
-	method := ""
-	if len(os.Args) > 1 {
-		method = os.Args[1]
-	}
+func main() {
 	from := "/workspace/web/source/"
-	if method == "check" || method == "compile" {
-		cmd := exec.Command("npx", "tsc")
-		result, err := cmd.CombinedOutput()
-		if err != nil {
-			message := string(result)
-			if message != "" {
-				lines := strings.Split(message, "\n")
-				fmt.Println(lines[0])
-			}
-			method = ""
-		}
-	}
 	files, err := os.ReadDir(from)
 	if err == nil {
+		compile := []string{}
 		for _, file := range files {
 			if (!file.IsDir()) {
 				name := file.Name()
 				length := len(name)
 				if (name[length - 2: length] == "ts") {
 					path := filepath.Join(from, name)
-					if method == "build" || method == "compile" {
-						result := api.Build(api.BuildOptions{
-							Write: true,
-							Bundle: true,
-							Plugins: []api.Plugin{
-								cssPlugin,
-								svgPlugin,
-							},
-							JSX: api.JSXTransform,
-							JSXFactory: "DLS.html",
-							JSXFragment: "Fragment",
-							LogLevel: api.LogLevelInfo,
-							EntryPoints: []string{path},
-							Inject: []string{"/workspace/global.ts"}, 
-							Outdir: "/workspace/web/build/application",
-							NodePaths:  []string{"/workspace/node_modules"},
-						})
-						for _, err := range result.Errors {
-							fmt.Println(err.Text)
-						}
-					}
+					compile = append(compile, path)
 				}
 			}
 		}
-		if method == "build" || method == "compile" {
-			fmt.Println("Compiling public files...")
-			compileMarkups("/workspace/web/public/", "/workspace/web/build/")
-		}
+		build(compile)
+		fmt.Println("Compiling public files...")
+		compileMarkups("/workspace/web/public/", "/workspace/web/build/")
+		fmt.Println("Compiling build files...")
+		compileMarkups("/workspace/web/build/", "/workspace/build/")
 	} else {
 		fmt.Println(err)
 	}

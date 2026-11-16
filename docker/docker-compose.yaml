@@ -6,6 +6,8 @@ services:
       - ../.env
     ports:
       - 4040:4040
+    depends_on:
+      - application_nginx
     restart: unless-stopped
     image: ngrok/ngrok:latest
     command: [ "http", "application_nginx:80" ]
@@ -15,6 +17,10 @@ services:
     tty: true
     ports:
       - 80:80
+    profiles:
+      - nginx
+      - ngrok
+      - tauri
     image: nginx:alpine
     restart: unless-stopped
     security_opt:
@@ -66,6 +72,8 @@ services:
       - ../.env
     build: ./tauri/
     stdin_open: true
+    depends_on:
+      - application_nginx
     devices:
       - /dev/dri:/dev/dri
     working_dir: /workspace/

@@ -2,52 +2,40 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "EXECUTAR",
+            "name": "WEB",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker compose -f ./docker/docker-compose.yaml up"
+            "command": "docker compose --profile nnginx -f ./docker/docker-compose.yaml up"
         },
         {
-            "name": "EXECUTAR CONTAINERS COM NGROK",
-            "request": "launch",
-            "type": "node-terminal",
-            "command": "docker compose --profile ngrok -f ./docker/docker-compose.yaml up"
-        },
-        {
-            "name": "COMPILAR BACKEND",
-            "request": "launch",
-            "type": "node-terminal",
-            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_java"
-        },
-        {
-            "name": "CHECAR FRONTEND",
-            "request": "launch",
-            "type": "node-terminal",
-            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_typescript"
-        },
-        {
-            "name": "INSTALAR DEPENDÊNCIAS FRONTEND",
-            "request": "launch",
-            "type": "node-terminal",
-            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_esbuilder install"
-        },
-        {
-            "name": "COMPILAR FRONTEND",
-            "request": "launch",
-            "type": "node-terminal",
-            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_esbuilder build"
-        },
-        {
-            "name": "EXECUTAR TAURI",
+            "name": "TAURI",
             "request": "launch",
             "type": "node-terminal",
             "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_tauri"
         },
         {
-            "name": "AIDER",
+            "name": "NGROK",
             "request": "launch",
             "type": "node-terminal",
-            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_aider"
+            "command": "docker compose --profile ngrok -f ./docker/docker-compose.yaml up"
+        },
+        {
+            "name": "COMPILAR PARA WEB",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_esbuilder build"
+        },
+        {
+            "name": "CHECAR SINTAXE",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_typescript"
+        },
+        {
+            "name": "CHECAR BIBLIOTECAS",
+            "request": "launch",
+            "type": "node-terminal",
+            "command": "docker compose -f ./docker/docker-compose.yaml run --rm application_esbuilder install"
         }
     ]
 }
